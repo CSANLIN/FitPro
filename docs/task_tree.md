@@ -54,17 +54,17 @@ Phase 1 - 基础骨架
 │   ├── [x] application.yml / application-dev.yml 配置
 │   ├── [x] 多环境配置 (dev/prod)
 │   └── [x] 启动类 FitnessApplication.java
-├── 1.2 通用组件
-│   ├── [ ] Result.java 统一响应封装
-│   ├── [ ] PageResult.java 分页响应
-│   ├── [ ] BaseEntity.java 实体基类 (id, createdAt, updatedAt, deleted)
-│   ├── [ ] GlobalExceptionHandler 全局异常处理
-│   ├── [ ] BusinessException 自定义业务异常
-│   └── [ ] MybatisPlusConfig 分页插件/自动填充
-├── 1.3 数据库
-│   ├── [ ] 创建 fitness_db 数据库
-│   ├── [ ] 执行建表 SQL (19张表)
-│   └── [ ] 初始化种子数据 (管理员账号、运动分类)
+├── 1.2 通用组件 ✅
+│   ├── [x] Result.java 统一响应封装
+│   ├── [x] PageResult.java 分页响应
+│   ├── [x] BaseEntity.java 实体基类 (id, createdAt, updatedAt, deleted)
+│   ├── [x] GlobalExceptionHandler 全局异常处理
+│   ├── [x] BusinessException 自定义业务异常
+│   └── [x] MybatisPlusConfig 分页插件/自动填充
+├── 1.3 数据库 ✅
+│   ├── [x] 创建 fitness_db 数据库
+│   ├── [x] 执行建表 SQL (19张表)
+│   └── [x] 初始化种子数据 (管理员账号、运动分类)
 ├── 1.4 前端初始化
 │   ├── [ ] Vite + Vue 3 项目创建
 │   ├── [ ] Element Plus 引入与配置

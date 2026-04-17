@@ -20,25 +20,25 @@
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 1.2.1 | 统一响应封装 | `common/Result.java` | 泛型 `Result<T>`, 静态方法 `success()` `success(data)` `error(code, msg)`, 字段: code/message/data | `[ ]` |
-| 1.2.2 | 分页响应封装 | `common/PageResult.java` | 泛型 `PageResult<T>`, 字段: list/total/pageNum/pageSize, 提供从 IPage 转换的静态工厂方法 | `[ ]` |
-| 1.2.3 | 实体基类 | `common/BaseEntity.java` | 字段: id(Long, @TableId ASSIGN_ID), createdAt(LocalDateTime), updatedAt(LocalDateTime), deleted(Integer, @TableLogic) | `[ ]` |
-| 1.2.4 | 业务异常类 | `common/exception/BusinessException.java` | 字段: code(int), message(String), 继承 RuntimeException | `[ ]` |
-| 1.2.5 | 全局异常处理器 | `common/exception/GlobalExceptionHandler.java` | @RestControllerAdvice, 捕获: BusinessException→对应code, MethodArgumentNotValidException→400, AccessDeniedException→403, Exception→500 | `[ ]` |
-| 1.2.6 | MyBatis-Plus 配置 | `config/MybatisPlusConfig.java` | 分页插件 PaginationInnerInterceptor, MetaObjectHandler 自动填充 createdAt/updatedAt | `[ ]` |
+| 1.2.1 | 统一响应封装 | `common/Result.java` | 泛型 `Result<T>`, 静态方法 `success()` `success(data)` `error(code, msg)`, 字段: code/message/data | `[x]` |
+| 1.2.2 | 分页响应封装 | `common/PageResult.java` | 泛型 `PageResult<T>`, 字段: list/total/pageNum/pageSize, 提供从 IPage 转换的静态工厂方法 | `[x]` |
+| 1.2.3 | 实体基类 | `common/BaseEntity.java` | 字段: id(Long, @TableId ASSIGN_ID), createdAt(LocalDateTime), updatedAt(LocalDateTime), deleted(Integer, @TableLogic) | `[x]` |
+| 1.2.4 | 业务异常类 | `common/exception/BusinessException.java` | 字段: code(int), message(String), 继承 RuntimeException | `[x]` |
+| 1.2.5 | 全局异常处理器 | `common/exception/GlobalExceptionHandler.java` | @RestControllerAdvice, 捕获: BusinessException→对应code, MethodArgumentNotValidException→400, AccessDeniedException→403, Exception→500 | `[x]` |
+| 1.2.6 | MyBatis-Plus 配置 | `config/MybatisPlusConfig.java` | 分页插件 PaginationInnerInterceptor, MetaObjectHandler 自动填充 createdAt/updatedAt | `[x]` |
 
 ### 1.3 数据库初始化
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 1.3.1 | 建库脚本 | `sql/00_create_database.sql` | `CREATE DATABASE fitness_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;` | `[ ]` |
-| 1.3.2 | 用户与身体数据表 | `sql/01_user.sql` | 建表: sys_user, body_record; 索引: idx_user_username, idx_user_phone, idx_body_record_user_id | `[ ]` |
-| 1.3.3 | 会籍与签到表 | `sql/02_membership.sql` | 建表: membership_card, member_membership, check_in; 索引: idx_membership_user_id, idx_checkin_user_id | `[ ]` |
-| 1.3.4 | 运动库表 | `sql/03_exercise.sql` | 建表: exercise_category, exercise; 索引: idx_exercise_category_id | `[ ]` |
-| 1.3.5 | 训练模块表 | `sql/04_workout.sql` | 建表: workout_template, workout_template_item, workout_plan, workout_plan_day, workout_plan_day_item, workout_record, workout_record_item | `[ ]` |
-| 1.3.6 | 课程模块表 | `sql/05_course.sql` | 建表: course, course_schedule, course_booking; 索引: idx_schedule_date, idx_booking_user_id | `[ ]` |
-| 1.3.7 | 系统模块表 | `sql/06_system.sql` | 建表: sys_announcement, sys_operation_log | `[ ]` |
-| 1.3.8 | 种子数据 | `sql/07_seed_data.sql` | 插入: 超级管理员账号 (admin/admin123, BCrypt加密), 运动分类 (胸部/背部/腿部/肩部/手臂/核心/有氧), 示例会员卡种 | `[ ]` |
+| 1.3.1 | 建库脚本 | `sql/00_create_database.sql` | `CREATE DATABASE fitness_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;` | `[x]` |
+| 1.3.2 | 用户与身体数据表 | `sql/01_user.sql` | 建表: sys_user, body_record; 索引: idx_user_username, idx_user_phone, idx_body_record_user_id | `[x]` |
+| 1.3.3 | 会籍与签到表 | `sql/02_membership.sql` | 建表: membership_card, member_membership, check_in; 索引: idx_membership_user_id, idx_checkin_user_id | `[x]` |
+| 1.3.4 | 运动库表 | `sql/03_exercise.sql` | 建表: exercise_category, exercise; 索引: idx_exercise_category_id | `[x]` |
+| 1.3.5 | 训练模块表 | `sql/04_workout.sql` | 建表: workout_template, workout_template_item, workout_plan, workout_plan_day, workout_plan_day_item, workout_record, workout_record_item | `[x]` |
+| 1.3.6 | 课程模块表 | `sql/05_course.sql` | 建表: course, course_schedule, course_booking; 索引: idx_schedule_date, idx_booking_user_id | `[x]` |
+| 1.3.7 | 系统模块表 | `sql/06_system.sql` | 建表: sys_announcement, sys_operation_log | `[x]` |
+| 1.3.8 | 种子数据 | `sql/07_seed_data.sql` | 插入: 超级管理员账号 (admin/admin123, BCrypt加密), 运动分类 (胸部/背部/腿部/肩部/手臂/核心/有氧), 示例会员卡种 | `[x]` |
 
 ### 1.4 前端项目初始化
 
