@@ -35,6 +35,7 @@ logs/
 
 # Claude
 .claude/
+.claudignore
 
 # Node
 node_modules/

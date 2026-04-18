@@ -44,25 +44,25 @@
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 1.4.1 | Vite 创建 Vue 3 项目 | `fitness-frontend/` | `npm create vite@latest fitness-frontend -- --template vue`, `npm install` 成功 | `[ ]` |
-| 1.4.2 | 安装核心依赖 | `package.json` | dependencies: vue-router@4, pinia, axios, element-plus, @element-plus/icons-vue, echarts; devDependencies: sass, unplugin-auto-import, unplugin-vue-components | `[ ]` |
-| 1.4.3 | Vite 配置 | `vite.config.js` | 配置: @别名→src, Element Plus 自动导入, 开发代理 /api→http://localhost:8080 | `[ ]` |
-| 1.4.4 | 全局样式 | `src/styles/index.scss` `src/styles/variables.scss` | CSS 变量: 主色/背景色/文字色/间距, Element Plus 主题覆盖, reset 样式 | `[ ]` |
-| 1.4.5 | Axios 封装 | `src/utils/request.js` | 创建实例 baseURL='/api', 请求拦截器注入 Bearer Token, 响应拦截器: 解包 data / 401 跳登录 / ElMessage 报错 | `[ ]` |
-| 1.4.6 | 路由基础配置 | `src/router/index.js` | 路由: / → 登录, /admin → 管理端布局, /app → 会员端布局; 导航守卫: 未登录拦截 | `[ ]` |
-| 1.4.7 | Pinia 初始化 | `src/stores/index.js` | createPinia() 注册到 app | `[ ]` |
-| 1.4.8 | 管理端布局 | `src/layout/AdminLayout.vue` | 左侧菜单 + 顶部导航栏 + 右侧内容区 (el-container), 菜单折叠, 面包屑 | `[ ]` |
-| 1.4.9 | 会员端布局 | `src/layout/AppLayout.vue` | 顶部导航 + 底部 TabBar + 内容区, 移动端友好 | `[ ]` |
-| 1.4.10 | main.js 入口 | `src/main.js` | 注册: App, Router, Pinia, Element Plus, 全局样式 | `[ ]` |
+| 1.4.1 | Vite 创建 Vue 3 项目 | `fitness-frontend/` | `npm create vite@latest fitness-frontend -- --template vue`, `npm install` 成功 | `[x]` |
+| 1.4.2 | 安装核心依赖 | `package.json` | dependencies: vue-router@4, pinia, axios, element-plus, @element-plus/icons-vue, echarts; devDependencies: sass, unplugin-auto-import, unplugin-vue-components | `[x]` |
+| 1.4.3 | Vite 配置 | `vite.config.js` | 配置: @别名→src, Element Plus 自动导入, 开发代理 /api→http://localhost:8080 | `[x]` |
+| 1.4.4 | 全局样式 | `src/styles/index.scss` `src/styles/variables.scss` | CSS 变量: 主色/背景色/文字色/间距, Element Plus 主题覆盖, reset 样式 | `[x]` |
+| 1.4.5 | Axios 封装 | `src/utils/request.js` | 创建实例 baseURL='/api', 请求拦截器注入 Bearer Token, 响应拦截器: 解包 data / 401 跳登录 / ElMessage 报错 | `[x]` |
+| 1.4.6 | 路由基础配置 | `src/router/index.js` | 路由: / → 登录, /admin → 管理端布局, /app → 会员端布局; 导航守卫: 未登录拦截 | `[x]` |
+| 1.4.7 | Pinia 初始化 | `src/stores/index.js` | createPinia() 注册到 app | `[x]` |
+| 1.4.8 | 管理端布局 | `src/layout/AdminLayout.vue` | 左侧菜单 + 顶部导航栏 + 右侧内容区 (el-container), 菜单折叠, 面包屑 | `[x]` |
+| 1.4.9 | 会员端布局 | `src/layout/AppLayout.vue` | 顶部导航 + 底部 TabBar + 内容区, 移动端友好 | `[x]` |
+| 1.4.10 | main.js 入口 | `src/main.js` | 注册: App, Router, Pinia, Element Plus, 全局样式 | `[x]` |
 
 ### 1.5 联调验证
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 1.5.1 | 健康检查接口 | `module/system/controller/HealthController.java` | `GET /api/health` 返回 `Result.success("ok")` | `[ ]` |
-| 1.5.2 | CORS 配置 | `config/CorsConfig.java` | 允许 localhost:5173, 允许 GET/POST/PUT/DELETE, 允许 Authorization 头 | `[ ]` |
-| 1.5.3 | Knife4j 配置 | `config/SwaggerConfig.java` | 访问 http://localhost:8080/doc.html 能看到接口文档 | `[ ]` |
-| 1.5.4 | 前端联调测试 | 手动验证 | 前端 `npm run dev` 启动, 请求 /api/health 返回成功 | `[ ]` |
+| 1.5.1 | 健康检查接口 | `module/system/controller/HealthController.java` | `GET /api/health` 返回 `Result.success("ok")` | `[x]` |
+| 1.5.2 | CORS 配置 | `config/CorsConfig.java` | 允许 localhost:5173, 允许 GET/POST/PUT/DELETE, 允许 Authorization 头 | `[x]` |
+| 1.5.3 | Knife4j 配置 | `config/SwaggerConfig.java` | 访问 http://localhost:8080/doc.html 能看到接口文档 | `[x]` |
+| 1.5.4 | 前端联调测试 | 手动验证 | 前端 `npm run dev` 启动, 请求 /api/health 返回成功 | `[x]` |
 
 **M1 里程碑验收**: 后端启动无报错 + Knife4j 文档可访问 + 前端请求后端成功 + 19张表建好
 
@@ -74,11 +74,11 @@
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 2.1.1 | Redis 配置类 | `config/RedisConfig.java` | RedisTemplate 序列化配置 (Key: String, Value: JSON) | `[ ]` |
-| 2.1.2 | JWT 工具类 | `security/JwtTokenProvider.java` | 方法: generateAccessToken(userId, role)→String, generateRefreshToken(userId)→String, parseToken(token)→Claims, isTokenExpired(token)→boolean; Access Token 有效期 2h, Refresh Token 7d; 密钥从配置读取 | `[ ]` |
-| 2.1.3 | JWT 认证过滤器 | `security/JwtAuthFilter.java` | 继承 OncePerRequestFilter, 从 Authorization 头提取 Token, 解析后设置 SecurityContext, 白名单路径直接放行 | `[ ]` |
-| 2.1.4 | UserDetailsService 实现 | `security/UserDetailsServiceImpl.java` | 从 sys_user 表加载用户, 构建 UserDetails (含角色 ROLE_SUPER_ADMIN / ROLE_COACH / ROLE_MEMBER) | `[ ]` |
-| 2.1.5 | Security 配置 | `config/SecurityConfig.java` | SecurityFilterChain: 禁用 csrf, 无状态 session, 白名单 (/api/auth/**, /doc.html, /webjars/**), 注册 JwtAuthFilter, BCryptPasswordEncoder Bean | `[ ]` |
+| 2.1.1 | Redis 配置类 | `config/RedisConfig.java` | RedisTemplate 序列化配置 (Key: String, Value: JSON) | `[x]` |
+| 2.1.2 | JWT 工具类 | `security/JwtTokenProvider.java` | 方法: generateAccessToken(userId, role)→String, generateRefreshToken(userId)→String, parseToken(token)→Claims, isTokenExpired(token)→boolean; Access Token 有效期 2h, Refresh Token 7d; 密钥从配置读取 | `[x]` |
+| 2.1.3 | JWT 认证过滤器 | `security/JwtAuthFilter.java` | 继承 OncePerRequestFilter, 从 Authorization 头提取 Token, 解析后设置 SecurityContext, 白名单路径直接放行 | `[x]` |
+| 2.1.4 | UserDetailsService 实现 | `security/UserDetailsServiceImpl.java` | 从 sys_user 表加载用户, 构建 UserDetails (含角色 ROLE_SUPER_ADMIN / ROLE_COACH / ROLE_MEMBER) | `[x]` |
+| 2.1.5 | Security 配置 | `config/SecurityConfig.java` | SecurityFilterChain: 禁用 csrf, 无状态 session, 白名单 (/api/auth/**, /doc.html, /webjars/**), 注册 JwtAuthFilter, BCryptPasswordEncoder Bean | `[x]` |
 
 ### 2.2 认证接口 (后端)
 

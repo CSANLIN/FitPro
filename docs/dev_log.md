@@ -56,3 +56,72 @@
 **关键决策**
 - `course_booking` 加 `UNIQUE KEY (user_id, schedule_id)`：数据库层面防止同一用户重复预约同一排课，比应用层校验更可靠。
 - 种子数据 ID 使用固定大数（`1000000000000000001`）：避免与雪花算法生成的 ID 冲突，雪花 ID 基于时间戳，不会生成这么小的值。
+
+---
+
+## [2026-04-18] Phase 1.4 — 前端项目初始化
+
+**完成内容**
+- `fitness-frontend/` — Vite + Vue 3 项目创建，pnpm 安装依赖
+- `package.json` — 依赖：Vue 3.4, Vue Router 4, Pinia 2, Axios, Element Plus 2.4, @element-plus/icons-vue, echarts, sass, unplugin 自动导入插件
+- `vite.config.js` — 配置 `@` 别名 → `src/`，开发代理 `/api` → `http://localhost:8080`，Element Plus 组件/图标自动导入
+- `src/styles/` — CSS 变量系统（颜色/间距/圆角/阴影/字体），全局重置，Element Plus 主题覆盖（主色渐变）
+- `src/utils/request.js` — Axios 实例封装，请求拦截器自动注入 Bearer Token，响应拦截器解包 `response.data.data`，401 自动跳登录，统一 ElMessage 错误提示
+- `src/router/index.js` — 路由配置：`/` → 登录页（待实现），`/admin/*` → 管理端布局，`/app/*` → 会员端布局，路由守卫检查 Token/角色
+- `src/stores/` — Pinia 初始化，`auth.js` 管理 Token/用户信息（login/logout 方法待实现）
+- `src/layout/AdminLayout.vue` — 管理端布局：左侧可折叠菜单（仪表盘/会员/教练/课程/运动库/系统），顶部导航栏，面包屑，用户下拉
+- `src/layout/AppLayout.vue` — 会员端布局：顶部导航栏（Logo + 用户头像），底部 TabBar（首页/课程/训练/我的），移动端适配
+- `src/main.js` — 应用入口，注册路由、Pinia、全局样式
+
+**关键决策**
+- 使用 Vite 而非 Webpack：启动快、热更新快，开发体验更好
+- 使用 `<script setup>` 语法：比 Options API 更简洁，逻辑组织更清晰
+- 使用 Pinia 而非 Vuex：Vue 官方推荐，TypeScript 友好，API 更简单
+- Element Plus 自动导入：减少 `import` 语句，代码更干净
+- CSS 变量系统：主题定制方便，设计规范统一
+
+**遗留问题**
+- 路由白名单需要补充（登录页、注册页、403/404 错误页）
+- Auth Store 的 `login()`、`logout()` 方法等待后端接口（Phase 2）
+- 移动端适配需在 Phase 5 进一步优化
+
+---
+
+## [2026-04-18] Phase 1.5 — 联调验证
+
+**完成内容**
+- `module/system/controller/HealthController.java` — 健康检查接口，`GET /api/health` 返回 `Result.success("ok")`
+- `config/CorsConfig.java` — CORS 跨域配置，允许 `localhost:5173` 前端开发服务器，支持常用 HTTP 方法和头部
+- `config/SwaggerConfig.java` — Knife4j/OpenAPI 配置，配置 API 文档基本信息，可通过 `http://localhost:8080/doc.html` 访问
+- 前端联调测试 — 验证前后端连通性：前端启动成功，可正常请求 `/api/health` 接口
+
+**关键决策**
+- CORS 配置使用 `CorsFilter` 而非 `WebMvcConfigurer`，可处理所有请求（包括静态资源）
+- Knife4j 配置使用 OpenAPI 3 规范（Spring Boot 3 默认），与 Spring Boot 3 的 Jakarta 命名空间兼容
+- 健康检查接口单独放在 `system` 模块，未来可扩展为完整的健康检查端点（数据库、Redis 连接状态）
+
+**遗留问题**
+- Knife4j 文档需要实际启动后端服务验证可访问性（启动后可访问 `http://localhost:8080/doc.html`）
+- MySQL 和 Redis 服务需要本地启动，否则后端启动会失败
+
+---
+
+## [2026-04-18] Phase 2.1 — 后端安全基础设施
+
+**完成内容**
+- `config/RedisConfig.java` — RedisTemplate 序列化配置，Key 用 StringRedisSerializer，Value 用 Jackson2JsonRedisSerializer（含类型信息，支持反序列化）
+- `security/JwtTokenProvider.java` — JWT 工具类，使用 JJWT 0.12.x 新 API（`Jwts.parser().verifyWith()`），生成/解析 Access Token (2h) 和 Refresh Token (7d)，密钥从 `application.yml` 读取
+- `security/JwtAuthFilter.java` — JWT 认证过滤器，继承 `OncePerRequestFilter`，从 `Authorization: Bearer {token}` 提取 Token，解析后设置 `SecurityContextHolder`
+- `security/UserDetailsServiceImpl.java` — 从 `sys_user` 表加载用户，构建 `UserDetails`，角色格式 `ROLE_{role}`
+- `module/user/entity/UserEntity.java` — 映射 `sys_user` 表（UserDetailsServiceImpl 依赖）
+- `module/user/mapper/UserMapper.java` — 继承 `BaseMapper<UserEntity>`
+- `config/SecurityConfig.java` — Spring Security 配置：禁用 CSRF、无状态 Session、白名单放行、注册 JwtAuthFilter、BCryptPasswordEncoder Bean、启用 `@PreAuthorize`
+
+**关键决策**
+- JJWT 0.12.x 新 API：`Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload()`，旧的 `parserBuilder()` 已废弃
+- `Jackson2JsonRedisSerializer` 使用构造函数传入 `ObjectMapper`，避免过时的 `setObjectMapper()` 方法
+- `SecurityConfig` 中 `.cors(Customizer.withDefaults())` 确保 Spring Security 不拦截 CORS 预检请求（OPTIONS）
+- `UserEntity` 和 `UserMapper` 提前在 Phase 2.1 创建，作为 `UserDetailsServiceImpl` 的依赖
+
+**遗留问题**
+- 无
