@@ -1,4 +1,4 @@
-USE fitness_db;
+USE fitpro;
 
 -- 超级管理员账号 (密码: admin123)
 INSERT INTO sys_user (id, username, password, nickname, role, status, created_at, updated_at, deleted)

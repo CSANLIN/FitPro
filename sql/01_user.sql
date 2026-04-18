@@ -1,4 +1,4 @@
-USE fitness_db;
+USE fitpro;
 
 -- 用户表
 CREATE TABLE IF NOT EXISTS sys_user (

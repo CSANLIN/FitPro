@@ -1,4 +1,4 @@
-USE fitness_db;
+USE fitpro;
 
 -- 训练模板表
 CREATE TABLE IF NOT EXISTS workout_template (

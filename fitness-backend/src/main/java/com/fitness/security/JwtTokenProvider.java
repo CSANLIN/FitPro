@@ -92,4 +92,12 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
+    public long getAccessTokenExpire() {
+        return accessTokenExpire;
+    }
+
+    public long getRefreshTokenExpire() {
+        return refreshTokenExpire;
+    }
 }

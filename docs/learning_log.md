@@ -1709,3 +1709,672 @@ public class TestBCrypt {
 > 学完后在此处打勾并写下心得：[ ] 已学完
 > 心得：
 
+---
+
+## [2026-04-18] Phase 2.2 — 认证接口（小白版）
+
+### 本节目标
+
+这一步我们实现了系统的"前台接待处"——用户可以在这里注册账号、登录、刷新令牌、登出。做完之后，用户就能通过这些接口完成整个认证流程：注册 → 登录获取 Token → 用 Token 访问其他接口 → Token 过期时刷新 → 登出清除 Token。
+
+---
+
+### 知识点讲解
+
+#### 1. DTO（Data Transfer Object）是什么？
+
+**它是什么？**
+DTO 就是"快递单据"。用户填写表单（用户名、密码等）发给后端，后端不能直接用这个表单数据，要先验证、转换，这个转换的"中间格式"就是 DTO。
+
+**为什么要有 DTO？**
+- **数据验证**：DTO 上贴注解（`@NotBlank`、`@Size` 等），Spring 自动验证
+- **数据隐藏**：用户表有 100 个字段，但注册只需要 5 个，DTO 只暴露需要的字段
+- **版本兼容**：API 升级时，DTO 可以新增字段，不影响旧客户端
+
+**代码例子：**
+
+```java
+@Data
+public class RegisterDTO {
+    @NotBlank(message = "用户名不能为空")
+    @Size(min = 3, max = 20, message = "用户名长度3-20位")
+    private String username;
+    
+    @NotBlank(message = "密码不能为空")
+    @Size(min = 6, message = "密码至少6位")
+    private String password;
+}
+```
+
+这些注解就像"快递单据上的检查项"：
+- 用户名不能空 ✓
+- 用户名长度 3-20 ✓
+- 密码不能空 ✓
+- 密码至少 6 位 ✓
+
+如果不符合，Spring 自动返回 400 错误，不用我们手动检查。
+
+#### 2. VO（Value Object）是什么？
+
+**它是什么？**
+VO 就是"快递收据"。后端处理完请求后，要返回数据给前端，这个返回的"格式"就是 VO。
+
+**DTO vs VO 的区别：**
+| 方向 | 用途 | 例子 |
+|------|------|------|
+| DTO | 前端 → 后端 | 用户填表单（用户名、密码） |
+| VO | 后端 → 前端 | 后端返回用户信息（ID、昵称、角色） |
+
+**为什么要有 VO？**
+- **脱敏**：用户表有密码字段，VO 里不包含密码
+- **聚合**：多个表的数据合并成一个 VO 返回
+- **格式化**：时间戳转成可读的日期字符串
+
+**代码例子：**
+```java
+@Data
+public class UserInfoVO {
+    private Long id;
+    private String username;
+    private String nickname;
+    private String role;
+    // 注意：没有 password 字段！
+}
+```
+
+#### 3. Service 层是什么？
+
+**它是什么？**
+Service 层是"业务逻辑处理中心"。Controller 接收请求，Service 处理业务，Mapper 操作数据库。
+
+**为什么要分层？**
+```
+Controller（接收请求）
+    ↓
+Service（处理业务逻辑）
+    ↓
+Mapper（操作数据库）
+```
+
+如果不分层，所有逻辑都在 Controller 里，会变成"大泥球"，难以维护。
+
+**Service 的职责：**
+- 验证业务规则（用户名是否存在、密码是否正确）
+- 调用 Mapper 操作数据库
+- 调用其他 Service 完成复杂业务
+- 处理事务（多个数据库操作要么全成功，要么全失败）
+
+#### 4. 事务（Transaction）是什么？
+
+**它是什么？**
+事务就像"银行转账"。你从 A 账户转 100 块到 B 账户，要么两个账户都更新成功，要么都失败。不能出现"A 账户扣了 100，但 B 账户没收到"的情况。
+
+**为什么需要事务？**
+在注册流程中：
+1. 插入用户到数据库
+2. 生成 Token
+3. 存 Refresh Token 到 Redis
+
+如果第 2 步失败了，第 1 步的用户插入要回滚（撤销），否则数据库里有个"孤儿"用户。
+
+**代码里怎么用？**
+```java
+@Transactional(rollbackFor = Exception.class)  // 任何异常都回滚
+public TokenVO register(RegisterDTO dto) {
+    // 1. 插入用户
+    userMapper.insert(user);
+    // 2. 生成 Token
+    String token = jwtTokenProvider.generateAccessToken(...);
+    // 如果这里出错，第 1 步会自动回滚
+}
+```
+
+#### 5. 密码验证流程
+
+**注册时：**
+```
+用户输入明文密码 "admin123"
+    ↓
+BCrypt.hashpw() 加密
+    ↓
+存到数据库（加密后的密码）
+```
+
+**登录时：**
+```
+用户输入明文密码 "admin123"
+    ↓
+从数据库查出加密后的密码
+    ↓
+BCrypt.checkpw(明文, 加密后) 比对
+    ↓
+返回 true/false
+```
+
+**为什么不能反向解密？**
+BCrypt 是"单向加密"，就像把鸡蛋打碎了，无法还原成完整的鸡蛋。这样即使数据库被黑客盗取，黑客也看不到明文密码。
+
+#### 6. Token 刷新流程
+
+**问题：** Access Token 只有 2 小时有效，过期后怎么办？
+
+**方案：** 用 Refresh Token 换新 Access Token
+
+**流程：**
+```
+用户登录
+    ↓
+后端返回：Access Token（2h）+ Refresh Token（7d）
+    ↓
+用户用 Access Token 访问接口
+    ↓
+2 小时后，Access Token 过期
+    ↓
+前端用 Refresh Token 调用 /api/auth/refresh
+    ↓
+后端验证 Refresh Token 有效
+    ↓
+返回新的 Access Token（又有 2 小时）
+    ↓
+用户继续用新 Token 访问接口
+```
+
+**为什么要这么复杂？**
+- 如果只有一个 Token（7 天有效），被盗用风险大
+- 如果只有短 Token（2 小时），用户要频繁登录，体验差
+- 双 Token 方案：短 Token 保安全，长 Token 保体验
+
+#### 7. SecurityContext 是什么？
+
+**它是什么？**
+SecurityContext 是 Spring Security 的"当前用户上下文"，就像"线程本地存储"。
+
+**为什么需要它？**
+在 `getCurrentUserInfo()` 方法里，我们需要知道"当前登录的是谁"。但这个信息怎么传进来？
+
+**答案：** JWT 过滤器已经把用户信息放进 SecurityContext 了：
+```java
+// 在 JwtAuthFilter 里
+SecurityContextHolder.getContext().setAuthentication(authentication);
+
+// 在 AuthService 里
+Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+Long userId = Long.parseLong(principal.toString());
+```
+
+就像"线程的私人笔记本"，每个请求线程都有自己的笔记本，记着"当前用户是谁"。
+
+---
+
+### 我们做了什么
+
+#### 文件清单（认证接口 7 大件）
+
+1. **`module/auth/dto/RegisterDTO.java`** — 注册请求参数
+2. **`module/auth/dto/LoginDTO.java`** — 登录请求参数
+3. **`module/auth/vo/TokenVO.java`** — Token 响应
+4. **`module/auth/vo/UserInfoVO.java`** — 用户信息响应
+5. **`module/auth/service/AuthService.java`** — 认证服务接口
+6. **`module/auth/service/impl/AuthServiceImpl.java`** — 认证服务实现
+7. **`module/auth/controller/AuthController.java`** — 认证控制器
+
+#### 1. 请求参数 DTO
+
+**RegisterDTO：**
+- 用户名、密码、确认密码、昵称、手机号、角色
+- 所有字段都有校验注解（`@NotBlank`、`@Size`、`@Pattern`）
+- 前端发来的数据会自动验证，不符合直接返回 400
+
+**LoginDTO：**
+- 用户名、密码
+- 简洁设计，只需要最少信息
+
+#### 2. 响应对象 VO
+
+**TokenVO：**
+```json
+{
+  "accessToken": "eyJhbGc...",
+  "refreshToken": "eyJhbGc...",
+  "tokenType": "Bearer",
+  "expiresIn": 7200,           // 2小时，单位秒
+  "refreshExpiresIn": 604800   // 7天，单位秒
+}
+```
+
+**UserInfoVO：**
+- 用户的所有信息（除了密码）
+- 用于 `/api/auth/me` 接口返回当前用户信息
+
+#### 3. 认证服务实现（5 个核心方法）
+
+**`register(RegisterDTO dto)`**
+```
+1. 检查用户名是否已存在 → 存在则抛异常
+2. 检查手机号是否已存在 → 存在则抛异常
+3. 检查两次密码是否一致 → 不一致则抛异常
+4. BCrypt 加密密码
+5. 构建 UserEntity，保存到数据库
+6. 生成 Access Token + Refresh Token
+7. 存 Refresh Token 到 Redis（7天过期）
+8. 返回 TokenVO
+```
+
+**`login(String username, String password)`**
+```
+1. 根据用户名查询用户 → 不存在则抛异常
+2. BCrypt 验证密码 → 不匹配则抛异常
+3. 检查用户状态（0=正常，1=禁用）→ 禁用则抛异常
+4. 生成 Access Token + Refresh Token
+5. 存 Refresh Token 到 Redis
+6. 返回 TokenVO
+```
+
+**`refresh(String refreshToken)`**
+```
+1. 验证 Refresh Token 格式和类型
+2. 从 Token 中提取用户 ID
+3. 从 Redis 查出存储的 Refresh Token
+4. 比对：传入的 Token 是否与 Redis 中的一致 → 不一致则抛异常
+5. 查询用户信息，检查用户状态
+6. 生成新的 Access Token（Refresh Token 保持不变）
+7. 返回 TokenVO
+```
+
+**`logout(String refreshToken)`**
+```
+1. 验证 Refresh Token 格式和类型
+2. 从 Token 中提取用户 ID
+3. 从 Redis 中删除对应的 Refresh Token
+4. 记录日志
+```
+
+**`getCurrentUserInfo()`**
+```
+1. 从 SecurityContext 获取当前用户 ID
+2. 根据 ID 查询用户信息
+3. 检查用户状态
+4. 转换为 UserInfoVO（脱敏）
+5. 返回
+```
+
+#### 4. 认证控制器（5 个接口）
+
+| 接口 | 方法 | 路径 | 参数 | 返回 |
+|------|------|------|------|------|
+| 注册 | POST | `/api/auth/register` | RegisterDTO | TokenVO |
+| 登录 | POST | `/api/auth/login` | LoginDTO | TokenVO |
+| 刷新 | POST | `/api/auth/refresh` | refreshToken | TokenVO |
+| 登出 | POST | `/api/auth/logout` | refreshToken | 无 |
+| 获取用户 | GET | `/api/auth/me` | 无 | UserInfoVO |
+
+---
+
+### 我们怎么做的
+
+#### 技术决策过程
+
+**1. RedisTemplate 类型问题**
+- **问题：** `RedisConfig` 配置的是 `RedisTemplate<String, Object>`，但 `AuthServiceImpl` 里用 `RedisTemplate<String, String>`
+- **解决：** 改成 `RedisTemplate<String, Object>` 保持一致
+- **教训：** 泛型类型要匹配，否则运行时会报类型转换错误
+
+**2. JwtTokenProvider 扩展**
+- **问题：** `AuthServiceImpl` 需要知道 Token 的过期时间（用于返回 `expiresIn`）
+- **解决：** 在 `JwtTokenProvider` 中添加 `getAccessTokenExpire()` 和 `getRefreshTokenExpire()` 方法
+- **教训：** Service 层需要什么，就在工具类里提供什么方法
+
+**3. 时间字段自动填充**
+- **问题：** 每次 `register()` 和 `login()` 都要手动设置 `createdAt` 和 `updatedAt`
+- **解决：** `UserEntity` 继承 `BaseEntity`，利用 MyBatis-Plus 的 `MetaObjectHandler` 自动填充
+- **教训：** 充分利用框架的自动化功能，减少重复代码
+
+**4. 错误码设计**
+- **问题：** 注册、登录、刷新、登出各种错误，怎么区分？
+- **解决：** 统一用 `BusinessException` 抛出，错误码 1001-1009：
+  - 1001：用户名已存在
+  - 1002：手机号已存在
+  - 1003：两次密码不一致
+  - 1004：用户名或密码错误
+  - 1005：用户账户已被禁用
+  - 1006：无效的刷新令牌
+  - 1007：刷新令牌已失效
+  - 1008：用户不存在
+  - 1009：用户未认证
+- **教训：** 错误码要有规律，便于前端处理
+
+#### 依赖关系梳理
+
+```
+AuthController
+    ↓ 调用
+AuthService
+    ↓ 需要
+JwtTokenProvider（生成/验证 Token）
+UserMapper（查询/插入用户）
+RedisTemplate（存储 Refresh Token）
+PasswordEncoder（加密密码）
+SecurityContextHolder（获取当前用户）
+```
+
+---
+
+### 我们为什么这么做
+
+#### 1. 为什么要分 DTO 和 VO？
+
+**不分的后果：**
+```java
+// 直接用 UserEntity 接收请求
+@PostMapping("/register")
+public Result<UserEntity> register(@RequestBody UserEntity user) {
+    // 问题1：UserEntity 有 100 个字段，但注册只需要 5 个
+    // 问题2：没有数据验证
+    // 问题3：返回时暴露了密码字段
+}
+```
+
+**分开的好处：**
+- RegisterDTO 只有 6 个字段，清晰
+- 自动验证，不用手动检查
+- UserInfoVO 不包含密码，安全
+
+#### 2. 为什么要用事务？
+
+**不用事务的后果：**
+```
+用户注册成功，插入数据库 ✓
+生成 Token 时出错 ✗
+→ 数据库里有个"孤儿"用户，但前端没收到 Token，无法登录
+```
+
+**用事务的好处：**
+```
+用户注册成功，插入数据库 ✓
+生成 Token 时出错 ✗
+→ 自动回滚，数据库里没有这个用户
+→ 前端收到错误，用户可以重新注册
+```
+
+#### 3. 为什么 Refresh Token 要存 Redis？
+
+**不存的后果：**
+```
+用户登出，但 Refresh Token 还没过期
+用户用旧的 Refresh Token 换新 Access Token
+→ 系统无法阻止，用户被"复活"了
+```
+
+**存 Redis 的好处：**
+```
+用户登出，删除 Redis 中的 Refresh Token
+用户用旧的 Refresh Token 换新 Access Token
+→ Redis 查不到，返回"令牌已失效"
+→ 用户真正登出了
+```
+
+#### 4. 为什么要检查用户状态？
+
+**不检查的后果：**
+```
+管理员禁用了某个用户账户
+但用户的 Refresh Token 还有效
+用户继续用 Token 访问系统
+→ 禁用形同虚设
+```
+
+**检查的好处：**
+```
+管理员禁用用户
+用户用 Token 访问接口
+→ JwtAuthFilter 解析 Token，获取用户 ID
+→ 查数据库，发现用户被禁用
+→ 返回 403，拒绝访问
+```
+
+---
+
+### 用联系的观点看问题
+
+**认证系统的"生态链"：**
+
+```
+用户表 (sys_user)
+    ↓ (提供用户数据)
+AuthService
+    ↓ (调用)
+JwtTokenProvider（生成 Token）
+    ↓ (返回)
+AuthController
+    ↓ (返回给)
+前端
+    ↓ (存储 Token）
+下次请求时
+    ↓ (携带 Token）
+JwtAuthFilter
+    ↓ (验证 Token）
+SecurityContext
+    ↓ (提供用户身份）
+业务接口
+```
+
+每个环节都相互依赖、相互制约：
+- 没有用户表，AuthService 无法查询
+- 没有 JwtTokenProvider，无法生成 Token
+- 没有 Redis，无法存储 Refresh Token
+- 没有 JwtAuthFilter，无法验证 Token
+
+**安全与便利的矛盾统一：**
+- **安全要求**：密码加密、Token 短期有效、登出后立即失效
+- **便利要求**：用户不用频繁登录、操作流畅
+- **我们的方案**：
+  - Access Token 2 小时（安全）
+  - Refresh Token 7 天（便利）
+  - Redis 黑名单（可控）
+
+---
+
+### 用发展的观点看问题
+
+**从 Phase 2.1 到 Phase 2.2 的演进：**
+
+Phase 2.1：系统有了"门禁系统"（Spring Security + JWT）
+↓
+Phase 2.2：系统有了"前台接待处"（认证接口）
+
+**技术栈的螺旋上升：**
+1. **基础认证**（Phase 2.1）→ 系统能验证 Token
+2. **接口实现**（Phase 2.2）→ 用户能获取 Token
+3. **前端对接**（Phase 2.3）→ 用户能通过 UI 登录
+
+**从"无状态"到"有管理的无状态"：**
+- JWT 宣称无状态（不存 Session）
+- 但我们用 Redis 存 Refresh Token（有状态）
+- 这是"扬弃"：保留无状态的优点，克服无状态的缺点
+
+---
+
+### 运用对立统一规律分析
+
+**认证 vs 性能 的对立统一：**
+- **对立面**：每次请求都要验证 Token，消耗 CPU
+- **统一面**：JWT 验证很快（只需要验证签名），不会成为瓶颈
+- **我们的平衡**：用快速的 JWT 验证，而不是每次都查数据库
+
+**集中 vs 分布 的对立统一：**
+- **集中**：所有认证逻辑在 AuthService 里
+- **分布**：Token 分布在每个请求中，Redis 分布式存储
+- **统一**：集中管理规则 + 分布式执行 = 可扩展的认证系统
+
+**短期 vs 长期 的对立统一：**
+- **短期**：Access Token 2 小时，安全性高
+- **长期**：Refresh Token 7 天，用户体验好
+- **统一**：双 Token 方案平衡两者
+
+---
+
+### 如何去实践去检验自己的理解
+
+#### 动手实验 1：观察注册流程
+
+**步骤：**
+1. 启动后端服务
+2. 用 Knife4j 文档调用 `/api/auth/register`
+3. 填入：username=test001, password=123456, confirmPassword=123456, nickname=测试用户, phone=13800138000, role=MEMBER
+4. 观察返回的 TokenVO
+
+**你应该看到：**
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "accessToken": "eyJhbGc...",
+    "refreshToken": "eyJhbGc...",
+    "tokenType": "Bearer",
+    "expiresIn": 7200,
+    "refreshExpiresIn": 604800
+  }
+}
+```
+
+**验证点：**
+- 返回了两个 Token
+- `expiresIn` 是 7200（2 小时 = 7200 秒）
+- `refreshExpiresIn` 是 604800（7 天 = 604800 秒）
+
+#### 动手实验 2：验证密码加密
+
+**步骤：**
+1. 注册成功后，用 Navicat 打开 `sys_user` 表
+2. 查看刚注册的用户的 `password` 字段
+
+**你应该看到：**
+```
+$2a$10$abcdefghijklmnopqrstuvwxyz...
+```
+
+这是 BCrypt 加密后的密码，看不出原始密码是什么。
+
+**验证点：**
+- 密码不是明文存储
+- 每个用户的加密密码都不同（即使密码相同）
+
+#### 动手实验 3：测试登录流程
+
+**步骤：**
+1. 用 Knife4j 调用 `/api/auth/login`
+2. 填入：username=test001, password=123456
+3. 观察返回的 Token
+
+**你应该看到：**
+返回新的 Token（与注册时不同）
+
+**验证点：**
+- 登录成功返回 Token
+- 每次登录返回的 Token 都不同（因为时间戳不同）
+
+#### 动手实验 4：测试 Token 刷新
+
+**步骤：**
+1. 从登录返回的 TokenVO 中复制 `refreshToken`
+2. 用 Knife4j 调用 `/api/auth/refresh`
+3. 填入：refreshToken=（粘贴刚才复制的）
+4. 观察返回的新 Token
+
+**你应该看到：**
+```json
+{
+  "accessToken": "新的 Token",
+  "refreshToken": "原来的 Refresh Token（保持不变）",
+  ...
+}
+```
+
+**验证点：**
+- Access Token 更新了
+- Refresh Token 保持不变
+- 可以用新的 Access Token 继续访问接口
+
+#### 动手实验 5：测试登出
+
+**步骤：**
+1. 从登录返回的 TokenVO 中复制 `refreshToken`
+2. 用 Knife4j 调用 `/api/auth/logout`
+3. 填入：refreshToken=（粘贴刚才复制的）
+4. 观察返回结果
+
+**你应该看到：**
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": null
+}
+```
+
+**验证点：**
+- 登出成功
+- 之后用这个 Refresh Token 调用 `/api/auth/refresh` 应该返回"令牌已失效"
+
+#### 动手实验 6：测试获取当前用户
+
+**步骤：**
+1. 从登录返回的 TokenVO 中复制 `accessToken`
+2. 用 Knife4j 调用 `/api/auth/me`
+3. 在请求头中添加：`Authorization: Bearer {accessToken}`
+4. 观察返回的用户信息
+
+**你应该看到：**
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "id": 1234567890,
+    "username": "test001",
+    "nickname": "测试用户",
+    "phone": "13800138000",
+    "role": "MEMBER",
+    ...
+  }
+}
+```
+
+**验证点：**
+- 返回了当前登录用户的信息
+- 没有返回 `password` 字段（脱敏）
+- 用户信息与注册时一致
+
+---
+
+### 本节小结
+
+**学到了：**
+- DTO 是"请求快递单据"，自动验证数据
+- VO 是"响应快递收据"，脱敏返回数据
+- Service 层处理业务逻辑，分层让代码更清晰
+- 事务保证数据一致性，要么全成功要么全失败
+- 双 Token 方案平衡安全与体验
+- SecurityContext 是"当前用户上下文"，让我们知道谁在访问
+
+**记住：**
+- 注册时检查用户名/手机号唯一性
+- 登录时验证密码用 BCrypt.checkpw()
+- Refresh Token 要存 Redis，登出时删除
+- 每个操作都要检查用户状态（是否被禁用）
+- 错误码要有规律（1001-1009），便于前端处理
+- 返回给前端的 VO 不能包含敏感信息（密码）
+
+**思维提升：**
+- 理解了"分层架构"：Controller → Service → Mapper
+- 体验了"数据流转"：DTO（入）→ Service 处理 → VO（出）
+- 建立了"安全意识"：密码加密、Token 验证、用户状态检查
+
+---
+
+> 📝 **学习心得区**（由学员填写）
+> 学完后在此处打勾并写下心得：[√ ] 已学完
+> 心得：我觉得光是这样看着文字学习理解，效果不好，我可能还得去网上找视频或文章文档，建立起整体的思维，那这就涉及到我的学习的顺序，学习的资源。我发现动手实验这个很好，学习效果很好很不错，我可能需要你在这方面更详尽。
+

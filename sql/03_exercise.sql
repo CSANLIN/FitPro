@@ -1,4 +1,4 @@
-USE fitness_db;
+USE fitpro;
 
 -- 运动分类表
 CREATE TABLE IF NOT EXISTS exercise_category (

@@ -62,7 +62,7 @@ Phase 1 - 基础骨架
 │   ├── [x] BusinessException 自定义业务异常
 │   └── [x] MybatisPlusConfig 分页插件/自动填充
 ├── 1.3 数据库 ✅
-│   ├── [x] 创建 fitness_db 数据库
+│   ├── [x] 创建 fitpro 数据库
 │   ├── [x] 执行建表 SQL (19张表)
 │   └── [x] 初始化种子数据 (管理员账号、运动分类)
 ├── 1.4 前端初始化 ✅
@@ -93,11 +93,11 @@ Phase 2 - 认证体系
 │   ├── [x] RedisConfig.java (Token 存储)
 │   └── [x] CorsConfig.java
 ├── 2.2 认证接口
-│   ├── [ ] POST /api/auth/register (注册)
-│   ├── [ ] POST /api/auth/login (登录)
-│   ├── [ ] POST /api/auth/refresh (刷新Token)
-│   ├── [ ] POST /api/auth/logout (登出)
-│   └── [ ] GET /api/auth/me (获取当前用户)
+│   ├── [x] POST /api/auth/register (注册)
+│   ├── [x] POST /api/auth/login (登录)
+│   ├── [x] POST /api/auth/refresh (刷新Token)
+│   ├── [x] POST /api/auth/logout (登出)
+│   └── [x] GET /api/auth/me (获取当前用户)
 ├── 2.3 前端认证
 │   ├── [ ] 登录页面 LoginView.vue
 │   ├── [ ] 注册页面 RegisterView.vue

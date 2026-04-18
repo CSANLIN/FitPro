@@ -1,4 +1,4 @@
-USE fitness_db;
+USE fitpro;
 
 -- 课程表
 CREATE TABLE IF NOT EXISTS course (

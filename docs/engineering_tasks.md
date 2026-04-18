@@ -13,7 +13,7 @@
 | 1.1.1 | Spring Initializr 创建项目 (Java 17, Spring Boot 3.2, Maven) | `fitness-backend/` 整个目录 | `mvn compile` 通过 | `[x]` |
 | 1.1.2 | pom.xml 补充依赖 | `pom.xml` | 依赖: mybatis-plus-spring-boot3-starter 3.5.x, spring-boot-starter-data-redis, knife4j-openapi3-jakarta-spring-boot-starter 4.x, lombok, hutool-all, mapstruct, jjwt 0.12.x, spring-boot-starter-security, spring-boot-starter-validation | `[x]` |
 | 1.1.3 | 主配置文件 | `src/main/resources/application.yml` | 激活 dev profile, 设置 server.port=8080, context-path=/api | `[x]` |
-| 1.1.4 | 开发环境配置 | `src/main/resources/application-dev.yml` | MySQL 连接 (fitness_db, 3306), Redis 连接 (localhost:6379), MyBatis-Plus 配置 (mapper-locations, logic-delete, id-type), 日志级别 DEBUG | `[x]` |
+| 1.1.4 | 开发环境配置 | `src/main/resources/application-dev.yml` | MySQL 连接 (fitpro, 3306), Redis 连接 (localhost:6379), MyBatis-Plus 配置 (mapper-locations, logic-delete, id-type), 日志级别 DEBUG | `[x]` |
 | 1.1.5 | 启动类 | `src/.../FitnessApplication.java` | `@SpringBootApplication` `@MapperScan("com.fitness.module.*.mapper")` | `[x]` |
 
 ### 1.2 通用组件层
@@ -31,7 +31,7 @@
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 1.3.1 | 建库脚本 | `sql/00_create_database.sql` | `CREATE DATABASE fitness_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;` | `[x]` |
+| 1.3.1 | 建库脚本 | `sql/00_create_database.sql` | `CREATE DATABASE fitpro CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;` | `[x]` |
 | 1.3.2 | 用户与身体数据表 | `sql/01_user.sql` | 建表: sys_user, body_record; 索引: idx_user_username, idx_user_phone, idx_body_record_user_id | `[x]` |
 | 1.3.3 | 会籍与签到表 | `sql/02_membership.sql` | 建表: membership_card, member_membership, check_in; 索引: idx_membership_user_id, idx_checkin_user_id | `[x]` |
 | 1.3.4 | 运动库表 | `sql/03_exercise.sql` | 建表: exercise_category, exercise; 索引: idx_exercise_category_id | `[x]` |
@@ -84,12 +84,12 @@
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 2.2.1 | Auth DTO | `module/auth/dto/LoginDTO.java` `RegisterDTO.java` | LoginDTO: username + password; RegisterDTO: username + password + nickname + phone + role(默认MEMBER) | `[ ]` |
-| 2.2.2 | Auth VO | `module/auth/vo/TokenVO.java` `UserInfoVO.java` | TokenVO: accessToken + refreshToken + expiresIn; UserInfoVO: id + username + nickname + avatar + role | `[ ]` |
-| 2.2.3 | User Entity + Mapper | `module/user/entity/UserEntity.java` `module/user/mapper/UserMapper.java` | UserEntity 映射 sys_user 全字段, UserMapper 继承 BaseMapper | `[ ]` |
-| 2.2.4 | AuthService | `module/auth/service/AuthService.java` + `impl/` | register(): 校验用户名唯一→BCrypt加密→入库→返回TokenVO; login(): 查用户→校验密码→生成双Token→Refresh存Redis→返回TokenVO; refresh(): 校验RefreshToken→生成新AccessToken; logout(): 删除Redis中RefreshToken | `[ ]` |
-| 2.2.5 | AuthController | `module/auth/controller/AuthController.java` | POST /api/auth/register, POST /api/auth/login, POST /api/auth/refresh, POST /api/auth/logout, GET /api/auth/me | `[ ]` |
-| 2.2.6 | Knife4j 接口测试 | 手动验证 | 在 Swagger 文档中测试注册→登录→携带Token访问/me | `[ ]` |
+| 2.2.1 | Auth DTO | `module/auth/dto/LoginDTO.java` `RegisterDTO.java` | LoginDTO: username + password; RegisterDTO: username + password + nickname + phone + role(默认MEMBER) | `[x]` |
+| 2.2.2 | Auth VO | `module/auth/vo/TokenVO.java` `UserInfoVO.java` | TokenVO: accessToken + refreshToken + expiresIn; UserInfoVO: id + username + nickname + avatar + role | `[x]` |
+| 2.2.3 | User Entity + Mapper | `module/user/entity/UserEntity.java` `module/user/mapper/UserMapper.java` | UserEntity 映射 sys_user 全字段, UserMapper 继承 BaseMapper | `[x]` |
+| 2.2.4 | AuthService | `module/auth/service/AuthService.java` + `impl/` | register(): 校验用户名唯一→BCrypt加密→入库→返回TokenVO; login(): 查用户→校验密码→生成双Token→Refresh存Redis→返回TokenVO; refresh(): 校验RefreshToken→生成新AccessToken; logout(): 删除Redis中RefreshToken | `[x]` |
+| 2.2.5 | AuthController | `module/auth/controller/AuthController.java` | POST /api/auth/register, POST /api/auth/login, POST /api/auth/refresh, POST /api/auth/logout, GET /api/auth/me | `[x]` |
+| 2.2.6 | Knife4j 接口测试 | 手动验证 | 在 Swagger 文档中测试注册→登录→携带Token访问/me | `[~]` |
 
 ### 2.3 前端认证
 

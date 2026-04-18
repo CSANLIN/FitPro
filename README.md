@@ -25,13 +25,13 @@
 
 ```bash
 mysql -u root -p < sql/00_create_database.sql
-mysql -u root -p fitness_db < sql/01_user.sql
-mysql -u root -p fitness_db < sql/02_membership.sql
-mysql -u root -p fitness_db < sql/03_exercise.sql
-mysql -u root -p fitness_db < sql/04_workout.sql
-mysql -u root -p fitness_db < sql/05_course.sql
-mysql -u root -p fitness_db < sql/06_system.sql
-mysql -u root -p fitness_db < sql/07_seed_data.sql
+mysql -u root -p fitpro < sql/01_user.sql
+mysql -u root -p fitpro < sql/02_membership.sql
+mysql -u root -p fitpro < sql/03_exercise.sql
+mysql -u root -p fitpro < sql/04_workout.sql
+mysql -u root -p fitpro < sql/05_course.sql
+mysql -u root -p fitpro < sql/06_system.sql
+mysql -u root -p fitpro < sql/07_seed_data.sql
 ```
 
 或者用 Navicat / MySQL Workbench 等图形工具依次执行这 8 个文件。

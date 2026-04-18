@@ -1,4 +1,4 @@
-USE fitness_db;
+USE fitpro;
 
 -- 系统公告表
 CREATE TABLE IF NOT EXISTS sys_announcement (

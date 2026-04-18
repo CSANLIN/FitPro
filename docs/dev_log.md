@@ -14,7 +14,7 @@
   - Knife4j 4.4.0（OpenAPI 3 / Jakarta）
   - Lombok、Hutool 5.8.26、JJWT 0.12.5
 - `application.yml` — 主配置：激活 dev profile、MyBatis-Plus 全局（雪花 ID、逻辑删除、驼峰映射）、Knife4j 启用、JWT 参数（access 2h / refresh 7d）
-- `application-dev.yml` — 开发环境：MySQL localhost:3306/fitness_db、Redis localhost:6379 无密码、debug 日志
+- `application-dev.yml` — 开发环境：MySQL localhost:3306/fitpro、Redis localhost:6379 无密码、debug 日志
 - `application-prod.yml` — 生产环境：所有敏感配置读环境变量（`DB_HOST`、`DB_PASSWORD`、`REDIS_*`）、HikariCP 连接池调优、日志写文件
 - `FitnessApplication.java` — 启动类，`@MapperScan("com.fitness.module.**.mapper")`
 - `FitnessApplicationTests.java` — 上下文加载测试桩
@@ -125,3 +125,31 @@
 
 **遗留问题**
 - 无
+
+---
+
+## [2026-04-18] Phase 2.2 — 认证接口
+
+**完成内容**
+- `module/auth/dto/RegisterDTO.java` — 用户注册请求参数，包含用户名、密码、确认密码、昵称、手机号、角色字段，使用 `@NotBlank`、`@Size`、`@Pattern` 等校验注解
+- `module/auth/dto/LoginDTO.java` — 用户登录请求参数，包含用户名和密码字段
+- `module/auth/vo/TokenVO.java` — 令牌响应对象，包含 `accessToken`、`refreshToken`、`tokenType`、`expiresIn`、`refreshExpiresIn` 字段
+- `module/auth/vo/UserInfoVO.java` — 用户信息响应对象，映射 `UserEntity` 所有字段（除密码外），用于返回给前端的脱敏数据
+- `module/auth/service/AuthService.java` — 认证服务接口，定义 `register`、`login`、`refresh`、`logout`、`getCurrentUserInfo` 方法
+- `module/auth/service/impl/AuthServiceImpl.java` — 认证服务实现类，已完成所有方法：
+  - `register()`：校验用户名/手机号唯一性 → BCrypt 加密密码 → 保存用户 → 生成双 Token → 存储 Refresh Token 到 Redis → 返回 TokenVO
+  - `login()`：验证用户名密码 → 检查用户状态 → 生成双 Token → 存储 Refresh Token → 返回 TokenVO
+  - `refresh()`：验证 Refresh Token → 与 Redis 存储比对 → 生成新 Access Token → 返回 TokenVO
+  - `logout()`：验证 Refresh Token → 从 Redis 中删除对应的 Refresh Token
+  - `getCurrentUserInfo()`：从 SecurityContext 获取当前用户 ID → 查询用户信息 → 转换为 UserInfoVO
+- `module/auth/controller/AuthController.java` — 认证控制器，完成 `/api/auth/register`、`/login`、`/refresh`、`/logout`、`/me` 所有接口
+
+**关键决策**
+- RedisTemplate 类型匹配：将 `RedisTemplate<String, String>` 改为 `RedisTemplate<String, Object>` 以匹配 `RedisConfig` 中的 JSON 序列化配置
+- JwtTokenProvider 扩展：添加 `getAccessTokenExpire()` 和 `getRefreshTokenExpire()` 方法供服务层获取过期时间配置
+- 时间字段自动填充：`UserEntity` 继承 `BaseEntity`，利用 MyBatis-Plus 的 `MetaObjectHandler` 自动填充 `createdAt` 和 `updatedAt`，避免在服务层手动设置时间
+- 统一业务错误码：注册、登录、刷新、登出等操作使用统一的 `BusinessException` 错误码（1001-1009）
+
+**遗留问题**
+- Maven 编译环境问题：本地环境中 Maven 不在 PATH 中，`mvn compile` 无法执行，需要用户配置 Maven 环境或使用 IDE 进行编译
+- 接口功能待测试：需启动后端服务，通过 Knife4j 文档测试注册→登录→刷新→登出→获取用户信息全流程

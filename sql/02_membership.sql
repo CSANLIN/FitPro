@@ -1,4 +1,4 @@
-USE fitness_db;
+USE fitpro;
 
 -- 会员卡种表
 CREATE TABLE IF NOT EXISTS membership_card (
