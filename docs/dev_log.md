@@ -153,3 +153,67 @@
 **遗留问题**
 - Maven 编译环境问题：本地环境中 Maven 不在 PATH 中，`mvn compile` 无法执行，需要用户配置 Maven 环境或使用 IDE 进行编译
 - 接口功能待测试：需启动后端服务，通过 Knife4j 文档测试注册→登录→刷新→登出→获取用户信息全流程
+
+---
+
+## [2026-04-18] Phase 2.3.1 — 前端认证API
+
+**完成内容**
+- `src/api/auth.js` — 认证API模块，包含5个方法：
+  - `register(data)`：用户注册，参数包含用户名、密码、昵称、手机号、角色
+  - `login(data)`：用户登录，参数包含用户名、密码
+  - `refresh(refreshToken)`：刷新访问令牌，参数为刷新令牌字符串
+  - `logout(refreshToken)`：用户登出，参数为刷新令牌字符串
+  - `getMe()`：获取当前用户信息
+
+**关键决策**
+- 使用统一的request实例（`@/utils/request`），该实例已配置baseURL为`/api`，并自动注入Bearer Token到请求头
+- 所有方法返回Promise，由request拦截器统一处理响应格式和错误码
+- 响应数据格式与后端`TokenVO`、`UserInfoVO`一致，request拦截器会自动提取`response.data.data`
+
+**遗留问题**
+- API调用尚未集成到具体的Auth Store和页面组件中，需后续完成2.3.2（Auth Store）和2.3.3/2.3.4（登录/注册页面）
+
+## [2026-04-18] Phase 2.3.2 — Auth Store
+
+**完成内容**
+- `src/stores/auth.js` — 认证状态管理 Store，使用 Pinia 的 Composition API 实现：
+  - 状态：token、refreshToken、userInfo，自动持久化到 localStorage
+  - 计算属性：isLoggedIn，基于 token 是否存在
+  - 方法：login() 调用 authApi.login 并保存令牌、fetchUserInfo() 获取用户信息、register() 注册并自动登录、logout() 调用后端登出接口并清除本地状态、refreshAccessToken() 刷新访问令牌、init() 初始化时自动获取用户信息
+
+**关键决策**
+- 采用 Composition API 写法，逻辑更集中，易于扩展
+- 所有方法都处理错误情况：失败时清除本地认证状态，确保状态一致性
+- 提供 init() 方法用于应用启动时恢复用户状态（有 token 但无 userInfo 时自动获取）
+- logout() 方法确保即使后端登出失败也清除本地状态，避免用户卡在登录状态
+
+**遗留问题**
+- 需要与路由守卫集成，实现未登录跳转和角色权限控制（Phase 2.3.5）
+- 需要与 Axios 拦截器集成，实现 Token 自动刷新和 401 处理（Phase 2.3.6）
+- 需要前端页面调用这些方法完成登录/注册流程（Phase 2.3.3/2.3.4）
+
+---
+## [2026-04-18] Phase 2.3.3 — 登录页面
+
+**完成内容**
+- `src/views/auth/LoginView.vue` — 完整的登录页面组件：
+  - 响应式布局，使用 CSS 变量系统确保设计一致性
+  - 背景使用健身主题图片叠加渐变蒙层，营造专业氛围
+  - 表单包含用户名、密码输入框，支持密码显示/隐藏切换
+  - 表单验证：用户名（3-20字符）、密码（6-20字符），Element Plus 规则验证
+  - "记住我"复选框和"忘记密码"链接（暂未实现功能）
+  - 登录按钮集成 Auth Store 的 `login()` 方法，支持加载状态
+  - 登录成功后根据用户角色自动跳转：管理员/教练 → `/admin/dashboard`，会员 → `/app/profile`
+  - 提供注册页面链接，方便新用户注册
+
+**关键决策**
+- 使用 Unsplash 健身图片作为背景，增强视觉吸引力
+- 采用卡片式设计，结合毛玻璃效果（backdrop-filter），符合现代 UI 趋势
+- 完全响应式设计，在移动端自动调整内边距和布局
+- 表单验证在提交前进行，确保数据格式正确
+- 登录成功后立即获取用户信息并保存到 Auth Store
+
+**遗留问题**
+- "忘记密码"功能暂未实现，需要后续 Phase 补充
+- 背景图片为外部 URL，生产环境建议下载到本地或使用 CDN 确保稳定性

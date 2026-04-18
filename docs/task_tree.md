@@ -99,10 +99,10 @@ Phase 2 - 认证体系
 │   ├── [x] POST /api/auth/logout (登出)
 │   └── [x] GET /api/auth/me (获取当前用户)
 ├── 2.3 前端认证
-│   ├── [ ] 登录页面 LoginView.vue
+│   ├── [x] 登录页面 LoginView.vue
 │   ├── [ ] 注册页面 RegisterView.vue
-│   ├── [ ] useAuthStore (Token管理, 用户状态)
-│   ├── [ ] 路由守卫 (未登录跳转, 角色权限)
+│   ├── [x] useAuthStore (Token管理, 用户状态)
+│   ├── [~] 路由守卫 (未登录跳转, 角色权限)
 │   ├── [ ] Axios 拦截器 (自动携带Token, 401处理)
 │   └── [ ] Token 过期自动刷新逻辑
 └── 2.4 验证

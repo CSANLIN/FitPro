@@ -148,7 +148,22 @@ router.beforeEach((to, from, next) => {
     // 已登录但访问登录/注册页，跳转到首页
     // 这里需要根据用户角色决定跳转到哪里
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-    if (userInfo.role === 'ROLE_SUPER_ADMIN' || userInfo.role === 'ROLE_COACH') {
+    const userRole = userInfo.role
+
+    // 如果用户信息中没有角色字段，可能是用户信息不完整，清除认证状态并停留在当前页面
+    if (!userRole) {
+      // 清除本地认证状态
+      localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('userInfo')
+      next()
+      return
+    }
+
+    // 后端返回的角色不带 ROLE_ 前缀，但前端权限检查时需要带前缀
+    const userRoleWithPrefix = `ROLE_${userRole}`
+
+    if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
       next('/admin/dashboard')
     } else {
       next('/app/profile')
@@ -161,7 +176,21 @@ router.beforeEach((to, from, next) => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
     const userRole = userInfo.role
 
-    if (!userRole || !to.meta.roles.includes(userRole)) {
+    // 如果用户信息中没有角色字段，可能是用户信息不完整，清除认证状态并跳转到登录页
+    if (!userRole) {
+      // 清除本地认证状态
+      localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('userInfo')
+      // 跳转到登录页并显示提示
+      next('/login')
+      return
+    }
+
+    // 后端返回的角色不带 ROLE_ 前缀，但路由 meta 中存储的是带前缀的角色
+    const userRoleWithPrefix = `ROLE_${userRole}`
+
+    if (!to.meta.roles.includes(userRoleWithPrefix)) {
       // 角色不匹配，跳转到无权限页面
       next('/403')
       return

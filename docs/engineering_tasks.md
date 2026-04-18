@@ -95,11 +95,11 @@
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 2.3.1 | Auth API | `src/api/auth.js` | authApi: login, register, refresh, logout, getMe | `[ ]` |
-| 2.3.2 | Auth Store | `src/stores/auth.js` | useAuthStore: token, refreshToken, userInfo, isLoggedIn(computed), login(), logout(), refreshAccessToken(), fetchUserInfo() | `[ ]` |
-| 2.3.3 | 登录页 | `src/views/auth/LoginView.vue` | 表单: 用户名+密码+记住我, Element Plus 表单校验, 登录成功→按角色跳转 (ADMIN→/admin, MEMBER→/app) | `[ ]` |
+| 2.3.1 | Auth API | `src/api/auth.js` | authApi: login, register, refresh, logout, getMe | `[x]` |
+| 2.3.2 | Auth Store | `src/stores/auth.js` | useAuthStore: token, refreshToken, userInfo, isLoggedIn(computed), login(), logout(), refreshAccessToken(), fetchUserInfo() | `[x]` |
+| 2.3.3 | 登录页 | `src/views/auth/LoginView.vue` | 表单: 用户名+密码+记住我, Element Plus 表单校验, 登录成功→按角色跳转 (ADMIN→/admin, MEMBER→/app) | `[x]` |
 | 2.3.4 | 注册页 | `src/views/auth/RegisterView.vue` | 表单: 用户名+密码+确认密码+昵称+手机号, 注册成功→自动登录→跳转 | `[ ]` |
-| 2.3.5 | 路由守卫完善 | `src/router/index.js` | beforeEach: 无Token→跳登录 (白名单除外), 有Token无userInfo→fetchUserInfo, 角色不匹配→403页面 | `[ ]` |
+| 2.3.5 | 路由守卫完善 | `src/router/index.js` | beforeEach: 无Token→跳登录 (白名单除外), 有Token无userInfo→fetchUserInfo, 角色不匹配→403页面 | `[~]` |
 | 2.3.6 | Axios Token 刷新 | `src/utils/request.js` | 响应拦截器: 401时用refreshToken换新token→重试原请求, refreshToken也失效→跳登录 | `[ ]` |
 | 2.3.7 | 403/404 页面 | `src/views/error/403View.vue` `404View.vue` | 简洁的错误提示 + 返回按钮 | `[ ]` |
 
