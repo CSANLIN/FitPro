@@ -208,6 +208,7 @@ public class AuthServiceImpl implements AuthService {
     public UserInfoVO getCurrentUserInfo() {
         // 1. 从 SecurityContext 中获取当前认证的用户 ID
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.debug("getCurrentUserInfo - principal: {}", principal);
         if (principal == null) {
             throw new BusinessException(1009, "用户未认证");
         }
@@ -218,9 +219,14 @@ public class AuthServiceImpl implements AuthService {
         } catch (NumberFormatException e) {
             throw new BusinessException(1009, "用户未认证");
         }
+        log.debug("getCurrentUserInfo - userId: {}", userId);
 
         // 2. 查询用户信息
         UserEntity user = userMapper.selectById(userId);
+        log.debug("getCurrentUserInfo - user found: id={}, username={}, role={}",
+            user != null ? user.getId() : "null",
+            user != null ? user.getUsername() : "null",
+            user != null ? user.getRole() : "null");
         if (user == null) {
             throw new BusinessException(1008, "用户不存在");
         }

@@ -89,7 +89,7 @@
 | 2.2.3 | User Entity + Mapper | `module/user/entity/UserEntity.java` `module/user/mapper/UserMapper.java` | UserEntity 映射 sys_user 全字段, UserMapper 继承 BaseMapper | `[x]` |
 | 2.2.4 | AuthService | `module/auth/service/AuthService.java` + `impl/` | register(): 校验用户名唯一→BCrypt加密→入库→返回TokenVO; login(): 查用户→校验密码→生成双Token→Refresh存Redis→返回TokenVO; refresh(): 校验RefreshToken→生成新AccessToken; logout(): 删除Redis中RefreshToken | `[x]` |
 | 2.2.5 | AuthController | `module/auth/controller/AuthController.java` | POST /api/auth/register, POST /api/auth/login, POST /api/auth/refresh, POST /api/auth/logout, GET /api/auth/me | `[x]` |
-| 2.2.6 | Knife4j 接口测试 | 手动验证 | 在 Swagger 文档中测试注册→登录→携带Token访问/me | `[~]` |
+| 2.2.6 | Knife4j 接口测试 | 手动验证 | 在 Swagger 文档中测试注册→登录→携带Token访问/me | `[x]` |
 
 ### 2.3 前端认证
 
@@ -98,10 +98,18 @@
 | 2.3.1 | Auth API | `src/api/auth.js` | authApi: login, register, refresh, logout, getMe | `[x]` |
 | 2.3.2 | Auth Store | `src/stores/auth.js` | useAuthStore: token, refreshToken, userInfo, isLoggedIn(computed), login(), logout(), refreshAccessToken(), fetchUserInfo() | `[x]` |
 | 2.3.3 | 登录页 | `src/views/auth/LoginView.vue` | 表单: 用户名+密码+记住我, Element Plus 表单校验, 登录成功→按角色跳转 (ADMIN→/admin, MEMBER→/app) | `[x]` |
-| 2.3.4 | 注册页 | `src/views/auth/RegisterView.vue` | 表单: 用户名+密码+确认密码+昵称+手机号, 注册成功→自动登录→跳转 | `[ ]` |
-| 2.3.5 | 路由守卫完善 | `src/router/index.js` | beforeEach: 无Token→跳登录 (白名单除外), 有Token无userInfo→fetchUserInfo, 角色不匹配→403页面 | `[~]` |
-| 2.3.6 | Axios Token 刷新 | `src/utils/request.js` | 响应拦截器: 401时用refreshToken换新token→重试原请求, refreshToken也失效→跳登录 | `[ ]` |
-| 2.3.7 | 403/404 页面 | `src/views/error/403View.vue` `404View.vue` | 简洁的错误提示 + 返回按钮 | `[ ]` |
+| 2.3.4 | 注册页 | `src/views/auth/RegisterView.vue` | 表单: 用户名+密码+确认密码+昵称+手机号, 注册成功→自动登录→跳转 | `[x]` |
+| 2.3.5 | 路由守卫完善 | `src/router/index.js` | beforeEach: 无Token→跳登录 (白名单除外), 有Token无userInfo→fetchUserInfo, 角色不匹配→403页面 | `[x]` |
+| 2.3.6 | Axios Token 刷新 | `src/utils/request.js` | 响应拦截器: 401时用refreshToken换新token→重试原请求, refreshToken也失效→跳登录 | `[x]` |
+| 2.3.7 | 403/404 页面 | `src/views/error/403View.vue` `404View.vue` | 简洁的错误提示 + 返回按钮 | `[x]` |
+
+### 2.4 认证流程验证
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 2.4.1 | 注册→登录→访问受保护接口流程验证 | 手动验证 | 新用户注册→登录获取Token→携带Token访问/me接口成功 | `[x]` |
+| 2.4.2 | 不同角色访问权限验证 | 手动验证 | SUPER_ADMIN能访问/admin路径，MEMBER只能访问/app路径，角色不匹配显示403 | `[x]` |
+| 2.4.3 | Token过期→刷新→重试流程验证 | 手动验证 | Access Token过期后，自动用Refresh Token刷新并重试请求，Refresh Token也过期时跳转登录页 | `[x]` |
 
 **M2 里程碑验收**: 注册新用户 → 登录获取Token → 访问受保护接口 → Token过期自动刷新 → 不同角色路由隔离
 
