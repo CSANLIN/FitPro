@@ -8,7 +8,7 @@ VALUES (
     '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2',
     '超级管理员',
     'SUPER_ADMIN',
-    1,
+    0,
     NOW(),
     NOW(),
     0
@@ -22,7 +22,7 @@ VALUES (
     '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8RDkfAO.NAVHnko.Oy',
     '张教练',
     'COACH',
-    1,
+    0,
     NOW(),
     NOW(),
     0

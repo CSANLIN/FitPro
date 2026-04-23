@@ -121,11 +121,11 @@
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 3.1.1 | User DTO/VO | `module/user/dto/UserQueryDTO.java` `UserUpdateDTO.java` `module/user/vo/UserVO.java` | QueryDTO: keyword + role + status + 分页参数; UpdateDTO: nickname + avatar + email + phone + gender + birthday; VO: 脱敏 (无password) | `[ ]` |
-| 3.1.2 | UserService | `module/user/service/UserService.java` + `impl/` | pageList(query): 分页+模糊搜索+角色筛选; getDetail(id); updateProfile(id, dto); updatePassword(id, oldPwd, newPwd); toggleStatus(id) | `[ ]` |
-| 3.1.3 | UserController | `module/user/controller/UserController.java` | GET /api/users (管理端列表), GET /api/users/{id}, PUT /api/users/profile (用户端修改), PUT /api/users/password, PUT /api/users/{id}/status (管理端) | `[ ]` |
-| 3.1.4 | 前端 - 个人中心 | `src/views/profile/ProfileView.vue` | 头像上传, 基本信息编辑表单, 修改密码弹窗 | `[ ]` |
-| 3.1.5 | 前端 - 用户管理 (管理端) | `src/views/member/MemberListView.vue` | el-table 列表 + 搜索栏 + 分页, 状态切换开关, 查看详情 | `[ ]` |
+| 3.1.1 | User DTO/VO | `module/user/dto/UserQueryDTO.java` `UserUpdateDTO.java` `module/user/vo/UserVO.java` | QueryDTO: keyword + role + status + 分页参数; UpdateDTO: nickname + avatar + email + phone + gender + birthday; VO: 脱敏 (无password) | `[x]` |
+| 3.1.2 | UserService | `module/user/service/UserService.java` + `impl/` | pageList(query): 分页+模糊搜索+角色筛选; getDetail(id); updateProfile(id, dto); updatePassword(id, oldPwd, newPwd); toggleStatus(id) | `[x]` |
+| 3.1.3 | UserController | `module/user/controller/UserController.java` | GET /api/users (管理端列表), GET /api/users/{id}, PUT /api/users/profile (用户端修改), PUT /api/users/password, PUT /api/users/{id}/status (管理端) | `[x]` |
+| 3.1.4 | 前端 - 个人中心 | `src/views/profile/ProfileView.vue` | 头像上传, 基本信息编辑表单, 修改密码弹窗 | `[x]` |
+| 3.1.5 | 前端 - 用户管理 (管理端) | `src/views/member/MemberListView.vue` | el-table 列表 + 搜索栏 + 分页, 状态切换开关, 查看详情 | `[x]` |
 
 ### 3.2 身体数据模块
 

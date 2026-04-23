@@ -46,7 +46,7 @@
           class="side-menu"
         >
           <el-menu-item index="/admin/dashboard">
-            <el-icon><Dashboard /></el-icon>
+            <el-icon><Odometer /></el-icon>
             <template #title>仪表盘</template>
           </el-menu-item>
 
@@ -127,7 +127,7 @@ import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import {
-  Dashboard,
+  Odometer,
   User,
   UserFilled,
   Calendar,

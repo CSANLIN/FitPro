@@ -189,12 +189,10 @@ router.beforeEach(async (to, from, next) => {
       userInfo = await authApi.getMe()
       localStorage.setItem('userInfo', JSON.stringify(userInfo))
     } catch (error) {
-      // 获取用户信息失败，清除认证状态并跳转到登录页
-      localStorage.removeItem('token')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('userInfo')
-      next('/login')
-      return
+      console.error('路由守卫中获取用户信息失败:', error)
+      // 获取用户信息失败，可能是token无效或网络问题
+      // 不清除认证状态，让用户继续尝试
+      // 如果token确实无效，后续请求会触发401处理
     }
   }
 

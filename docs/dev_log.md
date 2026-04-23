@@ -258,3 +258,36 @@
 **遗留问题**
 - 当前验证依赖手动操作，需要后续补充自动化集成测试
 - Token刷新机制在弱网环境下可能出现竞态条件，需考虑请求队列管理（Phase 5优化）
+
+## [2026-04-22] Phase 3.1 — 用户模块
+
+**完成内容**
+- 后端DTO/VO：
+  - `module/user/dto/UserQueryDTO.java` — 用户查询参数（关键词、角色、状态、分页）
+  - `module/user/dto/UserUpdateDTO.java` — 用户信息更新参数（昵称、头像、邮箱、手机号、性别、生日），带验证注解
+  - `module/user/dto/PasswordUpdateDTO.java` — 密码修改参数（原密码、新密码、确认密码）
+  - `module/user/vo/UserVO.java` — 用户信息响应对象，脱敏（无密码字段）
+- 后端Service层：
+  - `module/user/service/UserService.java` — 用户服务接口，定义5个方法：分页查询、获取详情、更新资料、修改密码、切换状态
+  - `module/user/service/impl/UserServiceImpl.java` — 用户服务实现，完整业务逻辑和异常处理
+- 后端Controller层：
+  - `module/user/controller/UserController.java` — 用户控制器，5个REST接口，使用`@PreAuthorize`进行权限控制
+- 前端API层：
+  - `src/api/user.js` — 用户API封装，5个方法对应后端接口
+- 前端页面：
+  - `src/views/app/ProfileView.vue`（修改）— 个人中心页面，包含基本信息编辑和修改密码功能
+  - `src/views/member/MemberListView.vue`（新建）— 用户管理页面，包含搜索、表格、分页、状态切换、详情查看
+
+**关键决策**
+- 权限控制策略：管理端接口（用户列表、状态切换）仅限`SUPER_ADMIN`角色；用户端接口（资料修改、密码修改）仅限当前用户操作自己数据
+- 唯一性校验：更新资料时检查手机号和邮箱是否被其他用户占用，避免数据冲突
+- 状态切换确认：前端使用`ElMessageBox.confirm`弹窗确认，防止误操作
+- 表单验证：前后端双重验证，前端使用Element Plus规则，后端使用`@Valid`注解
+- 分页查询：使用MyBatis-Plus的`LambdaQueryWrapper`构建动态查询条件，支持模糊搜索（用户名/昵称/手机号）
+
+**遗留问题**
+- 头像上传功能目前仅为前端预览，未实现后端文件上传接口（需后续Phase补充）
+- 用户详情弹窗中缺少编辑功能，目前仅为查看（可根据需求扩展）
+- 用户导出功能未实现（如Excel导出用户列表）
+- 批量操作功能未实现（如批量启用/禁用用户）
+

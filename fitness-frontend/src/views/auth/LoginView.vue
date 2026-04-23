@@ -144,32 +144,62 @@ const handleLogin = async () => {
   loading.value = true
 
   try {
+    console.log('开始登录，用户名:', form.username)
+
     // 调用 authStore 的登录方法
-    await authStore.login({
+    const loginResult = await authStore.login({
       username: form.username,
       password: form.password
     })
 
+    console.log('登录API返回结果:', loginResult)
+    console.log('authStore.userInfo:', authStore.userInfo)
+    console.log('authStore.token:', authStore.token)
+
     // 登录成功，显示消息
     ElMessage.success('登录成功')
 
+    // 等待一小段时间确保状态更新
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    // 确保用户信息已加载
+    if (!authStore.userInfo) {
+      console.log('用户信息为空，尝试重新获取')
+      try {
+        await authStore.fetchUserInfo()
+        console.log('重新获取用户信息成功:', authStore.userInfo)
+      } catch (fetchError) {
+        console.error('重新获取用户信息失败:', fetchError)
+        throw new Error('获取用户信息失败，请重试')
+      }
+    }
+
     // 根据用户角色跳转到不同页面
     const userRole = authStore.userInfo?.role
+    console.log('用户角色:', userRole)
+
     // 后端返回的角色不带 ROLE_ 前缀，但前端权限检查时需要带前缀
     const userRoleWithPrefix = userRole ? `ROLE_${userRole}` : null
+    console.log('带前缀的角色:', userRoleWithPrefix)
 
     if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
+      console.log('跳转到管理端仪表盘')
       await router.push('/admin/dashboard')
     } else if (userRoleWithPrefix === 'ROLE_MEMBER') {
+      console.log('跳转到会员端个人中心')
       await router.push('/app/profile')
     } else {
       // 未知角色，跳转到默认页面
+      console.log('未知角色，跳转到首页')
       await router.push('/')
     }
 
   } catch (error) {
     // 登录失败，错误消息已在 request.js 中显示
     console.error('登录失败:', error)
+    if (error.message !== '获取用户信息失败，请重试') {
+      ElMessage.error(error.message || '登录失败，请检查用户名和密码')
+    }
   } finally {
     loading.value = false
   }

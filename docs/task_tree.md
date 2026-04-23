@@ -158,12 +158,12 @@ S1 & S2 & S3 --> A1 & A2 & A3 & A4 & A5 & A6
 ```
 Phase 3 - 核心业务
 ├── 3.1 用户模块 (2天)
-│   ├── [ ] User Entity / DTO / VO
-│   ├── [ ] UserMapper + XML
-│   ├── [ ] UserService (CRUD, 分页查询, 修改密码)
-│   ├── [ ] UserController (管理端+用户端接口)
-│   ├── [ ] 个人中心页面 ProfileView.vue
-│   └── [ ] 管理端-用户列表页面
+│   ├── [x] User Entity / DTO / VO
+│   ├── [x] UserMapper + XML
+│   ├── [x] UserService (CRUD, 分页查询, 修改密码)
+│   ├── [x] UserController (管理端+用户端接口)
+│   ├── [x] 个人中心页面 ProfileView.vue
+│   └── [x] 管理端-用户列表页面
 ├── 3.2 身体数据模块 (1天)
 │   ├── [ ] BodyRecord Entity / DTO
 │   ├── [ ] BodyRecordService (录入, 历史查询)
