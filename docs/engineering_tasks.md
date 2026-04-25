@@ -140,13 +140,13 @@
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 3.3.1 | Entity 层 | `module/exercise/entity/ExerciseCategoryEntity.java` `ExerciseEntity.java` | 映射 exercise_category, exercise 表 | `[ ]` |
-| 3.3.2 | DTO/VO | `module/exercise/dto/ExerciseCreateDTO.java` `ExerciseQueryDTO.java` `vo/ExerciseVO.java` `ExerciseCategoryVO.java` | QueryDTO: categoryId + muscleGroup + equipment + difficulty + keyword | `[ ]` |
-| 3.3.3 | Mapper | `module/exercise/mapper/ExerciseCategoryMapper.java` `ExerciseMapper.java` | BaseMapper 继承, ExerciseMapper 加联查分类名的 XML | `[ ]` |
-| 3.3.4 | Service | `module/exercise/service/ExerciseCategoryService.java` `ExerciseService.java` + `impl/` | 分类: listAll, create, update, delete; 动作: pageList(query), create, update, delete, getDetail | `[ ]` |
-| 3.3.5 | Controller | `module/exercise/controller/ExerciseCategoryController.java` `ExerciseController.java` | 分类: GET/POST/PUT/DELETE /api/exercise-categories; 动作: GET/POST/PUT/DELETE /api/exercises | `[ ]` |
-| 3.3.6 | 前端 - 运动库浏览 (会员端) | `src/views/exercise/ExerciseListView.vue` | 分类 Tab 切换 + 动作卡片列表 + 筛选 (肌群/器械/难度) + 动作详情弹窗 | `[ ]` |
-| 3.3.7 | 前端 - 运动库管理 (管理端) | `src/views/exercise/ExerciseManageView.vue` | 分类管理 + 动作 CRUD 表格 + 新增/编辑弹窗 | `[ ]` |
+| 3.3.1 | Entity 层 | `module/exercise/entity/ExerciseCategoryEntity.java` `ExerciseEntity.java` | 映射 exercise_category, exercise 表 | `[x]` |
+| 3.3.2 | DTO/VO | `module/exercise/dto/ExerciseCreateDTO.java` `ExerciseQueryDTO.java` `vo/ExerciseVO.java` `ExerciseCategoryVO.java` | QueryDTO: categoryId + muscleGroup + equipment + difficulty + keyword | `[x]` |
+| 3.3.3 | Mapper | `module/exercise/mapper/ExerciseCategoryMapper.java` `ExerciseMapper.java` | BaseMapper 继承, ExerciseMapper 加联查分类名的 XML | `[x]` |
+| 3.3.4 | Service | `module/exercise/service/ExerciseCategoryService.java` `ExerciseService.java` + `impl/` | 分类: listAll, create, update, delete; 动作: pageList(query), create, update, delete, getDetail | `[x]` |
+| 3.3.5 | Controller | `module/exercise/controller/ExerciseCategoryController.java` `ExerciseController.java` | 分类: GET/POST/PUT/DELETE /api/exercise-categories; 动作: GET/POST/PUT/DELETE /api/exercises | `[x]` |
+| 3.3.6 | 前端 - 运动库浏览 (会员端) | `src/views/exercise/ExerciseListView.vue` | 分类 Tab 切换 + 动作卡片列表 + 筛选 (肌群/器械/难度) + 动作详情弹窗 | `[x]` |
+| 3.3.7 | 前端 - 运动库管理 (管理端) | `src/views/exercise/ExerciseManageView.vue` | 分类管理 + 动作 CRUD 表格 + 新增/编辑弹窗 | `[x]` |
 
 ### 3.4 训练模块
 

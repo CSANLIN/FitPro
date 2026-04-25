@@ -50,7 +50,8 @@ import {
   HomeFilled,
   Calendar,
   Basketball,
-  User
+  User,
+  DataLine
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -61,7 +62,8 @@ const authStore = useAuthStore()
 const tabItems = ref([
   { path: '/app/dashboard', label: '首页', icon: HomeFilled },
   { path: '/app/course', label: '课程', icon: Calendar },
-  { path: '/app/workout', label: '训练', icon: Basketball },
+  { path: '/app/exercise', label: '运动库', icon: Basketball },
+  { path: '/app/body-data', label: '身体', icon: DataLine },
   { path: '/app/profile', label: '我的', icon: User }
 ])
 

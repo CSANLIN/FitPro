@@ -259,6 +259,38 @@
 - 当前验证依赖手动操作，需要后续补充自动化集成测试
 - Token刷新机制在弱网环境下可能出现竞态条件，需考虑请求队列管理（Phase 5优化）
 
+## [2026-04-24] Phase 3.2 — 身体数据模块
+
+**完成内容**
+- 后端实体与DTO/VO：
+  - `module/user/entity/BodyRecordEntity.java` — 映射 `body_record` 表（不继承BaseEntity，因该表无updated_at和deleted字段）
+  - `module/user/dto/BodyRecordCreateDTO.java` — 身体数据录入参数，含完整校验注解（体重必填，身高/体脂/三围可选）
+  - `module/user/vo/BodyRecordVO.java` — 身体数据响应对象
+- 后端Mapper与Service：
+  - `module/user/mapper/BodyRecordMapper.java` — MyBatis-Plus Mapper
+  - `module/user/service/BodyRecordService.java` — 服务接口：create、listByUser、getLatest
+  - `module/user/service/impl/BodyRecordServiceImpl.java` — 实现：录入时自动计算BMI（weight / (height/100)²）
+- 后端Controller：
+  - `module/user/controller/BodyRecordController.java` — 3个REST接口（POST录入、GET历史列表、GET最新数据）
+- 前端API层：
+  - `src/api/bodyRecord.js` — 身体数据API封装
+- 前端页面：
+  - `src/views/app/BodyDataView.vue` — 身体数据页面（最新数据卡片 + 录入表单 + 历史记录表格 + 日期筛选）
+  - `src/router/index.js`（修改）— 添加 `/app/body-data` 路由
+  - `src/layout/AppLayout.vue`（修改）— 底部Tab新增"身体"导航
+
+**关键决策**
+- BMI 自动计算：在后端录入时根据 weight 和 height 自动计算并存入数据库，前端不需要计算
+- BodyRecordEntity 不继承 BaseEntity：因为 body_record 表没有 updated_at 和 deleted 字段（历史数据不需要修改和软删除）
+- 仅限当前用户操作：所有接口通过 SecurityContextHolder 获取当前用户ID，只能操作自己的身体数据
+- 日期筛选：GET 列表接口支持 startDate/endDate 参数，方便前端按时间段查询
+- 前端录入表单采用 el-input-number：精确控制数字输入范围（如体重20-300kg），避免无效数据
+
+**遗留问题**
+- 身体数据趋势图尚未实现（计划在 Phase 5.1 使用 ECharts 展示体重/体脂变化折线图）
+- 身体数据导出功能未实现
+- 目前仅支持会员端查看，管理端暂未提供查看会员身体数据的功能
+
 ## [2026-04-22] Phase 3.1 — 用户模块
 
 **完成内容**
@@ -290,4 +322,27 @@
 - 用户详情弹窗中缺少编辑功能，目前仅为查看（可根据需求扩展）
 - 用户导出功能未实现（如Excel导出用户列表）
 - 批量操作功能未实现（如批量启用/禁用用户）
+
+## [2026-04-25] Phase 3.3 — 运动库模块
+
+**完成内容**
+- 创建 `module/exercise/entity/ExerciseCategoryEntity.java` `ExerciseEntity.java` 映射 exercise_category/exercise 表
+- 创建 DTO: `ExerciseCategoryCreateDTO` `ExerciseCategoryUpdateDTO` `ExerciseCreateDTO` `ExerciseUpdateDTO` `ExerciseQueryDTO`
+- 创建 VO: `ExerciseCategoryVO`（含 exerciseCount）`ExerciseVO`（含 categoryName）
+- 创建 `ExerciseCategoryMapper` `ExerciseMapper` 及联查 XML `ExerciseMapper.xml`
+- 创建 `ExerciseCategoryService`（listAll/create/update/delete，删除前校验是否有动作）
+- 创建 `ExerciseService`（pageList 多条件筛选 + getDetail + create/update/delete）
+- 创建 `ExerciseCategoryController`（GET/POST/PUT/DELETE /api/exercise-categories）
+- 创建 `ExerciseController`（GET/POST/PUT/DELETE /api/exercises）
+- 创建前端 `api/exercise.js` 分类+动作 API 封装
+- 创建会员端 `ExerciseListView.vue`（分类 Tab + 肌群/器械/难度筛选 + 动作卡片列表 + 详情弹窗）
+- 创建管理端 `ExerciseManageView.vue`（分类 CRUD + 动作 CRUD 表格 + 搜索/分页）
+- 更新路由：添加 `/admin/exercise/category`、`/admin/exercise/list`、`/app/exercise`
+- 更新 `AppLayout.vue` Tab 导航
+
+**关键决策**
+- 分类表无 `updated_at` 和 `deleted` 字段，Entity 自定义字段不继承 BaseEntity
+- 动作 VO 通过 Mapper XML 联查 `exercise_category` 表获取分类名称，避免额外查询
+- 管理端分类管理和动作管理合并在一个页面中（`ExerciseManageView.vue`）用 Tab 切换，两种管理模式下各有独立的 CRUD 逻辑
+- 删除分类时校验分类下是否有动作，有动作则禁止删除
 

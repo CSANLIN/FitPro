@@ -165,16 +165,16 @@ Phase 3 - 核心业务
 │   ├── [x] 个人中心页面 ProfileView.vue
 │   └── [x] 管理端-用户列表页面
 ├── 3.2 身体数据模块 (1天)
-│   ├── [ ] BodyRecord Entity / DTO
-│   ├── [ ] BodyRecordService (录入, 历史查询)
-│   ├── [ ] BodyRecordController
-│   └── [ ] 身体数据录入/历史页面
+│   ├── [x] BodyRecord Entity / DTO / VO
+│   ├── [x] BodyRecordService (录入, 历史查询)
+│   ├── [x] BodyRecordController
+│   └── [x] 身体数据录入/历史页面 BodyDataView.vue
 ├── 3.3 运动库模块 (2天)
-│   ├── [ ] ExerciseCategory + Exercise Entity
-│   ├── [ ] ExerciseService (分类CRUD, 动作CRUD, 按肌群/器械筛选)
-│   ├── [ ] ExerciseController
-│   ├── [ ] 运动库浏览页面 (会员端)
-│   └── [ ] 运动库管理页面 (管理端)
+│   ├── [x] ExerciseCategory + Exercise Entity
+│   ├── [x] ExerciseService (分类CRUD, 动作CRUD, 按肌群/器械筛选)
+│   ├── [x] ExerciseController
+│   ├── [x] 运动库浏览页面 (会员端)
+│   └── [x] 运动库管理页面 (管理端)
 ├── 3.4 训练模块 (3天)
 │   ├── [ ] WorkoutTemplate / Plan / Record 全套 Entity
 │   ├── [ ] WorkoutTemplateService (模板CRUD)

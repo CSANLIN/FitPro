@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fitness.module.exercise.mapper.ExerciseMapper">
+
+    <resultMap id="ExerciseVOMap" type="com.fitness.module.exercise.vo.ExerciseVO">
+        <id column="id" property="id" />
+        <result column="category_id" property="categoryId" />
+        <result column="category_name" property="categoryName" />
+        <result column="name" property="name" />
+        <result column="description" property="description" />
+        <result column="muscle_group" property="muscleGroup" />
+        <result column="equipment" property="equipment" />
+        <result column="difficulty" property="difficulty" />
+        <result column="video_url" property="videoUrl" />
+        <result column="image_url" property="imageUrl" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <select id="selectExerciseVOPage" resultMap="ExerciseVOMap">
+        SELECT
+            e.id,
+            e.category_id,
+            ec.name AS category_name,
+            e.name,
+            e.description,
+            e.muscle_group,
+            e.equipment,
+            e.difficulty,
+            e.video_url,
+            e.image_url,
+            e.created_at
+        FROM exercise e
+        LEFT JOIN exercise_category ec ON e.category_id = ec.id
+        <where>
+            <if test="categoryId != null">
+                AND e.category_id = #{categoryId}
+            </if>
+            <if test="muscleGroup != null and muscleGroup != ''">
+                AND e.muscle_group LIKE CONCAT('%', #{muscleGroup}, '%')
+            </if>
+            <if test="equipment != null and equipment != ''">
+                AND e.equipment LIKE CONCAT('%', #{equipment}, '%')
+            </if>
+            <if test="difficulty != null and difficulty != ''">
+                AND e.difficulty = #{difficulty}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND e.name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY ec.sort_order ASC, e.created_at DESC
+    </select>
+</mapper>

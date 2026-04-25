@@ -11,11 +11,14 @@ const AppLayout = () => import('@/layout/AppLayout.vue')
 const NotFoundView = () => import('@/views/error/NotFoundView.vue')
 const ForbiddenView = () => import('@/views/error/ForbiddenView.vue')
 
-// 管理端子路由（后续填充）
+// 管理端子路由
 const AdminDashboard = () => import('@/views/admin/DashboardView.vue')
+const ExerciseManage = () => import('@/views/exercise/ExerciseManageView.vue')
 
 // 会员端子路由（后续填充）
 const AppProfile = () => import('@/views/app/ProfileView.vue')
+const AppBodyData = () => import('@/views/app/BodyDataView.vue')
+const ExerciseList = () => import('@/views/exercise/ExerciseListView.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,6 +65,25 @@ const router = createRouter({
             title: '仪表盘',
             icon: 'Dashboard'
           }
+        },
+        // 运动库管理
+        {
+          path: 'exercise/category',
+          name: 'ExerciseCategory',
+          component: ExerciseManage,
+          meta: {
+            title: '分类管理',
+            icon: 'Basketball'
+          }
+        },
+        {
+          path: 'exercise/list',
+          name: 'ExerciseList',
+          component: ExerciseManage,
+          meta: {
+            title: '动作管理',
+            icon: 'Basketball'
+          }
         }
         // 其他管理端路由后续添加
       ]
@@ -86,6 +108,25 @@ const router = createRouter({
           meta: {
             title: '个人中心',
             icon: 'User'
+          }
+        },
+        {
+          path: 'body-data',
+          name: 'AppBodyData',
+          component: AppBodyData,
+          meta: {
+            title: '身体数据',
+            icon: 'DataLine'
+          }
+        },
+        // 运动库浏览
+        {
+          path: 'exercise',
+          name: 'AppExercise',
+          component: ExerciseList,
+          meta: {
+            title: '运动库',
+            icon: 'Basketball'
           }
         }
         // 其他会员端路由后续添加
