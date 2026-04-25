@@ -86,6 +86,14 @@
             <el-menu-item index="/admin/exercise/list">动作管理</el-menu-item>
           </el-sub-menu>
 
+          <el-sub-menu index="workout">
+            <template #title>
+              <el-icon><List /></el-icon>
+              <span>训练管理</span>
+            </template>
+            <el-menu-item index="/admin/workout/templates">训练模板</el-menu-item>
+          </el-sub-menu>
+
           <el-sub-menu index="system">
             <template #title>
               <el-icon><Setting /></el-icon>
@@ -132,6 +140,7 @@ import {
   UserFilled,
   Calendar,
   Basketball,
+  List,
   Setting,
   Expand,
   Fold,

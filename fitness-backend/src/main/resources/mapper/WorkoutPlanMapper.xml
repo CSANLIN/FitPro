@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fitness.module.workout.mapper.WorkoutPlanMapper">
+
+    <resultMap id="PlanVOMap" type="com.fitness.module.workout.vo.WorkoutPlanVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="user_name" property="userName"/>
+        <result column="coach_name" property="coachName"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="status" property="status"/>
+        <result column="day_count" property="dayCount"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <resultMap id="PlanDetailMap" type="com.fitness.module.workout.vo.WorkoutPlanDetailVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="user_name" property="userName"/>
+        <result column="coach_name" property="coachName"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <collection property="days" column="id" select="selectPlanDays"/>
+    </resultMap>
+
+    <resultMap id="PlanDayMap" type="com.fitness.module.workout.vo.WorkoutPlanDetailVO$PlanDayVO">
+        <id column="id" property="id"/>
+        <result column="plan_id" property="planId"/>
+        <result column="day_of_week" property="dayOfWeek"/>
+        <result column="name" property="name"/>
+        <result column="template_id" property="templateId"/>
+        <collection property="items" column="id" select="selectPlanDayItems"/>
+    </resultMap>
+
+    <resultMap id="DayItemMap" type="com.fitness.module.workout.vo.WorkoutPlanDetailVO$PlanDayVO$DayItemVO">
+        <id column="id" property="id"/>
+        <result column="plan_day_id" property="planDayId"/>
+        <result column="exercise_id" property="exerciseId"/>
+        <result column="exercise_name" property="exerciseName"/>
+        <result column="sets" property="sets"/>
+        <result column="reps" property="reps"/>
+        <result column="weight" property="weight"/>
+        <result column="rest_seconds" property="restSeconds"/>
+        <result column="sort_order" property="sortOrder"/>
+    </resultMap>
+
+    <select id="selectPlanVOPage" resultMap="PlanVOMap">
+        SELECT
+            wp.id,
+            wp.name,
+            wp.description,
+            su.nickname AS user_name,
+            sc.nickname AS coach_name,
+            wp.start_date,
+            wp.end_date,
+            wp.status,
+            (SELECT COUNT(*) FROM workout_plan_day wpd WHERE wpd.plan_id = wp.id) AS day_count,
+            wp.created_at
+        FROM workout_plan wp
+        LEFT JOIN sys_user su ON wp.user_id = su.id
+        LEFT JOIN sys_user sc ON wp.coach_id = sc.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND wp.name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND wp.status = #{status}
+            </if>
+            <if test="userId != null">
+                AND wp.user_id = #{userId}
+            </if>
+        </where>
+        ORDER BY wp.created_at DESC
+    </select>
+
+    <select id="selectPlanDetail" resultMap="PlanDetailMap">
+        SELECT
+            wp.id,
+            wp.name,
+            wp.description,
+            su.nickname AS user_name,
+            sc.nickname AS coach_name,
+            wp.start_date,
+            wp.end_date,
+            wp.status,
+            wp.created_at
+        FROM workout_plan wp
+        LEFT JOIN sys_user su ON wp.user_id = su.id
+        LEFT JOIN sys_user sc ON wp.coach_id = sc.id
+        WHERE wp.id = #{planId}
+    </select>
+
+    <select id="selectPlanDays" resultMap="PlanDayMap">
+        SELECT
+            id,
+            plan_id,
+            day_of_week,
+            name,
+            template_id
+        FROM workout_plan_day
+        WHERE plan_id = #{planId}
+        ORDER BY day_of_week ASC
+    </select>
+
+    <select id="selectPlanDayItems" resultMap="DayItemMap">
+        SELECT
+            wpdi.id,
+            wpdi.plan_day_id,
+            wpdi.exercise_id,
+            e.name AS exercise_name,
+            wpdi.sets,
+            wpdi.reps,
+            wpdi.weight,
+            wpdi.rest_seconds,
+            wpdi.sort_order
+        FROM workout_plan_day_item wpdi
+        LEFT JOIN exercise e ON wpdi.exercise_id = e.id
+        WHERE wpdi.plan_day_id = #{planDayId}
+        ORDER BY wpdi.sort_order ASC
+    </select>
+</mapper>

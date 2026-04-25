@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fitness.module.workout.mapper.WorkoutRecordMapper">
+
+    <resultMap id="RecordVOMap" type="com.fitness.module.workout.vo.WorkoutRecordVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="plan_day_id" property="planDayId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="duration_minutes" property="durationMinutes"/>
+        <result column="total_volume" property="totalVolume"/>
+        <result column="note" property="note"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <resultMap id="RecordDetailMap" type="com.fitness.module.workout.vo.WorkoutRecordDetailVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="plan_day_id" property="planDayId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="duration_minutes" property="durationMinutes"/>
+        <result column="total_volume" property="totalVolume"/>
+        <result column="note" property="note"/>
+        <result column="created_at" property="createdAt"/>
+        <collection property="items" column="id" select="selectRecordItems"/>
+    </resultMap>
+
+    <resultMap id="RecordItemMap" type="com.fitness.module.workout.vo.WorkoutRecordDetailVO$RecordItemVO">
+        <id column="id" property="id"/>
+        <result column="record_id" property="recordId"/>
+        <result column="exercise_id" property="exerciseId"/>
+        <result column="exercise_name" property="exerciseName"/>
+        <result column="set_number" property="setNumber"/>
+        <result column="reps" property="reps"/>
+        <result column="weight" property="weight"/>
+        <result column="duration_seconds" property="durationSeconds"/>
+        <result column="completed" property="completed"/>
+    </resultMap>
+
+    <select id="selectRecordVOPage" resultMap="RecordVOMap">
+        SELECT
+            id,
+            name,
+            plan_day_id,
+            start_time,
+            end_time,
+            duration_minutes,
+            total_volume,
+            note,
+            created_at
+        FROM workout_record
+        <where>
+            user_id = #{userId}
+            <if test="startDate != null and startDate != ''">
+                AND DATE(created_at) &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND DATE(created_at) &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectRecordDetail" resultMap="RecordDetailMap">
+        SELECT
+            id,
+            name,
+            plan_day_id,
+            start_time,
+            end_time,
+            duration_minutes,
+            total_volume,
+            note,
+            created_at
+        FROM workout_record
+        WHERE id = #{recordId}
+    </select>
+
+    <select id="selectRecordItems" resultMap="RecordItemMap">
+        SELECT
+            wri.id,
+            wri.record_id,
+            wri.exercise_id,
+            e.name AS exercise_name,
+            wri.set_number,
+            wri.reps,
+            wri.weight,
+            wri.duration_seconds,
+            wri.completed
+        FROM workout_record_item wri
+        LEFT JOIN exercise e ON wri.exercise_id = e.id
+        WHERE wri.record_id = #{recordId}
+        ORDER BY wri.set_number ASC
+    </select>
+
+    <select id="selectWeeklyCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM workout_record
+        WHERE user_id = #{userId}
+          AND created_at &gt;= #{weekStart}
+    </select>
+
+    <select id="selectWeeklyVolume" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(total_volume), 0)
+        FROM workout_record
+        WHERE user_id = #{userId}
+          AND created_at &gt;= #{weekStart}
+    </select>
+</mapper>

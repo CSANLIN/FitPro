@@ -20,6 +20,11 @@ const AppProfile = () => import('@/views/app/ProfileView.vue')
 const AppBodyData = () => import('@/views/app/BodyDataView.vue')
 const ExerciseList = () => import('@/views/exercise/ExerciseListView.vue')
 
+// 训练模块
+const WorkoutPlan = () => import('@/views/workout/WorkoutPlanView.vue')
+const WorkoutRecord = () => import('@/views/workout/WorkoutRecordView.vue')
+const WorkoutTemplateManage = () => import('@/views/workout/WorkoutTemplateManageView.vue')
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -84,6 +89,16 @@ const router = createRouter({
             title: '动作管理',
             icon: 'Basketball'
           }
+        },
+        // 训练模板管理
+        {
+          path: 'workout/templates',
+          name: 'WorkoutTemplateManage',
+          component: WorkoutTemplateManage,
+          meta: {
+            title: '训练模板',
+            icon: 'List'
+          }
         }
         // 其他管理端路由后续添加
       ]
@@ -127,6 +142,26 @@ const router = createRouter({
           meta: {
             title: '运动库',
             icon: 'Basketball'
+          }
+        },
+        // 训练计划
+        {
+          path: 'plan',
+          name: 'AppWorkoutPlan',
+          component: WorkoutPlan,
+          meta: {
+            title: '训练计划',
+            icon: 'Calendar'
+          }
+        },
+        // 训练记录
+        {
+          path: 'record',
+          name: 'AppWorkoutRecord',
+          component: WorkoutRecord,
+          meta: {
+            title: '训练记录',
+            icon: 'Edit'
           }
         }
         // 其他会员端路由后续添加
