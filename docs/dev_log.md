@@ -3,6 +3,91 @@
 > 格式: `## [日期] Phase X.X — 任务标题`
 > 状态标记同 engineering_tasks: `[x]` 已完成 · `[~]` 进行中 · `[!]` 阻塞
 
+## [2026-04-26] Phase 3.6 — 会籍与签到模块
+
+**完成内容**
+- 会籍模块后端（`module/membership/`）：
+  - Entity: MembershipCardEntity(extends BaseEntity), MemberMembershipEntity(extends BaseEntity)
+  - DTO: CardCreateDTO, MembershipCreateDTO(userId+cardId), MembershipRenewDTO(membershipId+cardId)
+  - VO: MembershipCardVO, MembershipVO(含cardName+remainingDays/remainingTimes)
+  - Mapper: MembershipCardMapper, MemberMembershipMapper + XML(联查卡种名/会员名/剩余天数)
+  - Service: MembershipService — 卡种CRUD+上下架, 办卡(计算到期日/设置次数), 续费(延期/加次数), 冻结合管理, 退卡
+  - Controller: MembershipCardController(/api/membership-cards), MemberMembershipController(/api/memberships)
+- 签到模块后端（`module/checkin/`）：
+  - Entity: CheckInEntity(不继承BaseEntity)
+  - VO: CheckInVO, CheckInStatsVO(月统计+连续签到+日期列表)
+  - Mapper: CheckInMapper + XML(按月查签到日期)
+  - Service: CheckInService — 签到(校验会籍→次卡扣次数→自动过期) + 统计(连续签到)
+  - Controller: CheckInController(/api/check-ins)
+- 前端：API文件 + MembershipView(会籍卡片) + CheckInView(签到日历) + MembershipManageView(管理端卡种/会籍) + 路由更新
+
+**关键决策**
+- 会籍续费: 期限卡在到期日基础上延长, 次卡累加剩余次数
+- CheckInService 跨模块引用 MemberMembershipMapper (同一Maven模块)
+- 签到日历: 前端按月网格渲染, 后端按月返回签到日期字符串
+- 连续签到: 从今天往前遍历日期列表匹配
+
+**遗留问题**
+- 会籍到期自动过期需定时任务
+- 签到扫码方式尚未实现
+- 会员端Tab新增"签到"替换了首页位置
+
+---
+
+## [2026-04-26] Phase 3.5 — 课程与预约模块
+
+**完成内容**
+- 创建 3 个 Entity: CourseEntity(Course → BaseEntity), CourseScheduleEntity, CourseBookingEntity
+- 创建 5 个 DTO: CourseCreateDTO, CourseUpdateDTO, ScheduleCreateDTO(含教练时间冲突校验), ScheduleQueryDTO, BookingCreateDTO
+- 创建 4 个 VO: CourseVO, ScheduleVO(含courseName, coachName, booked状态), BookingVO(管理端), MyBookingVO(会员端)
+- 创建 3 个 Mapper + 2 个 XML:
+  - CourseScheduleMapper.xml: 日期范围查询+联查课程/教练信息+当前用户预约状态
+  - CourseBookingMapper.xml: 联查会员/课程/教练信息的预约记录
+  - CourseScheduleMapper @Update 原子操作: 乐观锁防止超卖(current_count +1 WHERE id AND current_count = expected AND current_count < max_capacity)
+- 创建 3 个 Service 接口及实现:
+  - CourseService: 课程 CRUD + 上下架切换
+  - CourseScheduleService: 排课创建(教练时间冲突检测), 日历范围查询, 取消, 自动状态更新(UPCOMING→ONGOING→FINISHED)
+  - CourseBookingService: 预约(校验+乐观锁容量控制), 取消(同时减人数), 我的预约列表, 排课预约列表, 全部预约
+- 创建 3 个 Controller: /api/courses(课程), /api/course-schedules(排课), /api/course-bookings(预约)
+- 创建前端 API: `src/api/course.js`（课程/排课/预约 全量API封装）
+- 创建前端 3 个页面:
+  - `CourseListView.vue`（会员端课程卡片+类型筛选+点击进入预约）
+  - `CourseBookingView.vue`（会员端排课列表+预约/取消+我的预约弹窗）
+  - `ScheduleManageView.vue`（管理端排课表格+新增排课弹窗+预约列表查看）
+- 更新路由: 管理端添加 `/admin/course/list`、`/admin/course/schedule`；会员端添加 `/app/course`、`/app/course/booking`
+
+**关键决策**
+- 乐观锁容量控制: 使用 `@Update("UPDATE course_schedule SET current_count = current_count + 1 WHERE id = #{scheduleId} AND current_count = #{expectedCount} AND current_count < max_capacity")` 原子操作，避免高并发下超卖
+- CourseScheduleEntity 和 CourseBookingEntity 不继承 BaseEntity，因为两张表没有 updated_at 和 deleted 字段
+- 排课时间冲突检测: 同一教练同一天同一时间段不能重复排课，使用时间区间重叠查询 (startTime < dto.endTime AND endTime > dto.startTime)
+- ScheduleVO 直接在 XML 中根据当前用户 ID 查询是否已预约 (`SELECT COUNT(*) > 0 FROM course_booking WHERE schedule_id AND user_id AND status='BOOKED'`)，避免额外循环查询
+
+**遗留问题**
+- 排课自动状态更新 `updateScheduleStatus()` 需要定时任务触发（如 Spring @Scheduled），目前仅提供方法未配置定时任务
+- 课程管理端页面(CourseManageView)暂时复用 ScheduleManageView，后续可单独实现课程CRUD页面
+- 预约成功后短信/通知推送未实现
+
+---
+
+## [2026-04-25] Phase 3.4 — 训练模块
+
+**完成内容**
+- 创建 7 个 Entity: WorkoutTemplate/Item, WorkoutPlan/Day/Item, WorkoutRecord/Item
+- 创建 6 个 DTO: TemplateCreate/Update, PlanCreate, RecordCreate, RecordQuery, PlanQuery
+- 创建 6 个 VO: TemplateVO/DetailVO, PlanVO/DetailVO, RecordVO/DetailVO
+- 创建 7 个 Mapper + 2 个 XML (联查计划+训练日和记录+组)
+- 创建 3 个 Service 接口及实现: WorkoutTemplateService, WorkoutPlanService, WorkoutRecordService
+- 创建 3 个 Controller: /api/workout-templates, /api/workout-plans, /api/workout-records
+- 创建前端 API: `src/api/workout.js`
+- 创建前端页面: WorkoutPlanView (会员训练计划), WorkoutRecordView (训练记录), WorkoutTemplateManageView (管理端模板管理)
+- 更新路由配置，添加训练模块相关路由
+
+**关键决策**
+- WorkoutRecordEntity 不继承 BaseEntity，因为该表没有 updated_at 字段，独立定义 id/createdAt
+- DTO 中采用静态内部类的方式实现 PlanCreateDTO 嵌套 PlanDayDTO → PlanDayItemDTO 结构，简化包结构
+- WorkoutPlanController 根据角色自动过滤：会员只能看自己的计划，教练/管理员看全部
+- XML 使用 MyBatis 嵌套 select 查询实现一对多关联（计划→训练日→动作）
+
 ---
 
 ## [2026-04-17] Phase 1.1 — 后端项目初始化

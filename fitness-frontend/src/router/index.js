@@ -25,6 +25,16 @@ const WorkoutPlan = () => import('@/views/workout/WorkoutPlanView.vue')
 const WorkoutRecord = () => import('@/views/workout/WorkoutRecordView.vue')
 const WorkoutTemplateManage = () => import('@/views/workout/WorkoutTemplateManageView.vue')
 
+// 课程模块
+const CourseList = () => import('@/views/course/CourseListView.vue')
+const CourseBooking = () => import('@/views/course/CourseBookingView.vue')
+const ScheduleManage = () => import('@/views/course/ScheduleManageView.vue')
+
+// 会籍与签到模块
+const MembershipView = () => import('@/views/membership/MembershipView.vue')
+const MembershipManage = () => import('@/views/membership/MembershipManageView.vue')
+const CheckInView = () => import('@/views/checkin/CheckInView.vue')
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -99,6 +109,36 @@ const router = createRouter({
             title: '训练模板',
             icon: 'List'
           }
+        },
+        // 课程管理
+        {
+          path: 'course/list',
+          name: 'CourseManage',
+          component: ScheduleManage,
+          meta: {
+            title: '课程列表',
+            icon: 'Calendar'
+          }
+        },
+        // 排课管理
+        {
+          path: 'course/schedule',
+          name: 'ScheduleManage',
+          component: ScheduleManage,
+          meta: {
+            title: '排课管理',
+            icon: 'Calendar'
+          }
+        },
+        // 会籍管理
+        {
+          path: 'membership',
+          name: 'MembershipManage',
+          component: MembershipManage,
+          meta: {
+            title: '会籍管理',
+            icon: 'Ticket'
+          }
         }
         // 其他管理端路由后续添加
       ]
@@ -162,6 +202,46 @@ const router = createRouter({
           meta: {
             title: '训练记录',
             icon: 'Edit'
+          }
+        },
+        // 课程列表
+        {
+          path: 'course',
+          name: 'AppCourseList',
+          component: CourseList,
+          meta: {
+            title: '课程预约',
+            icon: 'Notebook'
+          }
+        },
+        // 课程预约（排课列表）
+        {
+          path: 'course/booking',
+          name: 'AppCourseBooking',
+          component: CourseBooking,
+          meta: {
+            title: '课程预约',
+            icon: 'Ticket'
+          }
+        },
+        // 会籍信息
+        {
+          path: 'membership',
+          name: 'AppMembership',
+          component: MembershipView,
+          meta: {
+            title: '会籍信息',
+            icon: 'Ticket'
+          }
+        },
+        // 签到打卡
+        {
+          path: 'checkin',
+          name: 'AppCheckIn',
+          component: CheckInView,
+          meta: {
+            title: '签到打卡',
+            icon: 'Select'
           }
         }
         // 其他会员端路由后续添加

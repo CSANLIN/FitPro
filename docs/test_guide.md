@@ -237,3 +237,22 @@
 | 5 | 使用 `admin` 访问 `GET /api/users/{任意用户ID}` | 成功返回任意用户信息（SUPER_ADMIN 有权限） | | |
 | 6 | 使用 `testuser` 修改其他用户的资料 `PUT /api/users/profile`（实际只能改自己的） | 后端通过当前登录用户ID限制，只能修改自己的资料 | | |
 
+
+### 3.2 身体数据模块测试
+**测试目的**：验证身体数据的录入、查询和最新数据获取功能是否正常工作
+
+**前置条件**：
+- 启动后端应用（确保数据库已初始化）
+- 使用 `testuser` 账号登录获取 Token（若没有则先注册）
+- 需要管理员 Token 和 普通会员 Token 各一个
+
+| 步骤 | 操作 | 预期结果 | 实际结果 | 修复 |
+|------|------|----------|----------|------|
+| 1 | 使用 `testuser` 的Token，调用 `POST /api/body-records`，Body: `{"weight": 70.5, "height": 175.0, "bodyFat": 18.5, "chest": 100.0, "waist": 80.0, "hip": 95.0, "recordDate": "2024-04-15", "remark": "早晨空腹"}` | 返回200，包含录入的身体数据，BMI自动计算为 23.0（70.5 / 1.75²） | | |
+| 2 | 再次录入一条不同日期的数据，`POST /api/body-records`，Body: `{"weight": 72.0, "height": 175.0, "recordDate": "2024-04-01"}` | 返回200，仅录入体重和身高，其他字段为空 | | |
+| 3 | 使用 `testuser` 的Token，调用 `GET /api/body-records`（不传日期参数） | 返回200，返回所有记录列表（2条），按记录日期降序排列 | | |
+| 4 | 调用 `GET /api/body-records?startDate=2024-04-01&endDate=2024-04-10` | 返回200，只返回日期在 4月1日~4月10日 范围内的记录（1条） | | |
+| 5 | 调用 `GET /api/body-records/latest` | 返回200，返回最新的一条记录（4月15日那条） | | |
+| 6 | 使用未登录请求（不带Token）调用 `POST /api/body-records` | 返回401 未认证错误 | | |
+| 7 | 测试校验：`POST /api/body-records`，Body: `{"weight": -1, "recordDate": "2024-04-15"}` | 返回400 参数校验错误（体重不能低于20kg） | | |
+| 8 | 测试校验：`POST /api/body-records`，Body: `{"recordDate": "2024-04-15"}` | 返回400 参数校验错误（体重不能为空） | | |

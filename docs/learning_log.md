@@ -7,7 +7,9 @@
 
 - [Phase 1.1 — 后端项目初始化（小白版）](#phase-11)
 - [Phase 1.2 — 通用组件层（小白版）](#phase-12)
-- [Phase 1.3 — 数据库初始化（小白版）](#phase-13)
+- x graph TB    subgraph 路由层        R1[/ - 登录页]        R2[/admin - 管理端布局]        R3[/app - 会员端布局]    end​    subgraph 管理端页面        R2 --> P1[Dashboard 仪表盘]        R2 --> P2[会员管理]        R2 --> P3[教练管理]        R2 --> P4[课程管理]        R2 --> P5[运动库管理]        R2 --> P6[系统管理]    end​    subgraph 会员端页面        R3 --> P7[个人中心]        R3 --> P8[课程预约]        R3 --> P9[训练计划]        R3 --> P10[签到打卡]    end​    subgraph 状态管理 Pinia        S1[useAuthStore]        S2[useUserStore]        S3[useCourseStore]    end​    subgraph API 层        A1[authApi]        A2[userApi]        A3[courseApi]        A4[workoutApi]        A5[exerciseApi]        A6[membershipApi]    end​    P1 & P2 & P3 & P4 & P5 & P6 & P7 & P8 & P9 & P10 --> S1 & S2 & S3    S1 & S2 & S3 --> A1 & A2 & A3 & A4 & A5 & A6mermaid#mermaidChart9{font-family:sans-serif;font-size:16px;fill:var(--text-color);}#mermaidChart9 .error-icon{fill:#552222;}#mermaidChart9 .error-text{fill:#552222;stroke:#552222;}#mermaidChart9 .edge-thickness-normal{stroke-width:2px;}#mermaidChart9 .edge-thickness-thick{stroke-width:3.5px;}#mermaidChart9 .edge-pattern-solid{stroke-dasharray:0;}#mermaidChart9 .edge-pattern-dashed{stroke-dasharray:3;}#mermaidChart9 .edge-pattern-dotted{stroke-dasharray:2;}#mermaidChart9 .marker{fill:#333333;stroke:#333333;}#mermaidChart9 .marker.cross{stroke:#333333;}#mermaidChart9 svg{font-family:sans-serif;font-size:16px;}#mermaidChart9 :root{--mermaid-alt-font-family:sans-serif;}Syntax error in textmermaid version 10.9.1ERROR: [Mermaid] Lexical error on line 3. Unrecognized text.
+  ...层        R1[/ - 登录页]        R2[/admin 
+  ----------------------^
 - [Phase 1.4 — 前端项目初始化（小白版）](#phase-14)
 - [Phase 1.5 — 联调验证（小白版）](#phase-15)
 - [Phase 2.1 — 后端安全基础设施（小白版）](#phase-21)
@@ -1936,3 +1938,118 @@ Element Plus是基于Vue 3的UI组件库，提供了丰富的现成组件：输�
 
 现在，健身管理系统有了完整的用户管理功能：用户可以维护自己的资料，管理员可以管理所有用户。这为后续的课程预约、训练计划等功能打下了基础，因为所有这些功能都需要知道“谁”在使用系统。
 
+
+## [2026-04-24] Phase 3.2 — 身体数据模块（小白版）
+
+### 本节目标
+给 FitPro 会员系统添加"身体数据"功能，让用户可以记录自己的体重、体脂等身体指标，并查看历史变化。做完之后，会员可以像记日记一样记录每天的身体数据。
+
+### 知识点讲解
+
+#### 1. 什么是 BMI？
+BMI（Body Mass Index，身体质量指数）是衡量人体胖瘦程度的国际标准。公式很简单：
+```
+BMI = 体重(kg) ÷ 身高(m)的平方
+```
+比如：一个人体重 70kg，身高 1.75m，他的 BMI = 70 ÷ (1.75 × 1.75) ≈ 22.9
+
+在代码中我们不需要手动算，后端程序会自动帮你算好存到数据库里。
+
+#### 2. 什么是 @DecimalMin / @DecimalMax？
+这是 Java 里的"数字范围检查"注解。就像你填表时，有些格子里只能填特定范围的数字一样：
+- `@DecimalMin(value = "20")` 表示"这个数字不能小于20"
+- `@DecimalMax(value = "300")` 表示"这个数字不能大于300"
+
+这样如果有人想录入体重为 500kg 的"超人数据"，程序就会拒绝。
+
+#### 3. 为什么 BodyRecordEntity 不继承 BaseEntity？
+回顾一下：BaseEntity 是所有实体类的"老爸"，里面有 id、created_at、updated_at、deleted 四个通用字段。
+
+但 body_record 这张表很特殊——它是**历史记录**，记录一旦写入就不应该被修改或删除（你想，你上周记录的体重数据今天去改掉，那就不叫历史记录了）。所以这张表没有 updated_at（更新时间）和 deleted（软删除标记）字段。
+
+因此我们的 BodyRecordEntity 不能继承 BaseEntity，得自己定义所有字段。
+
+这就好比：大部分家具都是标准尺寸可以组装，但有个特殊形状的家具需要单独定制。
+
+#### 4. 什么是 @Transactional？
+在 Java 中，`@Transactional` 表示"事务"——就是把多个操作打包成一个整体，要么全部成功，要么全部失败。
+
+比如录入身体数据时，我们既要保存数据到数据库，又要计算 BMI。如果 BMI 计算到一半程序崩溃了，数据库里的数据就会不完整。有了 `@Transactional`，所有操作要么全部完成，要么就像没发生过一样回滚回去。
+
+类比：你在 ATM 上转账，扣你的钱和加对方的钱是两个步骤。如果扣完你的钱但系统故障没加到对方，钱就丢了。事务就是保证"要么两个都完成，要么都不做"。
+
+#### 5. 什么是 el-input-number？
+Element Plus（前端 UI 组件库）提供的一个数字输入框组件。特点是：
+- 只能输入数字，不能输入文字
+- 可以设置最小值和最大值
+- 可以设置步进值（每次加减多少）
+
+在身体数据录入表单中，体重输入范围是 20-300，步进 0.1，这样用户点上下箭头就可以精确调整。
+
+#### 6. 什么是 `this.getOne(wrapper)`？
+MyBatis-Plus 提供的方法：根据查询条件获取**一条**记录。我们用 `orderByDesc` 按日期排序后，用 `last("LIMIT 1")` 限制只取一条，这样就能拿到"最新的一条身体数据"。
+
+### 我们做了什么
+
+#### 后端：BodyRecordEntity.java（实体类）
+```java
+@Data
+@TableName("body_record")
+public class BodyRecordEntity {
+    @TableId(type = IdType.ASSIGN_ID)
+    private Long id;           // 主键，自动生成
+    private Long userId;       // 用户ID，关联到 sys_user 表
+    private BigDecimal weight; // 体重(kg)
+    private BigDecimal height; // 身高(cm)
+    private BigDecimal bodyFat;// 体脂率(%)
+    private BigDecimal bmi;    // BMI（自动计算）
+    private BigDecimal chest;  // 胸围(cm)
+    private BigDecimal waist;  // 腰围(cm)
+    private BigDecimal hip;    // 臀围(cm)
+    private LocalDate recordDate;   // 记录日期
+    private String remark;     // 备注
+    private LocalDateTime createdAt; // 创建时间
+}
+```
+这个类直接对应数据库的 body_record 表，每个字段就是表里的一列。`BigDecimal` 是 Java 中用来精确表示小数的类型，适合存体重、身高这种需要精确到小数点后两位的数据。
+
+#### 后端：BodyRecordServiceImpl.java（服务层核心）
+这里是关键业务逻辑所在：
+- **create()**：接收前端传来的数据，自动计算 BMI，然后存入数据库
+- **listByUser()**：按用户 ID 和日期范围查询历史记录，按日期降序排列（最新的在最前面）
+- **getLatest()**：查询用户最新的一条记录，用在首页卡片展示
+
+BMI 计算的核心代码：
+```java
+BigDecimal heightInMeter = height.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+return weight.divide(heightInMeter.multiply(heightInMeter), 2, RoundingMode.HALF_UP);
+```
+第一行：把厘米转成米（175cm → 1.75m）
+第二行：用公式 BMI = 体重 ÷ (身高 × 身高) 计算结果，保留2位小数
+
+#### 后端：BodyRecordController.java（控制器）
+定义了3个接口：
+1. `POST /api/body-records` — 录入身体数据
+2. `GET /api/body-records` — 查询自己的历史记录（可按日期筛选）
+3. `GET /api/body-records/latest` — 获取最新一条数据
+
+每个接口都会从 `SecurityContextHolder` 中获取当前登录用户的 ID，确保只能操作自己的身体数据。
+
+#### 前端：BodyDataView.vue（身体数据页面）
+页面分三块：
+1. **最新数据卡片**：在页面顶部展示最近一次记录的体重、BMI、体脂率、身高，一目了然
+2. **录入表单**：包含体重（必填）、身高、体脂率、胸围、腰围、臀围、记录日期、备注等字段
+3. **历史记录表格**：用表格展示所有历史记录，支持按日期范围筛选
+
+#### 前端：路由和导航
+在 `src/router/index.js` 中新增了 `/app/body-data` 路由，在 `AppLayout.vue` 底部 TabBar 中新增了"身体"标签，这样会员点击底部导航就能直接进入身体数据页面。
+
+### 本节小结
+- 身体数据模块是会员端的个人健康记录功能，可以记录体重、体脂、三围等指标
+- BMI 由后端自动计算，不需要前端计算
+- body_record 是"不可修改"的历史数据，所以没有更新时间字段
+- 后端提供 3 个接口：录入、列表查询、最新数据查询
+- 前端页面包含录入表单、最新数据卡片和历史记录表格三部分
+- 数据筛选功能让用户能按时间段查看特定范围内的记录
+- 学习到了 BigDecimal 精度计算、@Transactional 事务、el-input-number 数字输入框等知识点
+- 身体数据记录是后续数据图表展示的基础（Phase 5.1 将用 ECharts 画趋势图）

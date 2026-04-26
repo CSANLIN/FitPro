@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fitness.module.course.mapper.CourseScheduleMapper">
+
+    <resultMap id="ScheduleVOMap" type="com.fitness.module.course.vo.ScheduleVO">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="course_name" property="courseName"/>
+        <result column="course_cover" property="courseCover"/>
+        <result column="course_type" property="courseType"/>
+        <result column="coach_id" property="coachId"/>
+        <result column="coach_name" property="coachName"/>
+        <result column="schedule_date" property="scheduleDate"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="location" property="location"/>
+        <result column="current_count" property="currentCount"/>
+        <result column="max_capacity" property="maxCapacity"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="booked" property="booked"/>
+    </resultMap>
+
+    <select id="selectScheduleVOByDateRange" resultMap="ScheduleVOMap">
+        SELECT
+            cs.id,
+            cs.course_id,
+            c.name AS course_name,
+            c.cover_image AS course_cover,
+            c.course_type,
+            cs.coach_id,
+            su.nickname AS coach_name,
+            cs.schedule_date,
+            cs.start_time,
+            cs.end_time,
+            cs.location,
+            cs.current_count,
+            cs.max_capacity,
+            cs.status,
+            cs.created_at,
+            <if test="userId != null">
+                (SELECT COUNT(*) > 0 FROM course_booking cb
+                 WHERE cb.schedule_id = cs.id AND cb.user_id = #{userId} AND cb.status = 'BOOKED') AS booked
+            </if>
+            <if test="userId == null">
+                FALSE AS booked
+            </if>
+        FROM course_schedule cs
+        INNER JOIN course c ON cs.course_id = c.id
+        LEFT JOIN sys_user su ON cs.coach_id = su.id
+        <where>
+            <if test="startDate != null">
+                AND cs.schedule_date >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND cs.schedule_date &lt;= #{endDate}
+            </if>
+            <if test="courseId != null">
+                AND cs.course_id = #{courseId}
+            </if>
+            <if test="coachId != null">
+                AND cs.coach_id = #{coachId}
+            </if>
+        </where>
+        ORDER BY cs.schedule_date ASC, cs.start_time ASC
+    </select>
+</mapper>

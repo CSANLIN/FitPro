@@ -94,6 +94,14 @@
             <el-menu-item index="/admin/workout/templates">训练模板</el-menu-item>
           </el-sub-menu>
 
+          <el-sub-menu index="membership">
+            <template #title>
+              <el-icon><Ticket /></el-icon>
+              <span>会籍管理</span>
+            </template>
+            <el-menu-item index="/admin/membership">会籍管理</el-menu-item>
+          </el-sub-menu>
+
           <el-sub-menu index="system">
             <template #title>
               <el-icon><Setting /></el-icon>
@@ -141,6 +149,7 @@ import {
   Calendar,
   Basketball,
   List,
+  Ticket,
   Setting,
   Expand,
   Fold,

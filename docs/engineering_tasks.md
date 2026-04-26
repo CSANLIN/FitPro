@@ -148,48 +148,48 @@
 | 3.3.6 | 前端 - 运动库浏览 (会员端) | `src/views/exercise/ExerciseListView.vue` | 分类 Tab 切换 + 动作卡片列表 + 筛选 (肌群/器械/难度) + 动作详情弹窗 | `[x]` |
 | 3.3.7 | 前端 - 运动库管理 (管理端) | `src/views/exercise/ExerciseManageView.vue` | 分类管理 + 动作 CRUD 表格 + 新增/编辑弹窗 | `[x]` |
 
-### 3.4 训练模块
+### 3.4 训练模块 ✅
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 3.4.1 | Entity 层 (6个) | `module/workout/entity/` 下 WorkoutTemplateEntity, WorkoutTemplateItemEntity, WorkoutPlanEntity, WorkoutPlanDayEntity, WorkoutPlanDayItemEntity, WorkoutRecordEntity, WorkoutRecordItemEntity | 映射对应 7 张表 | `[ ]` |
-| 3.4.2 | DTO/VO | `module/workout/dto/` `vo/` | PlanCreateDTO (含嵌套 days→items), RecordCreateDTO (含嵌套 items), PlanVO, PlanDetailVO, RecordVO, RecordDetailVO, TemplateVO | `[ ]` |
-| 3.4.3 | Mapper + XML | `module/workout/mapper/` + `resources/mapper/` | 7 个 Mapper, WorkoutPlanMapper.xml: 联查计划+天+动作的嵌套结果映射, WorkoutRecordMapper.xml: 联查记录+组 | `[ ]` |
-| 3.4.4 | WorkoutTemplateService | `module/workout/service/WorkoutTemplateService.java` + `impl/` | CRUD + 复制模板 + 按教练查询 | `[ ]` |
-| 3.4.5 | WorkoutPlanService | `module/workout/service/WorkoutPlanService.java` + `impl/` | create(含嵌套保存), getDetail(联查), listByUser, listByCoach, updateStatus | `[ ]` |
-| 3.4.6 | WorkoutRecordService | `module/workout/service/WorkoutRecordService.java` + `impl/` | create(含嵌套保存), getDetail, listByUser(分页), 统计: weeklyCount, totalVolume | `[ ]` |
-| 3.4.7 | Controller | `module/workout/controller/` 3个 Controller | 模板: /api/workout-templates; 计划: /api/workout-plans; 记录: /api/workout-records | `[ ]` |
-| 3.4.8 | 前端 - 训练计划 (会员端) | `src/views/workout/WorkoutPlanView.vue` | 按周展示训练日, 每天显示动作列表, 点击进入训练记录 | `[ ]` |
-| 3.4.9 | 前端 - 训练记录 (会员端) | `src/views/workout/WorkoutRecordView.vue` | 实时记录: 选动作→填组数/重量/次数→完成, 历史记录列表 | `[ ]` |
-| 3.4.10 | 前端 - 训练模板管理 (管理端) | `src/views/workout/WorkoutTemplateManageView.vue` | 模板 CRUD + 动作拖拽排序 | `[ ]` |
+| 3.4.1 | Entity 层 (7个) | `module/workout/entity/` 下 WorkoutTemplateEntity, WorkoutTemplateItemEntity, WorkoutPlanEntity, WorkoutPlanDayEntity, WorkoutPlanDayItemEntity, WorkoutRecordEntity, WorkoutRecordItemEntity | 映射对应 7 张表 | `[x]` |
+| 3.4.2 | DTO/VO | `module/workout/dto/` `vo/` | PlanCreateDTO (含嵌套 days→items), RecordCreateDTO (含嵌套 items), PlanVO, PlanDetailVO, RecordVO, RecordDetailVO, TemplateVO | `[x]` |
+| 3.4.3 | Mapper + XML | `module/workout/mapper/` + `resources/mapper/` | 7 个 Mapper, WorkoutPlanMapper.xml: 联查计划+天+动作的嵌套结果映射, WorkoutRecordMapper.xml: 联查记录+组 | `[x]` |
+| 3.4.4 | WorkoutTemplateService | `module/workout/service/WorkoutTemplateService.java` + `impl/` | CRUD + 复制模板 + 按教练查询 | `[x]` |
+| 3.4.5 | WorkoutPlanService | `module/workout/service/WorkoutPlanService.java` + `impl/` | create(含嵌套保存), getDetail(联查), listByUser, listByCoach, updateStatus | `[x]` |
+| 3.4.6 | WorkoutRecordService | `module/workout/service/WorkoutRecordService.java` + `impl/` | create(含嵌套保存), getDetail, listByUser(分页), 统计: weeklyCount, totalVolume | `[x]` |
+| 3.4.7 | Controller | `module/workout/controller/` 3个 Controller | 模板: /api/workout-templates; 计划: /api/workout-plans; 记录: /api/workout-records | `[x]` |
+| 3.4.8 | 前端 - 训练计划 (会员端) | `src/views/workout/WorkoutPlanView.vue` | 按周展示训练日, 每天显示动作列表, 点击进入训练记录 | `[x]` |
+| 3.4.9 | 前端 - 训练记录 (会员端) | `src/views/workout/WorkoutRecordView.vue` | 实时记录: 选动作→填组数/重量/次数→完成, 历史记录列表 | `[x]` |
+| 3.4.10 | 前端 - 训练模板管理 (管理端) | `src/views/workout/WorkoutTemplateManageView.vue` | 模板 CRUD + 动作拖拽排序 | `[x]` |
 
-### 3.5 课程与预约模块
-
-| # | 任务 | 产出文件 | 验收标准 | 状态 |
-|---|------|----------|----------|------|
-| 3.5.1 | Entity 层 | `module/course/entity/` CourseEntity, CourseScheduleEntity, CourseBookingEntity | 映射 3 张表 | `[ ]` |
-| 3.5.2 | DTO/VO | `module/course/dto/` `vo/` | CourseCreateDTO, ScheduleCreateDTO, BookingCreateDTO, CourseVO, ScheduleVO (含教练名+课程名+已约人数), BookingVO | `[ ]` |
-| 3.5.3 | Mapper + XML | `module/course/mapper/` | CourseScheduleMapper.xml: 联查课程+教练信息 | `[ ]` |
-| 3.5.4 | CourseService | `module/course/service/CourseService.java` + `impl/` | CRUD + 上下架 | `[ ]` |
-| 3.5.5 | CourseScheduleService | `module/course/service/CourseScheduleService.java` + `impl/` | create, listByDateRange(日历查询), listByCoach, cancel | `[ ]` |
-| 3.5.6 | CourseBookingService | `module/course/service/CourseBookingService.java` + `impl/` | book(userId, scheduleId): 校验容量→乐观锁更新currentCount→创建预约; cancel(bookingId); listByUser; listBySchedule | `[ ]` |
-| 3.5.7 | Controller | `module/course/controller/` 3个 Controller | 课程: /api/courses; 排课: /api/course-schedules; 预约: /api/course-bookings | `[ ]` |
-| 3.5.8 | 前端 - 课程列表 (会员端) | `src/views/course/CourseListView.vue` | 课程卡片列表 + 类型筛选 + 点击查看排课 | `[ ]` |
-| 3.5.9 | 前端 - 课程预约 (会员端) | `src/views/course/CourseBookingView.vue` | 排课日历 + 点击预约/取消 + 我的预约列表 | `[ ]` |
-| 3.5.10 | 前端 - 排课管理 (管理端) | `src/views/course/ScheduleManageView.vue` | 日历视图排课 + 新增排课弹窗 (选课程+教练+时间+地点) | `[ ]` |
-
-### 3.6 会籍与签到模块
+### 3.5 课程与预约模块 ✅
 
 | # | 任务 | 产出文件 | 验收标准 | 状态 |
 |---|------|----------|----------|------|
-| 3.6.1 | Entity 层 | `module/membership/entity/` MembershipCardEntity, MemberMembershipEntity; `module/checkin/entity/` CheckInEntity | 映射 3 张表 | `[ ]` |
-| 3.6.2 | DTO/VO | 各模块 dto/ vo/ | CardCreateDTO, MembershipCreateDTO (办卡: userId+cardId), MembershipVO (含卡种名+剩余天数/次数), CheckInVO | `[ ]` |
-| 3.6.3 | MembershipService | `module/membership/service/` + `impl/` | createCard(管理端), listCards; assignMembership(办卡): 计算到期日; renew(续费); freeze/unfreeze(冻结/解冻); cancel(退卡) | `[ ]` |
-| 3.6.4 | CheckInService | `module/checkin/service/` + `impl/` | checkIn(userId): 校验有效会籍→次卡扣次数→创建记录; listByUser(分页); todayCount(统计) | `[ ]` |
-| 3.6.5 | Controller | 2个 Controller | 会籍: /api/memberships, /api/membership-cards; 签到: /api/check-ins | `[ ]` |
-| 3.6.6 | 前端 - 会籍信息 (会员端) | `src/views/membership/MembershipView.vue` | 当前会籍卡片 (类型+到期日+剩余次数) + 历史会籍 | `[ ]` |
-| 3.6.7 | 前端 - 签到打卡 (会员端) | `src/views/checkin/CheckInView.vue` | 签到按钮 + 本月签到日历 + 签到记录列表 | `[ ]` |
-| 3.6.8 | 前端 - 会籍管理 (管理端) | `src/views/membership/MembershipManageView.vue` | 卡种管理 + 会员办卡/续费/冻结/退卡操作弹窗 | `[ ]` |
+| 3.5.1 | Entity 层 | `module/course/entity/` CourseEntity, CourseScheduleEntity, CourseBookingEntity | 映射 3 张表 | `[x]` |
+| 3.5.2 | DTO/VO | `module/course/dto/` `vo/` | CourseCreateDTO, ScheduleCreateDTO, BookingCreateDTO, CourseVO, ScheduleVO (含教练名+课程名+已约人数), BookingVO, MyBookingVO | `[x]` |
+| 3.5.3 | Mapper + XML | `module/course/mapper/` | CourseScheduleMapper.xml: 联查课程+教练信息+预约状态; CourseBookingMapper.xml: 联查预约信息 | `[x]` |
+| 3.5.4 | CourseService | `module/course/service/CourseService.java` + `impl/` | CRUD + 上下架 | `[x]` |
+| 3.5.5 | CourseScheduleService | `module/course/service/CourseScheduleService.java` + `impl/` | create(含冲突检测), listByDateRange(日历查询), cancel, updateScheduleStatus(自动状态更新) | `[x]` |
+| 3.5.6 | CourseBookingService | `module/course/service/CourseBookingService.java` + `impl/` | book(userId, scheduleId): 校验容量→乐观锁原子更新current_count→创建预约; cancel(bookingId); listByUser; listBySchedule; listAll | `[x]` |
+| 3.5.7 | Controller | `module/course/controller/` 3个 Controller | 课程: /api/courses; 排课: /api/course-schedules; 预约: /api/course-bookings | `[x]` |
+| 3.5.8 | 前端 - 课程列表 (会员端) | `src/views/course/CourseListView.vue` | 课程卡片列表 + 类型筛选 + 点击查看排课 | `[x]` |
+| 3.5.9 | 前端 - 课程预约 (会员端) | `src/views/course/CourseBookingView.vue` | 排课列表 + 预约/取消 + 我的预约弹窗 | `[x]` |
+| 3.5.10 | 前端 - 排课管理 (管理端) | `src/views/course/ScheduleManageView.vue` | 排课列表表格 + 新增排课弹窗(选课程+教练+时间+地点) + 预约列表查看 | `[x]` |
+
+### 3.6 会籍与签到模块 ✅
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 3.6.1 | Entity 层 | `module/membership/entity/` MembershipCardEntity, MemberMembershipEntity; `module/checkin/entity/` CheckInEntity | 映射 3 张表 | `[x]` |
+| 3.6.2 | DTO/VO | 各模块 dto/ vo/ | CardCreateDTO, MembershipCreateDTO, MembershipRenewDTO, MembershipCardVO, MembershipVO (含卡种名+剩余天数/次数), CheckInVO, CheckInStatsVO | `[x]` |
+| 3.6.3 | MembershipService | `module/membership/service/` + `impl/` | createCard(管理端), listCards, updateCard; assignMembership(办卡): 计算到期日; renew(续费); freeze/unfreeze(冻结/解冻); cancel(退卡) | `[x]` |
+| 3.6.4 | CheckInService | `module/checkin/service/` + `impl/` | checkIn(userId): 校验有效会籍→次卡扣次数→创建记录; listByUser; listAll; getStats(月统计+连续签到) | `[x]` |
+| 3.6.5 | Controller | 3个 Controller | 会籍: /api/memberships, /api/membership-cards; 签到: /api/check-ins | `[x]` |
+| 3.6.6 | 前端 - 会籍信息 (会员端) | `src/views/membership/MembershipView.vue` | 当前会籍卡片 (类型+到期日+剩余天数/次数) + 历史会籍表格 | `[x]` |
+| 3.6.7 | 前端 - 签到打卡 (会员端) | `src/views/checkin/CheckInView.vue` | 圆形签到按钮 + 本月签到日历网格 + 签到统计 + 时间线列表 | `[x]` |
+| 3.6.8 | 前端 - 会籍管理 (管理端) | `src/views/membership/MembershipManageView.vue` | Tab切换: 卡种管理(CRUD+上下架) + 会籍管理(办卡/续费/冻结/解冻/退卡弹窗) | `[x]` |
 
 **M3 里程碑验收**: 所有业务模块 CRUD 接口可用 + 前端页面可操作 + Knife4j 文档完整
 

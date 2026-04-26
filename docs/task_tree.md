@@ -175,29 +175,29 @@ Phase 3 - 核心业务
 │   ├── [x] ExerciseController
 │   ├── [x] 运动库浏览页面 (会员端)
 │   └── [x] 运动库管理页面 (管理端)
-├── 3.4 训练模块 (3天)
-│   ├── [ ] WorkoutTemplate / Plan / Record 全套 Entity
-│   ├── [ ] WorkoutTemplateService (模板CRUD)
-│   ├── [ ] WorkoutPlanService (计划制定, 按周展示)
-│   ├── [ ] WorkoutRecordService (记录训练, 统计)
-│   ├── [ ] 训练计划页面 (会员端, 按周日历展示)
-│   ├── [ ] 训练记录页面 (会员端, 实时记录)
-│   └── [ ] 训练模板管理 (管理端/教练端)
+├── 3.4 训练模块 (3天) ✅
+│   ├── [x] WorkoutTemplate / Plan / Record 全套 Entity
+│   ├── [x] WorkoutTemplateService (模板CRUD)
+│   ├── [x] WorkoutPlanService (计划制定, 按周展示)
+│   ├── [x] WorkoutRecordService (记录训练, 统计)
+│   ├── [x] 训练计划页面 (会员端, 按周日历展示)
+│   ├── [x] 训练记录页面 (会员端, 实时记录)
+│   └── [x] 训练模板管理 (管理端/教练端)
 ├── 3.5 课程与预约模块 (3天)
-│   ├── [ ] Course / CourseSchedule / CourseBooking Entity
-│   ├── [ ] CourseService (课程CRUD)
-│   ├── [ ] CourseScheduleService (排课, 日历查询)
-│   ├── [ ] CourseBookingService (预约, 取消, 容量控制)
-│   ├── [ ] 课程列表/详情页面 (会员端)
-│   ├── [ ] 排课日历页面 (管理端)
-│   └── [ ] 预约管理页面 (管理端)
+│   ├── [x] Course / CourseSchedule / CourseBooking Entity
+│   ├── [x] CourseService (课程CRUD)
+│   ├── [x] CourseScheduleService (排课, 日历查询)
+│   ├── [x] CourseBookingService (预约, 取消, 容量控制)
+│   ├── [x] 课程列表/详情页面 (会员端)
+│   ├── [x] 排课日历页面 (管理端)
+│   └── [x] 预约管理页面 (管理端)
 └── 3.6 会籍与签到模块 (2天)
-    ├── [ ] MembershipCard / MemberMembership / CheckIn Entity
-    ├── [ ] MembershipService (办卡, 续费, 冻结, 退卡)
-    ├── [ ] CheckInService (签到, 记录查询)
-    ├── [ ] 会籍信息页面 (会员端)
-    ├── [ ] 签到打卡页面 (会员端)
-    └── [ ] 会籍管理页面 (管理端)
+    ├── [x] MembershipCard / MemberMembership / CheckIn Entity
+    ├── [x] MembershipService (办卡, 续费, 冻结, 退卡)
+    ├── [x] CheckInService (签到, 记录查询)
+    ├── [x] 会籍信息页面 (会员端)
+    ├── [x] 签到打卡页面 (会员端)
+    └── [x] 会籍管理页面 (管理端)
 ```
 
 ## 第四阶段：管理端完善 (8天)

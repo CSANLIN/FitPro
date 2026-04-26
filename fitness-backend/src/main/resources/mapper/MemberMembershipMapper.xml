@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fitness.module.membership.mapper.MemberMembershipMapper">
+
+    <resultMap id="MembershipVOMap" type="com.fitness.module.membership.vo.MembershipVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="card_id" property="cardId"/>
+        <result column="card_name" property="cardName"/>
+        <result column="card_type" property="cardType"/>
+        <result column="card_price" property="cardPrice"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="remaining_days" property="remainingDays"/>
+        <result column="remaining_times" property="remainingTimes"/>
+        <result column="status" property="status"/>
+        <result column="frozen_at" property="frozenAt"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <select id="selectMembershipVOByUserId" resultMap="MembershipVOMap">
+        SELECT
+            mm.id,
+            mm.user_id,
+            su.nickname AS user_name,
+            mm.card_id,
+            mc.card_name,
+            mc.card_type,
+            mc.price AS card_price,
+            mm.start_date,
+            mm.end_date,
+            CASE
+                WHEN mc.card_type = 'TIMES' THEN NULL
+                WHEN mm.end_date IS NOT NULL THEN DATEDIFF(mm.end_date, NOW())
+                ELSE NULL
+            END AS remaining_days,
+            mm.remaining_times,
+            mm.status,
+            mm.frozen_at,
+            mm.created_at
+        FROM member_membership mm
+        LEFT JOIN membership_card mc ON mm.card_id = mc.id
+        LEFT JOIN sys_user su ON mm.user_id = su.id
+        WHERE mm.user_id = #{userId}
+        ORDER BY mm.created_at DESC
+    </select>
+
+    <select id="selectAllMembershipVO" resultMap="MembershipVOMap">
+        SELECT
+            mm.id,
+            mm.user_id,
+            su.nickname AS user_name,
+            mm.card_id,
+            mc.card_name,
+            mc.card_type,
+            mc.price AS card_price,
+            mm.start_date,
+            mm.end_date,
+            CASE
+                WHEN mc.card_type = 'TIMES' THEN NULL
+                WHEN mm.end_date IS NOT NULL THEN DATEDIFF(mm.end_date, NOW())
+                ELSE NULL
+            END AS remaining_days,
+            mm.remaining_times,
+            mm.status,
+            mm.frozen_at,
+            mm.created_at
+        FROM member_membership mm
+        LEFT JOIN membership_card mc ON mm.card_id = mc.id
+        LEFT JOIN sys_user su ON mm.user_id = su.id
+        ORDER BY mm.created_at DESC
+    </select>
+</mapper>

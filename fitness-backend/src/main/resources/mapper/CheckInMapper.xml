@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fitness.module.checkin.mapper.CheckInMapper">
+
+    <resultMap id="CheckInVOMap" type="com.fitness.module.checkin.vo.CheckInVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="membership_id" property="membershipId"/>
+        <result column="check_in_time" property="checkInTime"/>
+        <result column="check_in_type" property="checkInType"/>
+        <result column="check_in_date" property="checkInDate"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <select id="selectCheckInVOByUserId" resultMap="CheckInVOMap">
+        SELECT
+            ci.id,
+            ci.user_id,
+            su.nickname AS user_name,
+            ci.membership_id,
+            ci.check_in_time,
+            ci.check_in_type,
+            DATE_FORMAT(ci.check_in_time, '%Y-%m-%d') AS check_in_date,
+            ci.created_at
+        FROM check_in ci
+        LEFT JOIN sys_user su ON ci.user_id = su.id
+        WHERE ci.user_id = #{userId}
+        ORDER BY ci.check_in_time DESC
+    </select>
+
+    <select id="selectAllCheckInVO" resultMap="CheckInVOMap">
+        SELECT
+            ci.id,
+            ci.user_id,
+            su.nickname AS user_name,
+            ci.membership_id,
+            ci.check_in_time,
+            ci.check_in_type,
+            DATE_FORMAT(ci.check_in_time, '%Y-%m-%d') AS check_in_date,
+            ci.created_at
+        FROM check_in ci
+        LEFT JOIN sys_user su ON ci.user_id = su.id
+        ORDER BY ci.check_in_time DESC
+    </select>
+
+    <select id="selectCheckInDatesByMonth" resultType="java.lang.String">
+        SELECT DISTINCT DATE_FORMAT(check_in_time, '%Y-%m-%d') AS check_in_date
+        FROM check_in
+        WHERE user_id = #{userId}
+        AND DATE_FORMAT(check_in_time, '%Y-%m') = #{yearMonth}
+        ORDER BY check_in_date ASC
+    </select>
+</mapper>
