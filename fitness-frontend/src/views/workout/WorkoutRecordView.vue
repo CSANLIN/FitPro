@@ -10,6 +10,31 @@
       </el-button>
     </div>
 
+    <!-- 本周训练概览 -->
+    <div class="weekly-stats-row" v-if="weeklyStats">
+      <div class="stat-pill">
+        <div class="pill-icon yellow"><el-icon><Calendar /></el-icon></div>
+        <div class="pill-info">
+          <div class="pill-val">{{ weeklyStats.weeklyCount || 0 }}</div>
+          <div class="pill-lbl">本周训练次数</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div class="pill-icon green"><el-icon><Medal /></el-icon></div>
+        <div class="pill-info">
+          <div class="pill-val">{{ weeklyStats.weeklyVolume || 0 }}<small>kg</small></div>
+          <div class="pill-lbl">本周总训练量</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div class="pill-icon blue"><el-icon><TrendCharts /></el-icon></div>
+        <div class="pill-info">
+          <div class="pill-val">{{ weeklyStats.avgVolume || 0 }}<small>kg</small></div>
+          <div class="pill-lbl">次均训练量</div>
+        </div>
+      </div>
+    </div>
+
     <!-- 记录列表和筛选区域 -->
     <div class="record-container">
       <div class="filter-bar">
@@ -199,7 +224,7 @@ import { useRoute } from 'vue-router'
 import { workoutApi } from '@/api/workout'
 import { exerciseApi } from '@/api/exercise'
 import { ElMessage } from 'element-plus'
-import { Plus, Clock, Timer, Medal } from '@element-plus/icons-vue'
+import { Plus, Clock, Timer, Medal, TrendCharts, Calendar } from '@element-plus/icons-vue'
 
 const route = useRoute()
 
@@ -209,6 +234,7 @@ const total = ref(0)
 const loading = ref(false)
 const detailVisible = ref(false)
 const createVisible = ref(false)
+const weeklyStats = ref(null)
 const saving = ref(false)
 const currentRecord = ref(null)
 const exercises = ref([])
@@ -249,6 +275,19 @@ const monthOnly = (timeStr) => {
 const timeOnly = (timeStr) => {
   if (!timeStr) return '--'
   return timeStr.substring(11, 16)
+}
+
+// 获取本周统计
+const fetchWeeklyStats = async () => {
+  try {
+    const res = await workoutApi.weeklyStats()
+    if (res) {
+      const avg = res.weeklyCount > 0 ? Math.round((res.weeklyVolume || 0) / res.weeklyCount) : 0
+      weeklyStats.value = { ...res, avgVolume: avg }
+    }
+  } catch (e) {
+    console.warn('获取周统计失败:', e)
+  }
 }
 
 // 加载数据
@@ -390,6 +429,7 @@ onMounted(() => {
   fetchRecords()
   fetchExercises()
   fetchPlanOptions()
+  fetchWeeklyStats()
 
   if (route.query.planId) {
     showCreateDialog()
@@ -429,6 +469,52 @@ onMounted(() => {
 .create-btn {
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* 本周训练概览 */
+.weekly-stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-pill {
+  flex: 1;
+  background: white;
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+.pill-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.pill-icon.yellow { background: #fef3c7; color: #d97706; }
+.pill-icon.green { background: #d1fae5; color: #059669; }
+.pill-icon.blue { background: #dbeafe; color: #2563eb; }
+.pill-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+.pill-val small {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+.pill-lbl {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .filter-bar {

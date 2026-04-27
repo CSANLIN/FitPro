@@ -1,4 +1,4 @@
-// FitPro 全局样式
+// FitPro 全局样式 - Be.run Aesthetic
 // ====================
 
 @use './variables.scss';
@@ -26,48 +26,38 @@ body {
   padding: 0;
   min-height: 100vh;
   overflow-x: hidden;
+  background-color: var(--bg-base); // 关键背景色
 }
 
 h1, h2, h3, h4, h5, h6 {
   margin-top: 0;
   margin-bottom: var(--space-md);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.3;
+  font-weight: var(--font-weight-black);
+  letter-spacing: -0.5px; // 紧凑字间距增加现代感
+  line-height: 1.2;
+  color: var(--text-primary);
 }
 
 p {
   margin-top: 0;
   margin-bottom: var(--space-md);
+  color: var(--text-regular);
 }
 
 a {
-  color: var(--primary-color);
+  color: var(--text-primary);
   text-decoration: none;
-  transition: color 0.2s;
+  font-weight: 600;
+  transition: all 0.2s;
 
   &:hover {
-    color: var(--primary-dark);
+    color: var(--primary-color);
   }
 }
 
-ul, ol {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-button {
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  cursor: pointer;
-}
+ul, ol { margin: 0; padding: 0; list-style: none; }
+img { max-width: 100%; height: auto; display: block; }
+button { font-family: inherit; font-size: inherit; line-height: inherit; cursor: pointer; }
 
 // 工具类
 .text-primary { color: var(--text-primary) !important; }
@@ -78,137 +68,250 @@ button {
 .bg-base { background-color: var(--bg-base) !important; }
 .bg-light { background-color: var(--bg-light) !important; }
 .bg-lighter { background-color: var(--bg-lighter) !important; }
+.bg-dark { background-color: var(--accent-dark) !important; color: white !important; }
 
-.mt-xs { margin-top: var(--space-xs) !important; }
+// 间距工具类略...
 .mt-sm { margin-top: var(--space-sm) !important; }
 .mt-md { margin-top: var(--space-md) !important; }
 .mt-lg { margin-top: var(--space-lg) !important; }
-.mt-xl { margin-top: var(--space-xl) !important; }
-
-.mb-xs { margin-bottom: var(--space-xs) !important; }
 .mb-sm { margin-bottom: var(--space-sm) !important; }
 .mb-md { margin-bottom: var(--space-md) !important; }
 .mb-lg { margin-bottom: var(--space-lg) !important; }
-.mb-xl { margin-bottom: var(--space-xl) !important; }
-
-.p-xs { padding: var(--space-xs) !important; }
-.p-sm { padding: var(--space-sm) !important; }
-.p-md { padding: var(--space-md) !important; }
-.p-lg { padding: var(--space-lg) !important; }
-.p-xl { padding: var(--space-xl) !important; }
 
 // 布局类
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--space-md);
+.container { width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 var(--space-md); }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.flex-1 { flex: 1; }
+.full-width { width: 100% !important; }
+.full-height { height: 100% !important; }
+.text-center { text-align: center !important; }
+.text-right { text-align: right !important; }
+.hidden { display: none !important; }
+.pointer { cursor: pointer !important; }
+
+// 高级模糊弥散背景(Blob)
+.blur-blob-yellow {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: var(--blob-yellow);
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.flex {
-  display: flex;
+.blur-blob-red {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: var(--blob-red);
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.flex-col {
-  flex-direction: column;
+// 现代暗黑卡片 (从参考图右侧日历获取灵感)
+.dark-panel {
+  background-color: var(--accent-dark) !important;
+  color: white !important;
+  border: none !important;
+  
+  .el-card__header {
+    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+    color: white !important;
+  }
 }
 
-.items-center {
-  align-items: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-// 通用类
-.full-width {
-  width: 100% !important;
-}
-
-.full-height {
-  height: 100% !important;
-}
-
-.text-center {
-  text-align: center !important;
-}
-
-.text-right {
-  text-align: right !important;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.pointer {
-  cursor: pointer !important;
-}
-
-// Element Plus 增强样式
+// Element Plus 全局高级视觉覆盖 (Be.run Style)
 .el-button {
-  font-weight: var(--font-weight-medium) !important;
+  font-weight: 700 !important;
+  border-radius: var(--border-radius-pill) !important;
+  padding: 12px 24px !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  // 默认按钮 (偏深灰/黑白风格)
+  &.el-button--default {
+    background-color: white !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-sm) !important;
+    
+    &:hover {
+      background-color: #f5f5f5 !important;
+      transform: translateY(-2px);
+    }
+  }
+
+  // 主色按钮 (亮黄色)
+  &.el-button--primary {
+    background-color: var(--primary-color) !important;
+    color: var(--text-primary) !important; // 黄色配黑字
+    box-shadow: 0 4px 15px rgba(255, 204, 46, 0.3) !important;
+    
+    &:hover {
+      background-color: var(--primary-light) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 204, 46, 0.4) !important;
+    }
+    
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+  
+  // 深黑按钮 (参考图 Upgrade 按钮)
+  &.btn-dark {
+    background-color: var(--accent-dark) !important;
+    color: white !important;
+    
+    &:hover {
+      background-color: #000000 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+  }
 }
 
+// 卡片极其圆润
 .el-card {
   border-radius: var(--border-radius-lg) !important;
-  box-shadow: var(--shadow-sm) !important;
-
-  &:hover {
-    box-shadow: var(--shadow-base) !important;
+  border: none !important;
+  box-shadow: var(--shadow-base) !important;
+  background-color: var(--bg-light) !important;
+  
+  .el-card__header {
+    border-bottom: 1px dashed var(--border-light) !important;
+    padding: 20px 24px !important;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--text-primary);
+  }
+  
+  .el-card__body {
+    padding: 24px !important;
   }
 }
 
+// 弹窗
 .el-dialog {
   border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+  
+  .el-dialog__header {
+    margin-right: 0 !important;
+    padding: 30px 30px 20px !important;
+    font-weight: 800;
+    border-bottom: none !important;
+    
+    .el-dialog__title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+  }
+  
+  .el-dialog__body {
+    padding: 10px 30px 30px !important;
+  }
+  
+  .el-dialog__footer {
+    padding: 20px 30px 30px !important;
+    border-top: none !important;
+  }
 }
 
-.el-form-item {
-  margin-bottom: var(--space-lg) !important;
+// 表格
+.el-table {
+  --el-table-header-bg-color: transparent !important;
+  --el-table-header-text-color: var(--text-secondary) !important;
+  --el-table-row-hover-bg-color: #faf9f6 !important;
+  --el-table-border-color: var(--border-light) !important;
+  background: transparent !important;
+  border-radius: var(--border-radius-sm);
+  
+  th.el-table__cell {
+    font-weight: 700 !important;
+    font-size: 13px;
+    border-bottom: 2px solid var(--border-light) !important;
+  }
+  
+  td.el-table__cell {
+    border-bottom: 1px dashed var(--border-light) !important;
+    padding: 16px 0 !important;
+  }
 }
 
-// 滚动条样式
+// 输入框、搜索框 (胶囊型)
+.el-input__wrapper, .el-select-v2__wrapper {
+  box-shadow: none !important;
+  background-color: white !important;
+  border: 1px solid var(--border-base) !important;
+  border-radius: var(--border-radius-pill) !important;
+  padding: 8px 16px !important;
+  
+  &.is-focus, &:hover {
+    border-color: var(--accent-dark) !important;
+  }
+}
+
+// Search 特制输入框
+.search-pill .el-input__wrapper {
+  background-color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+  padding: 10px 24px !important;
+  
+  .el-input__inner {
+    font-weight: 500;
+  }
+}
+
+.el-pagination {
+  .btn-prev, .btn-next, .el-pager li {
+    background-color: transparent !important;
+    border-radius: 50% !important;
+    width: 36px;
+    height: 36px;
+    font-weight: 600;
+    
+    &.is-active {
+      background-color: var(--primary-color) !important;
+      color: var(--text-primary) !important;
+      box-shadow: 0 4px 10px rgba(255, 204, 46, 0.4);
+    }
+  }
+}
+
+// 标签
+.el-tag {
+  border-radius: var(--border-radius-pill) !important;
+  font-weight: 700 !important;
+  border: none !important;
+  padding: 0 12px !important;
+  
+  &.el-tag--success { background-color: #e6f4ea !important; color: var(--success-color) !important; }
+  &.el-tag--warning { background-color: #fff8e1 !important; color: var(--warning-color) !important; }
+  &.el-tag--danger { background-color: #fce8e6 !important; color: var(--danger-color) !important; }
+}
+
+// 滚动条优化
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: var(--bg-lighter);
-  border-radius: var(--border-radius-sm);
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--border-light);
-  border-radius: var(--border-radius-sm);
-
+  background: var(--border-base);
+  border-radius: 10px;
   &:hover {
-    background: var(--border-base);
-  }
-}
-
-// 响应式断点
-@media (max-width: 768px) {
-  .container {
-    padding: 0 var(--space-sm);
-  }
-
-  .hidden-mobile {
-    display: none !important;
-  }
-}
-
-@media (min-width: 769px) {
-  .hidden-desktop {
-    display: none !important;
+    background: var(--text-placeholder);
   }
 }

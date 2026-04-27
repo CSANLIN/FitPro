@@ -1,7 +1,10 @@
 <template>
   <div class="login-container">
-    <div class="login-background">
-      <div class="login-background-overlay"></div>
+    <!-- 动态发光气泡背景 (Be.run Aesthetic) -->
+    <div class="background-blobs">
+      <div class="blob-yellow"></div>
+      <div class="blob-red"></div>
+      <div class="blob-accent"></div>
     </div>
 
     <div class="login-content">
@@ -10,15 +13,21 @@
         <div class="login-header">
           <div class="login-logo">
             <div class="logo-icon">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="20" fill="var(--primary-color)" />
-                <path d="M15 25L20 30L30 15" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M10 20L15 25" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              <!-- FitPro Logo (暗黑色调哑铃) -->
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="24" fill="#242529" />
+                <g transform="rotate(-45 24 24)">
+                  <rect x="12" y="20" width="6" height="8" rx="2" fill="#ffcc2e" />
+                  <rect x="30" y="20" width="6" height="8" rx="2" fill="#ffcc2e" />
+                  <rect x="18" y="22" width="12" height="4" fill="#ffcc2e" />
+                  <rect x="8" y="16" width="4" height="16" rx="2" fill="#ffcc2e" />
+                  <rect x="36" y="16" width="4" height="16" rx="2" fill="#ffcc2e" />
+                </g>
               </svg>
             </div>
             <h1 class="login-title">FitPro</h1>
           </div>
-          <p class="login-subtitle">智能健身管理系统</p>
+          <p class="login-subtitle">智能健身管理中心</p>
         </div>
 
         <!-- 登录表单 -->
@@ -29,20 +38,24 @@
             :rules="rules"
             label-width="0"
             @submit.prevent="handleLogin"
+            class="be-form"
           >
             <!-- 用户名输入 -->
             <el-form-item prop="username">
+              <div class="input-label">用户名</div>
               <el-input
                 v-model="form.username"
                 placeholder="请输入用户名"
                 size="large"
                 :prefix-icon="User"
                 clearable
+                class="pill-input"
               />
             </el-form-item>
 
             <!-- 密码输入 -->
             <el-form-item prop="password">
+              <div class="input-label">密码</div>
               <el-input
                 v-model="form.password"
                 type="password"
@@ -51,14 +64,15 @@
                 :prefix-icon="Lock"
                 clearable
                 show-password
+                class="pill-input"
               />
             </el-form-item>
 
             <!-- 记住我和忘记密码 -->
             <div class="login-options">
-              <el-checkbox v-model="form.rememberMe" label="记住我" />
+              <el-checkbox v-model="form.rememberMe" label="记住我" class="custom-checkbox" />
               <router-link to="/forgot-password" class="forgot-password">
-                忘记密码?
+                忘记密码？
               </router-link>
             </div>
 
@@ -69,26 +83,20 @@
                 size="large"
                 :loading="loading"
                 @click="handleLogin"
-                class="login-button"
+                class="login-button btn-dark"
               >
-                登录
+                立即登录
               </el-button>
             </el-form-item>
 
             <!-- 注册链接 -->
             <div class="register-link">
-              还没有账号？
+              新用户？
               <router-link to="/register" class="register-link-button">
-                立即注册
+                创建账号
               </router-link>
             </div>
           </el-form>
-        </div>
-
-        <!-- 底部信息 -->
-        <div class="login-footer">
-          <p class="copyright">© 2026 FitPro 健身管理系统. All rights reserved.</p>
-          <p class="version">版本 v1.0.0</p>
         </div>
       </div>
     </div>
@@ -102,23 +110,17 @@ import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
-// 路由
 const router = useRouter()
-
-// Pinia Store
 const authStore = useAuthStore()
-
-// 表单引用
 const formRef = ref()
+const loading = ref(false)
 
-// 表单数据
 const form = reactive({
   username: '',
   password: '',
   rememberMe: false
 })
 
-// 表单验证规则
 const rules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -130,75 +132,36 @@ const rules = {
   ]
 }
 
-// 加载状态
-const loading = ref(false)
-
-// 登录处理
 const handleLogin = async () => {
-  // 表单验证
   if (!formRef.value) return
-
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
 
   loading.value = true
 
   try {
-    console.log('开始登录，用户名:', form.username)
-
-    // 调用 authStore 的登录方法
-    const loginResult = await authStore.login({
-      username: form.username,
-      password: form.password
-    })
-
-    console.log('登录API返回结果:', loginResult)
-    console.log('authStore.userInfo:', authStore.userInfo)
-    console.log('authStore.token:', authStore.token)
-
-    // 登录成功，显示消息
-    ElMessage.success('登录成功')
-
-    // 等待一小段时间确保状态更新
+    await authStore.login({ username: form.username, password: form.password })
+    ElMessage.success('欢迎回来！')
     await new Promise(resolve => setTimeout(resolve, 100))
 
-    // 确保用户信息已加载
     if (!authStore.userInfo) {
-      console.log('用户信息为空，尝试重新获取')
-      try {
-        await authStore.fetchUserInfo()
-        console.log('重新获取用户信息成功:', authStore.userInfo)
-      } catch (fetchError) {
-        console.error('重新获取用户信息失败:', fetchError)
-        throw new Error('获取用户信息失败，请重试')
-      }
+      await authStore.fetchUserInfo()
     }
 
-    // 根据用户角色跳转到不同页面
-    const userRole = authStore.userInfo?.role
-    console.log('用户角色:', userRole)
-
-    // 后端返回的角色不带 ROLE_ 前缀，但前端权限检查时需要带前缀
-    const userRoleWithPrefix = userRole ? `ROLE_${userRole}` : null
-    console.log('带前缀的角色:', userRoleWithPrefix)
+    const userRole = authStore.userInfo?.role || ''
+    const userRoleWithPrefix = userRole.startsWith('ROLE_') ? userRole : `ROLE_${userRole}`
 
     if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
-      console.log('跳转到管理端仪表盘')
       await router.push('/admin/dashboard')
     } else if (userRoleWithPrefix === 'ROLE_MEMBER') {
-      console.log('跳转到会员端个人中心')
-      await router.push('/app/profile')
+      await router.push('/app/home')
     } else {
-      // 未知角色，跳转到默认页面
-      console.log('未知角色，跳转到首页')
       await router.push('/')
     }
-
   } catch (error) {
-    // 登录失败，错误消息已在 request.js 中显示
     console.error('登录失败:', error)
     if (error.message !== '获取用户信息失败，请重试') {
-      ElMessage.error(error.message || '登录失败，请检查用户名和密码')
+      ElMessage.error(error.message || '登录失败，请检查您的凭证')
     }
   } finally {
     loading.value = false
@@ -214,59 +177,107 @@ const handleLogin = async () => {
   justify-content: center;
   position: relative;
   overflow: hidden;
+  background-color: var(--bg-base); /* 温暖的米灰色背景 */
+  background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
 }
 
-.login-background {
+.login-container::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(36, 37, 41, 0.9) 100%);
   z-index: 0;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.9) 0%, rgba(103, 194, 58, 0.7) 100%);
-    opacity: 0.9;
-  }
+/* 环境光晕 blobs */
+.background-blobs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.blob-yellow {
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 600px;
+  height: 600px;
+  background: var(--blob-yellow);
+  filter: blur(100px);
+  border-radius: 50%;
+  animation: float 15s ease-in-out infinite;
+}
+
+.blob-red {
+  position: absolute;
+  bottom: -20%;
+  left: 10%;
+  width: 500px;
+  height: 500px;
+  background: var(--blob-red);
+  filter: blur(120px);
+  border-radius: 50%;
+  animation: float 20s ease-in-out infinite reverse;
+}
+
+.blob-accent {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 154, 68, 0.4);
+  filter: blur(100px);
+  border-radius: 50%;
+  animation: float 18s ease-in-out infinite 2s;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
 .login-content {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 420px;
-  padding: var(--space-xl);
+  max-width: 460px;
+  padding: 24px;
 }
 
 .login-card {
-  background: white;
-  border-radius: var(--border-radius-xl);
-  padding: var(--space-xxl) var(--space-xl);
-  box-shadow: var(--shadow-xl);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 36px;
+  padding: 48px 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0,0,0,0.02);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: var(--space-xl);
+  margin-bottom: 40px;
 }
 
 .login-logo {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-sm);
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
 .logo-icon {
@@ -276,98 +287,134 @@ const handleLogin = async () => {
 }
 
 .login-title {
-  font-size: var(--font-size-xxl);
-  font-weight: var(--font-weight-bold);
+  font-size: 32px;
+  font-weight: 800;
   color: var(--text-primary);
   margin: 0;
+  letter-spacing: -1px;
 }
 
 .login-subtitle {
-  font-size: var(--font-size-base);
+  font-size: 16px;
   color: var(--text-secondary);
+  font-weight: 500;
   margin: 0;
 }
 
-.login-form {
-  margin-bottom: var(--space-xl);
+/* 表单细节优化 */
+.be-form {
+  margin-bottom: 24px;
+}
+
+.input-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  margin-left: 8px;
+  line-height: 1;
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.pill-input .el-input__wrapper) {
+  background-color: var(--bg-lighter) !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  padding: 12px 20px !important;
+  border-radius: 999px !important;
+  transition: all 0.2s;
+
+  &:hover, &.is-focus {
+    background-color: white !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 4px 15px rgba(255, 204, 46, 0.15) !important;
+  }
+}
+
+:deep(.pill-input .el-input__inner) {
+  font-weight: 600;
+  color: var(--text-primary);
+  height: 24px;
+  
+  &::placeholder {
+    font-weight: 500;
+    color: var(--text-placeholder);
+  }
 }
 
 .login-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-xl);
+  margin-bottom: 32px;
+  padding: 0 8px;
+}
 
-  :deep(.el-checkbox) {
-    color: var(--text-secondary);
+:deep(.custom-checkbox .el-checkbox__label) {
+  font-weight: 600;
+  color: var(--text-regular);
+}
+
+:deep(.custom-checkbox .el-checkbox__inner) {
+  border-radius: 6px;
+  width: 18px;
+  height: 18px;
+  
+  &::after {
+    top: 2px;
+    left: 6px;
   }
 }
 
 .forgot-password {
-  font-size: var(--font-size-sm);
-  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-regular);
   text-decoration: none;
   transition: color 0.2s;
 
   &:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
+    color: var(--text-primary);
   }
 }
 
 .login-button {
   width: 100%;
-  font-weight: var(--font-weight-medium);
-  height: 48px;
-  border-radius: var(--border-radius-lg);
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  height: 56px !important;
+  margin-top: 8px;
 }
 
 .register-link {
   text-align: center;
-  font-size: var(--font-size-base);
+  font-size: 15px;
+  font-weight: 500;
   color: var(--text-secondary);
-  margin-top: var(--space-lg);
+  margin-top: 32px;
 
   .register-link-button {
-    color: var(--primary-color);
-    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    font-weight: 700;
     text-decoration: none;
-    margin-left: var(--space-xs);
+    margin-left: 6px;
     transition: color 0.2s;
 
     &:hover {
-      color: var(--primary-dark);
-      text-decoration: underline;
+      color: var(--primary-color);
     }
   }
 }
 
-.login-footer {
-  text-align: center;
-  padding-top: var(--space-xl);
-  border-top: 1px solid var(--border-light);
-}
-
-.copyright {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  margin: 0 0 var(--space-xs);
-}
-
-.version {
-  font-size: var(--font-size-xs);
-  color: var(--text-placeholder);
-  margin: 0;
-}
-
-// 响应式调整
 @media (max-width: 768px) {
-  .login-content {
-    padding: var(--space-md);
-  }
-
   .login-card {
-    padding: var(--space-xl) var(--space-lg);
+    padding: 40px 24px;
+    border-radius: 28px;
   }
 }
 </style>

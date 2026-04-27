@@ -33,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("用户不存在: " + username);
         }
 
-        if (user.getStatus() == 0) {
+        if (user.getStatus() != 0) {
             throw new BusinessException(403, "账号已被禁用");
         }
 

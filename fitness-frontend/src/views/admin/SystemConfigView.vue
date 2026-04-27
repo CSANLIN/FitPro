@@ -1,71 +1,94 @@
 <template>
   <div class="system-config-view">
     <div class="page-header">
-      <h2>系统配置</h2>
+      <div class="header-content">
+        <h1 class="page-title">系统核心配置</h1>
+        <p class="page-subtitle">调整系统全局运行参数与环境变量</p>
+      </div>
     </div>
 
-    <el-row :gutter="16">
-      <el-col :span="16">
-        <el-card shadow="hover" class="config-card">
+    <el-row :gutter="24">
+      <el-col :xs="24" :lg="16">
+        <el-card class="premium-panel config-card">
           <template #header>
-            <div class="card-header">系统设置</div>
+            <div class="card-header">
+              <span class="panel-title">运行参数设置</span>
+            </div>
           </template>
 
-          <el-form :model="configForm" label-width="120px">
-            <el-form-item label="系统名称">
-              <el-input v-model="configForm.systemName" placeholder="FitPro" />
+          <el-form :model="configForm" label-width="140px" label-position="left" class="config-form">
+            <div class="form-section-title">基础品牌配置</div>
+            <el-form-item label="系统对外名称">
+              <el-input v-model="configForm.systemName" placeholder="例如：FitPro 旗舰中心" class="premium-input" />
             </el-form-item>
-            <el-form-item label="会员默认头像">
-              <el-input v-model="configForm.defaultAvatar" placeholder="头像URL" />
+            <el-form-item label="默认会员头像 URL">
+              <el-input v-model="configForm.defaultAvatar" placeholder="https://..." class="premium-input" />
             </el-form-item>
-            <el-form-item label="签到时间范围">
-              <el-row :gutter="8">
-                <el-col :span="10">
-                  <el-time-picker v-model="configForm.checkInStart" placeholder="开始时间" format="HH:mm" value-format="HH:mm" style="width: 100%" />
-                </el-col>
-                <el-col :span="1" style="text-align: center; line-height: 32px;">至</el-col>
-                <el-col :span="10">
-                  <el-time-picker v-model="configForm.checkInEnd" placeholder="结束时间" format="HH:mm" value-format="HH:mm" style="width: 100%" />
-                </el-col>
-              </el-row>
+
+            <div class="divider"></div>
+            <div class="form-section-title">业务规则配置</div>
+            
+            <el-form-item label="允许签到时段">
+              <div class="time-range-picker">
+                <el-time-picker v-model="configForm.checkInStart" placeholder="开启时间" format="HH:mm" value-format="HH:mm" class="flex-1" />
+                <span class="range-separator">至</span>
+                <el-time-picker v-model="configForm.checkInEnd" placeholder="结束时间" format="HH:mm" value-format="HH:mm" class="flex-1" />
+              </div>
             </el-form-item>
-            <el-form-item label="课程提前预约">
-              <el-row :gutter="8">
-                <el-col :span="10">
-                  <el-input-number v-model="configForm.bookingAdvanceDays" :min="1" :max="30" style="width: 100%" />
-                </el-col>
-                <el-col :span="2" style="line-height: 32px;">天</el-col>
-              </el-row>
+            
+            <el-form-item label="课程预约窗口">
+              <div class="input-with-unit">
+                提前 <el-input-number v-model="configForm.bookingAdvanceDays" :min="1" :max="30" class="number-input" /> 天可预约
+              </div>
             </el-form-item>
-            <el-form-item label="最大取消预约">
-              <el-row :gutter="8">
-                <el-col :span="10">
-                  <el-input-number v-model="configForm.maxBookingsPerDay" :min="1" :max="10" style="width: 100%" />
-                </el-col>
-                <el-col :span="2" style="line-height: 32px;">节/天</el-col>
-              </el-row>
+            
+            <el-form-item label="防刷课限制">
+              <div class="input-with-unit">
+                单人单日最多可预约 <el-input-number v-model="configForm.maxBookingsPerDay" :min="1" :max="10" class="number-input" /> 节课程
+              </div>
             </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :loading="saving" @click="handleSave">保存配置</el-button>
-              <el-button @click="resetConfig">重置</el-button>
-            </el-form-item>
+
+            <div class="form-actions">
+              <el-button @click="resetConfig" round plain>恢复默认配置</el-button>
+              <el-button type="primary" color="#3b82f6" :loading="saving" @click="handleSave" round>保存并立即生效</el-button>
+            </div>
           </el-form>
         </el-card>
       </el-col>
 
-      <el-col :span="8">
-        <el-card shadow="hover" class="info-card">
+      <el-col :xs="24" :lg="8">
+        <el-card class="premium-panel info-card">
           <template #header>
-            <div class="card-header">系统信息</div>
+            <div class="card-header">
+              <span class="panel-title">服务器运行环境</span>
+            </div>
           </template>
-          <el-descriptions :column="1" direction="vertical" border>
-            <el-descriptions-item label="系统版本">FitPro v1.0.0</el-descriptions-item>
-            <el-descriptions-item label="后端框架">Spring Boot 3.2.5</el-descriptions-item>
-            <el-descriptions-item label="前端框架">Vue 3.4 + Element Plus</el-descriptions-item>
-            <el-descriptions-item label="数据库">MySQL 8.0</el-descriptions-item>
-            <el-descriptions-item label="缓存">Redis 7.x</el-descriptions-item>
-            <el-descriptions-item label="运行环境">{{ configForm.environment || '开发环境' }}</el-descriptions-item>
-          </el-descriptions>
+          <div class="sys-info-list">
+            <div class="info-item">
+              <div class="info-label">核心版本</div>
+              <div class="info-value"><el-tag size="small" effect="dark" round>FitPro Admin v1.2</el-tag></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">后端运行架构</div>
+              <div class="info-value">Spring Boot 3.2.5</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">前端驱动</div>
+              <div class="info-value">Vue 3.4 + Vite 5</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">数据持久层</div>
+              <div class="info-value">MySQL 8.0 + MyBatis-Plus</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">高速缓存</div>
+              <div class="info-value">Redis 7.2 (Standalone)</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">当前运行模式</div>
+              <div class="info-value"><span class="status-dot"></span> {{ configForm.environment === 'prod' ? '生产环境 (Production)' : '开发环境 (Development)' }}</div>
+            </div>
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -82,7 +105,7 @@ const configForm = reactive({
   systemName: 'FitPro 健身管理系统',
   defaultAvatar: '',
   checkInStart: '06:00',
-  checkInEnd: '22:00',
+  checkInEnd: '23:30',
   bookingAdvanceDays: 7,
   maxBookingsPerDay: 3,
   environment: 'dev'
@@ -93,7 +116,6 @@ const fetchConfig = async () => {
     const data = await adminApi.getSystemConfig()
     if (data) Object.assign(configForm, data)
   } catch (e) {
-    // 配置接口暂未实现，使用默认值
     console.log('使用默认配置')
   }
 }
@@ -102,9 +124,9 @@ const handleSave = async () => {
   saving.value = true
   try {
     await adminApi.updateSystemConfig({ ...configForm })
-    ElMessage.success('配置保存成功')
+    ElMessage.success('系统配置已成功保存')
   } catch (e) {
-    ElMessage.warning('配置接口暂未实现，数据仅在前端保留')
+    ElMessage.warning('目前仅在前端展示，待后端实现持久化')
   } finally {
     saving.value = false
   }
@@ -117,16 +139,105 @@ const resetConfig = () => {
   configForm.checkInEnd = '22:00'
   configForm.bookingAdvanceDays = 7
   configForm.maxBookingsPerDay = 3
-  ElMessage.info('已重置为默认值')
+  ElMessage.info('参数已重置为出厂设置')
 }
 
 onMounted(() => fetchConfig())
 </script>
 
 <style scoped>
-.system-config-view { max-width: 1100px; }
-.page-header { margin-bottom: 16px; }
-.page-header h2 { margin: 0; font-size: 20px; font-weight: 600; }
-.config-card, .info-card { border-radius: 12px; margin-bottom: 16px; }
-.card-header { font-weight: 600; }
+.system-config-view { max-width: 1200px; margin: 0 auto; }
+.page-header { margin-bottom: 24px; }
+.page-title { font-size: 24px; font-weight: 800; margin: 0 0 4px; color: #0f172a; }
+.page-subtitle { font-size: 14px; color: #64748b; margin: 0; }
+
+.premium-panel { border: none !important; margin-bottom: 24px; }
+.card-header { font-weight: 700; font-size: 16px; color: #0f172a; }
+
+.config-form { padding: 10px 0; }
+
+.form-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.divider {
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 32px 0 24px;
+}
+
+.time-range-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.range-separator { color: #94a3b8; font-size: 13px; }
+
+.input-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #475569;
+}
+
+.number-input { width: 140px; }
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+/* 系统信息列表 */
+.sys-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.info-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
 </style>

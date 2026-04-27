@@ -386,7 +386,8 @@ router.beforeEach(async (to, from, next) => {
   if (to.path === '/login' || to.path === '/register') {
     // 如果本地有用户信息，直接重定向
     if (userInfo && userInfo.role) {
-      const userRoleWithPrefix = `ROLE_${userInfo.role}`
+      const rawRole = userInfo.role
+      const userRoleWithPrefix = rawRole.startsWith('ROLE_') ? rawRole : `ROLE_${rawRole}`
       if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
         next('/admin/dashboard')
       } else {
@@ -397,7 +398,8 @@ router.beforeEach(async (to, from, next) => {
       try {
         const freshUserInfo = await authApi.getMe()
         localStorage.setItem('userInfo', JSON.stringify(freshUserInfo))
-        const userRoleWithPrefix = `ROLE_${freshUserInfo.role}`
+        const rawRole = freshUserInfo.role
+        const userRoleWithPrefix = rawRole.startsWith('ROLE_') ? rawRole : `ROLE_${rawRole}`
         if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
           next('/admin/dashboard')
         } else {
@@ -428,9 +430,11 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // 情况4：检查角色权限
-  if (to.meta.roles && userInfo.role) {
-    const userRoleWithPrefix = `ROLE_${userInfo.role}`
+  if (to.meta.roles && userInfo && userInfo.role) {
+    const rawRole = userInfo.role
+    const userRoleWithPrefix = rawRole.startsWith('ROLE_') ? rawRole : `ROLE_${rawRole}`
     if (!to.meta.roles.includes(userRoleWithPrefix)) {
+      console.warn(`[Router Guard] Access denied to ${to.path}. User role: ${userRoleWithPrefix}, Required: ${to.meta.roles}`)
       next('/403')
       return
     }

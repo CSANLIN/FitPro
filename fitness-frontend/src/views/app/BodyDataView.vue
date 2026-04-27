@@ -108,6 +108,15 @@
         <!-- 历史记录 -->
         <el-tab-pane label="历史记录" name="history">
           <div class="history-container">
+            <!-- 趋势图 -->
+            <div class="chart-card-wrapper" v-if="historyList.length > 1">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <span class="chart-title">体重 / 体脂趋势</span>
+                </div>
+                <div ref="trendChartRef" class="trend-chart"></div>
+              </div>
+            </div>
             <div class="history-filter">
               <el-date-picker
                 v-model="dateRange"
@@ -153,10 +162,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { bodyRecordApi } from '@/api/bodyRecord'
 import { ElMessage } from 'element-plus'
 import { Calendar, Odometer, DataLine, PieChart, User } from '@element-plus/icons-vue'
+import * as echarts from 'echarts'
 
 // 标签页
 const activeTab = ref('create')
@@ -189,6 +199,91 @@ const dateRange = ref([])
 
 // 历史记录
 const historyList = ref([])
+
+// 趋势图
+const trendChartRef = ref(null)
+let trendChartInstance = null
+
+const renderTrendChart = async () => {
+  await nextTick()
+  if (!trendChartRef.value || historyList.value.length < 2) return
+  if (!trendChartInstance) {
+    trendChartInstance = echarts.init(trendChartRef.value)
+  }
+  const sorted = [...historyList.value].sort((a, b) => a.recordDate.localeCompare(b.recordDate))
+  const dates = sorted.map(d => (d.recordDate || '').slice(5))
+  const weights = sorted.map(d => d.weight)
+  const bodyFats = sorted.map(d => d.bodyFat)
+
+  const series = [
+    {
+      name: '体重 (kg)',
+      type: 'line',
+      smooth: true,
+      data: weights,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { color: '#3b82f6', width: 2 },
+      itemStyle: { color: '#3b82f6' },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(59,130,246,0.25)' },
+          { offset: 1, color: 'rgba(59,130,246,0.02)' }
+        ])
+      }
+    }
+  ]
+
+  const hasBodyFat = bodyFats.some(f => f != null)
+  if (hasBodyFat) {
+    series.push({
+      name: '体脂率 (%)',
+      type: 'line',
+      smooth: true,
+      data: bodyFats,
+      symbol: 'diamond',
+      symbolSize: 6,
+      lineStyle: { color: '#ef4444', width: 2 },
+      itemStyle: { color: '#ef4444' },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(239,68,68,0.2)' },
+          { offset: 1, color: 'rgba(239,68,68,0.02)' }
+        ])
+      }
+    })
+  }
+
+  trendChartInstance.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(255,255,255,0.95)',
+      borderWidth: 0,
+      borderRadius: 12,
+      padding: [10, 14]
+    },
+    legend: {
+      data: ['体重 (kg)', '体脂率 (%)'].slice(0, hasBodyFat ? 2 : 1),
+      bottom: 0,
+      itemWidth: 12,
+      itemHeight: 8
+    },
+    grid: { left: 40, right: 16, top: 20, bottom: 36 },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLabel: { fontSize: 11, color: '#94a3b8' },
+      axisLine: { show: false },
+      axisTick: { show: false }
+    },
+    yAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } },
+      axisLabel: { fontSize: 11, color: '#94a3b8' }
+    },
+    series
+  })
+}
 
 // 表单验证规则
 const rules = {
@@ -255,6 +350,7 @@ const fetchHistory = async () => {
       params.endDate = dateRange.value[1]
     }
     historyList.value = await bodyRecordApi.list(params)
+    await renderTrendChart()
   } catch (error) {
     console.error('获取历史记录失败:', error)
   } finally {
@@ -273,11 +369,18 @@ const fetchLatest = async () => {
 const dayOnly = (dateStr) => dateStr ? dateStr.split('-')[2] : ''
 const monthOnly = (dateStr) => dateStr ? dateStr.split('-')[1] : ''
 
+const handleResize = () => {
+  window.addEventListener('resize', () => {
+    trendChartInstance?.resize()
+  })
+}
+
 onMounted(async () => {
   pageLoading.value = true
   try {
     await fetchLatest()
     await fetchHistory()
+    handleResize()
   } finally {
     pageLoading.value = false
   }
@@ -473,6 +576,30 @@ onMounted(async () => {
   width: 150px;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* 趋势图卡片 */
+.chart-card-wrapper {
+  margin-bottom: 24px;
+}
+.chart-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px 16px 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+.chart-card-header {
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+.chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.trend-chart {
+  height: 220px;
+  width: 100%;
 }
 
 /* 历史记录时间轴 */

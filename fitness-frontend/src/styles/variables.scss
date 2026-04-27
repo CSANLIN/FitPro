@@ -1,47 +1,45 @@
-// FitPro CSS 变量
+// FitPro CSS 变量 - Be.run Bubbly/Soft Aesthetic
 // ======================
 
-// 颜色系统
 :root {
-  // 主色 - 健康蓝
-  --primary-color: #409eff;
-  --primary-light: #79bbff;
-  --primary-dark: #337ecc;
+  // 主色 - 活力暖黄 (从参考图提取)
+  --primary-color: #ffcc2e;
+  --primary-light: #ffde71;
+  --primary-dark: #e5b31c;
+  --primary-gradient: linear-gradient(135deg, #ffcc2e 0%, #ff9a44 100%);
 
-  // 成功色 - 健康绿
-  --success-color: #67c23a;
-  --success-light: #95d475;
-  --success-dark: #529b2e;
+  // 辅助色系
+  --accent-dark: #242529; // 深色卡片与按钮使用的炭黑色
+  --accent-red: #ff6b6b; // 渐变球/点缀色
+  --accent-green: #38b000;
+  
+  // 成功、警告、危险色调整适配暖色调
+  --success-color: #2b9348;
+  --warning-color: #ff9f1c;
+  --danger-color: #d90429;
+  --info-color: #7b848c;
 
-  // 警告色
-  --warning-color: #e6a23c;
-  --warning-light: #eebe77;
-  --warning-dark: #b88230;
+  // 文本色 (柔和的深灰而非纯黑)
+  --text-primary: #1c1d21;
+  --text-regular: #5a5a60;
+  --text-secondary: #8c8c93;
+  --text-placeholder: #b4b4bb;
 
-  // 危险色
-  --danger-color: #f56c6c;
-  --danger-light: #f89898;
-  --danger-dark: #c45656;
+  // 边框色
+  --border-base: #e0ddd7;
+  --border-light: #e8e5df;
+  --border-lighter: #f0ede7;
+  --border-extra-light: #f5f3ef;
 
-  // 信息色
-  --info-color: #909399;
-  --info-light: #b1b3b8;
-  --info-dark: #73767a;
-
-  // 中性色
-  --text-primary: #303133;
-  --text-regular: #606266;
-  --text-secondary: #909399;
-  --text-placeholder: #c0c4cc;
-
-  --border-base: #dcdfe6;
-  --border-light: #e4e7ed;
-  --border-lighter: #ebeef5;
-  --border-extra-light: #f2f6fc;
-
-  --bg-base: #f5f7fa;
-  --bg-light: #fafafa;
-  --bg-lighter: #fcfcfc;
+  // 背景色 (非常关键的暖灰色)
+  --bg-base: #ebe7df; // 整体页面背景
+  --bg-light: #ffffff; // 亮色卡片背景
+  --bg-lighter: #f8f6f1;
+  --bg-dark-card: #242529; // 深色卡片背景
+  
+  // 点缀色渐变发光球
+  --blob-yellow: rgba(255, 204, 46, 0.6);
+  --blob-red: rgba(255, 107, 107, 0.6);
 
   // 间距系统
   --space-xs: 4px;
@@ -51,61 +49,77 @@
   --space-xl: 32px;
   --space-xxl: 48px;
 
-  // 圆角
-  --border-radius-sm: 4px;
-  --border-radius-base: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 20px;
-  --border-radius-round: 9999px;
+  // 圆角 (极致大圆角，气泡感)
+  --border-radius-sm: 12px;
+  --border-radius-base: 20px;
+  --border-radius-lg: 32px;
+  --border-radius-xl: 40px;
+  --border-radius-pill: 9999px;
 
-  // 阴影
-  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
-  --shadow-base: 0 2px 8px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.16);
-  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
+  // 阴影 (非常柔和弥散，甚至近乎无阴影而是用背景色差对比)
+  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.02);
+  --shadow-base: 0 10px 30px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.05);
+  --shadow-dark: 0 20px 40px rgba(0, 0, 0, 0.15); // 深色卡片的阴影
 
-  // 字体
-  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol';
+  // 字体 (更圆润现代的字体)
+  --font-family-base: 'Outfit', 'Quicksand', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-base: 16px;
   --font-size-lg: 18px;
   --font-size-xl: 20px;
-  --font-size-xxl: 24px;
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-bold: 600;
+  --font-size-xxl: 26px;
+  --font-weight-light: 400;
+  --font-weight-normal: 500;
+  --font-weight-medium: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
 
   // 布局
-  --header-height: 60px;
-  --sidebar-width: 240px;
-  --sidebar-collapsed-width: 64px;
+  --header-height: 80px;
+  --sidebar-width: 120px; // 变窄，仅图标
   --footer-height: 60px;
 }
 
-// Element Plus 主题覆盖
-// 注：Element Plus 使用 CSS 变量，可以通过覆盖这些变量自定义主题
+// Element Plus 主题深度覆盖
 :root {
   --el-color-primary: var(--primary-color);
   --el-color-success: var(--success-color);
   --el-color-warning: var(--warning-color);
   --el-color-danger: var(--danger-color);
   --el-color-info: var(--info-color);
+  
+  --el-color-primary-light-9: #fff8e1;
+  
+  // 将主题默认按钮字色设为深色（因为主色是黄色）
+  --el-color-primary-light-3: #ffde71;
+  --el-color-primary-dark-2: #e5b31c;
 
   // 字体
   --el-font-family: var(--font-family-base);
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-regular);
+  --el-text-color-secondary: var(--text-secondary);
 
   // 边框
   --el-border-radius-base: var(--border-radius-base);
+  --el-border-radius-small: var(--border-radius-sm);
+  --el-border-radius-round: var(--border-radius-pill);
+  --el-border-color: var(--border-base);
+  --el-border-color-light: var(--border-light);
+  --el-border-color-lighter: var(--border-lighter);
+
+  // 背景
+  --el-bg-color: var(--bg-light);
+  --el-bg-color-page: var(--bg-base);
+  --el-bg-color-overlay: var(--bg-light);
+  --el-fill-color-blank: var(--bg-light);
+  --el-fill-color: var(--border-extra-light);
 
   // 阴影
-  --el-box-shadow-light: var(--shadow-base);
-}
-
-// 暗色模式变量（未来扩展）
-[data-theme="dark"] {
-  // 待实现
+  --el-box-shadow: var(--shadow-base);
+  --el-box-shadow-light: var(--shadow-sm);
+  --el-box-shadow-lighter: var(--shadow-sm);
 }

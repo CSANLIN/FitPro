@@ -1,7 +1,10 @@
 <template>
   <div class="register-container">
-    <div class="register-background">
-      <div class="register-background-overlay"></div>
+    <!-- 动态发光气泡背景 (Be.run Aesthetic) -->
+    <div class="background-blobs">
+      <div class="blob-yellow"></div>
+      <div class="blob-red"></div>
+      <div class="blob-accent"></div>
     </div>
 
     <div class="register-content">
@@ -10,15 +13,21 @@
         <div class="register-header">
           <div class="register-logo">
             <div class="logo-icon">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="20" fill="var(--primary-color)" />
-                <path d="M15 25L20 30L30 15" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M10 20L15 25" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              <!-- FitPro Logo (暗黑色调哑铃) -->
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="24" fill="#242529" />
+                <g transform="rotate(-45 24 24)">
+                  <rect x="12" y="20" width="6" height="8" rx="2" fill="#ffcc2e" />
+                  <rect x="30" y="20" width="6" height="8" rx="2" fill="#ffcc2e" />
+                  <rect x="18" y="22" width="12" height="4" fill="#ffcc2e" />
+                  <rect x="8" y="16" width="4" height="16" rx="2" fill="#ffcc2e" />
+                  <rect x="36" y="16" width="4" height="16" rx="2" fill="#ffcc2e" />
+                </g>
               </svg>
             </div>
             <h1 class="register-title">FitPro</h1>
           </div>
-          <p class="register-subtitle">创建您的健身账户</p>
+          <p class="register-subtitle">智能健身管理中心</p>
         </div>
 
         <!-- 注册表单 -->
@@ -251,29 +260,75 @@ const handleRegister = async () => {
   justify-content: center;
   position: relative;
   overflow: hidden;
+  background-color: var(--bg-base);
+  background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
 }
 
-.register-background {
+.register-container::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(36, 37, 41, 0.9) 100%);
   z-index: 0;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.9) 0%, rgba(103, 194, 58, 0.7) 100%);
-    opacity: 0.9;
-  }
+/* 环境光晕 blobs */
+.background-blobs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.blob-yellow {
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 600px;
+  height: 600px;
+  background: var(--blob-yellow);
+  filter: blur(100px);
+  border-radius: 50%;
+  animation: float 15s ease-in-out infinite;
+}
+
+.blob-red {
+  position: absolute;
+  bottom: -20%;
+  left: 10%;
+  width: 500px;
+  height: 500px;
+  background: var(--blob-red);
+  filter: blur(120px);
+  border-radius: 50%;
+  animation: float 20s ease-in-out infinite reverse;
+}
+
+.blob-accent {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 154, 68, 0.4);
+  filter: blur(100px);
+  border-radius: 50%;
+  animation: float 18s ease-in-out infinite 2s;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
 .register-content {
@@ -285,12 +340,13 @@ const handleRegister = async () => {
 }
 
 .register-card {
-  background: white;
-  border-radius: var(--border-radius-xl);
-  padding: var(--space-xxl) var(--space-xl);
-  box-shadow: var(--shadow-xl);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 36px;
+  padding: 40px 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0,0,0,0.02);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .register-header {

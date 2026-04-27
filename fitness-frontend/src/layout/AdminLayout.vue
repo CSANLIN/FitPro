@@ -1,345 +1,363 @@
 <template>
   <div class="admin-layout">
-    <!-- 顶部导航栏 -->
-    <el-header class="header">
-      <div class="header-left">
-        <el-icon class="collapse-icon" @click="toggleCollapse">
-          <component :is="isCollapsed ? 'Expand' : 'Fold'" />
-        </el-icon>
-        <div class="logo">
-          <span class="logo-text">FitPro</span>
-          <span class="logo-subtitle">管理后台</span>
-        </div>
-      </div>
-      <div class="header-right">
-        <el-dropdown>
-          <div class="user-info">
-            <el-avatar :size="32" :src="userAvatar" />
-            <span class="user-name">{{ userName }}</span>
-            <el-icon><ArrowDown /></el-icon>
+    <!-- 主体区域：增加整体内边距，让内部元素漂浮 -->
+    <div class="app-wrapper">
+      
+      <!-- 悬浮侧边栏 (Floating Pill Sidebar) -->
+      <aside class="floating-sidebar" :class="{ 'is-collapsed': isCollapsed }">
+        <div class="logo-area">
+          <div class="logo-icon">
+            <!-- 极简 Logo 标志 (哑铃) -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="12" fill="var(--primary-color)"/>
+              <g transform="rotate(-45 12 12)">
+                <rect x="6" y="10" width="3" height="4" rx="1" fill="#242529" />
+                <rect x="15" y="10" width="3" height="4" rx="1" fill="#242529" />
+                <rect x="9" y="11" width="6" height="2" fill="#242529" />
+                <rect x="4" y="8" width="2" height="8" rx="1" fill="#242529" />
+                <rect x="18" y="8" width="2" height="8" rx="1" fill="#242529" />
+              </g>
+            </svg>
           </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="goToProfile">
-                <el-icon><User /></el-icon>
-                个人中心
-              </el-dropdown-item>
-              <el-dropdown-item divided @click="logout">
-                <el-icon><SwitchButton /></el-icon>
-                退出登录
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-    </el-header>
+        </div>
 
-    <!-- 主体区域 -->
-    <el-container class="main-container">
-      <!-- 左侧菜单 -->
-      <el-aside :width="asideWidth" class="aside">
         <el-menu
           :default-active="activeMenu"
-          :collapse="isCollapsed"
+          :collapse="true"
           :collapse-transition="false"
           router
-          class="side-menu"
+          class="be-menu"
         >
-          <el-menu-item index="/admin/dashboard">
-            <el-icon><Odometer /></el-icon>
-            <template #title>仪表盘</template>
-          </el-menu-item>
+          <!-- 通过 Tooltip 或手写 Tooltip 替代文字，只显示图标 -->
+          <el-tooltip content="仪表盘" placement="right" :offset="20">
+            <el-menu-item index="/admin/dashboard" class="menu-pill">
+              <el-icon><Odometer /></el-icon>
+            </el-menu-item>
+          </el-tooltip>
 
-          <el-sub-menu index="member">
-            <template #title>
+          <el-tooltip content="会员管理" placement="right" :offset="20">
+            <el-menu-item index="/admin/member/list" class="menu-pill">
               <el-icon><User /></el-icon>
-              <span>会员管理</span>
-            </template>
-            <el-menu-item index="/admin/member/list">会员列表</el-menu-item>
-          </el-sub-menu>
+            </el-menu-item>
+          </el-tooltip>
 
-          <el-sub-menu index="coach">
-            <template #title>
+          <el-tooltip content="教练管理" placement="right" :offset="20">
+            <el-menu-item index="/admin/coach/list" class="menu-pill">
               <el-icon><UserFilled /></el-icon>
-              <span>教练管理</span>
-            </template>
-            <el-menu-item index="/admin/coach/list">教练列表</el-menu-item>
-          </el-sub-menu>
+            </el-menu-item>
+          </el-tooltip>
 
-          <el-sub-menu index="course">
-            <template #title>
-              <el-icon><Calendar /></el-icon>
-              <span>课程管理</span>
-            </template>
-            <el-menu-item index="/admin/course/list">课程列表</el-menu-item>
-            <el-menu-item index="/admin/course/schedule">排课管理</el-menu-item>
-          </el-sub-menu>
+          <el-tooltip content="课程中心" placement="right" :offset="20">
+            <el-menu-item index="/admin/course/list" class="menu-pill">
+              <el-icon><Notebook /></el-icon>
+            </el-menu-item>
+          </el-tooltip>
 
-          <el-sub-menu index="exercise">
-            <template #title>
+          <el-tooltip content="动作图鉴" placement="right" :offset="20">
+            <el-menu-item index="/admin/exercise/list" class="menu-pill">
               <el-icon><Basketball /></el-icon>
-              <span>运动库管理</span>
-            </template>
-            <el-menu-item index="/admin/exercise/category">分类管理</el-menu-item>
-            <el-menu-item index="/admin/exercise/list">动作管理</el-menu-item>
-          </el-sub-menu>
+            </el-menu-item>
+          </el-tooltip>
 
-          <el-sub-menu index="workout">
-            <template #title>
-              <el-icon><List /></el-icon>
-              <span>训练管理</span>
-            </template>
-            <el-menu-item index="/admin/workout/templates">训练模板</el-menu-item>
-          </el-sub-menu>
-
-          <el-sub-menu index="membership">
-            <template #title>
+          <el-tooltip content="会籍管理" placement="right" :offset="20">
+            <el-menu-item index="/admin/membership" class="menu-pill">
               <el-icon><Ticket /></el-icon>
-              <span>会籍管理</span>
-            </template>
-            <el-menu-item index="/admin/membership">会籍管理</el-menu-item>
-          </el-sub-menu>
-
-          <el-sub-menu index="system">
-            <template #title>
+            </el-menu-item>
+          </el-tooltip>
+          
+          <el-tooltip content="系统设置" placement="right" :offset="20">
+            <el-menu-item index="/admin/system/config" class="menu-pill">
               <el-icon><Setting /></el-icon>
-              <span>系统管理</span>
-            </template>
-            <el-menu-item index="/admin/system/announcement">公告管理</el-menu-item>
-            <el-menu-item index="/admin/system/log">操作日志</el-menu-item>
-            <el-menu-item index="/admin/system/config">系统配置</el-menu-item>
-          </el-sub-menu>
+            </el-menu-item>
+          </el-tooltip>
         </el-menu>
-      </el-aside>
+        
+        <!-- 底部用户头像 -->
+        <div class="sidebar-footer">
+          <el-dropdown trigger="click" placement="right-end">
+            <div class="mini-profile">
+              <el-avatar :size="36" :src="userAvatar" class="profile-avatar" />
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu class="premium-dropdown">
+                <el-dropdown-item @click="goToProfile">
+                  <el-icon><User /></el-icon>个人中心
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="logout" class="danger-item">
+                  <el-icon><SwitchButton /></el-icon>退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </aside>
 
       <!-- 右侧内容区 -->
-      <el-main class="main-content">
-        <!-- 面包屑 -->
-        <div class="breadcrumb">
-          <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/admin/dashboard' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item v-for="item in breadcrumb" :key="item.path">
-              {{ item.title }}
-            </el-breadcrumb-item>
-          </el-breadcrumb>
-        </div>
+      <main class="main-content">
+        <!-- 顶部功能区 (隐藏的面包屑，替换为搜索或问候语) -->
+        <header class="top-header">
+          <div class="header-left">
+            <h2 class="welcome-text">你好，{{ userName }}！</h2>
+            <p class="welcome-sub">准备好今天的高效健身房管理了吗？</p>
+          </div>
+          
+          <div class="header-right">
+            <!-- 悬浮胶囊搜索框 -->
+            <div class="search-pill hidden-mobile">
+              <el-input placeholder="搜索会员、课程或教练..." prefix-icon="Search" />
+            </div>
+            
+            <el-button class="btn-dark upgrade-btn">
+              工作台
+            </el-button>
+          </div>
+        </header>
 
-        <!-- 页面内容 -->
-        <div class="page-content">
+        <!-- 页面内容主体 -->
+        <div class="page-scroll-area">
           <router-view v-slot="{ Component }">
-            <transition name="fade" mode="out-in">
+            <transition name="fade-slide" mode="out-in">
               <component :is="Component" />
             </transition>
           </router-view>
         </div>
-      </el-main>
-    </el-container>
+      </main>
+      
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import {
-  Odometer,
-  User,
-  UserFilled,
-  Calendar,
-  Basketball,
-  List,
-  Ticket,
-  Setting,
-  Expand,
-  Fold,
-  ArrowDown,
-  SwitchButton
+  Odometer, User, UserFilled, Calendar, Basketball, List, Ticket, Setting,
+  Expand, Fold, ArrowDown, SwitchButton, FullScreen, Bell, Notebook, Search
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
-// 状态
-const isCollapsed = ref(false)
-
-// 计算属性
-const asideWidth = computed(() => isCollapsed.value ? '64px' : '240px')
-const activeMenu = computed(() => route.path)
-
-// 用户信息（模拟数据，后续从store获取）
-const userAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png')
-const userName = computed(() => authStore.userInfo?.nickname || '管理员')
-
-// 面包屑（简化版本，后续可根据路由元信息生成）
-const breadcrumb = computed(() => {
-  const pathArr = route.path.split('/').filter(Boolean)
-  const breadcrumbItems = []
-
-  // 移除admin前缀
-  if (pathArr[0] === 'admin') {
-    pathArr.shift()
-  }
-
-  // 生成面包屑（简化逻辑）
-  pathArr.forEach((path, index) => {
-    const fullPath = '/admin/' + pathArr.slice(0, index + 1).join('/')
-    breadcrumbItems.push({
-      path: fullPath,
-      title: path === 'dashboard' ? '仪表盘' :
-             path === 'member' ? '会员管理' :
-             path === 'course' ? '课程管理' :
-             path === 'exercise' ? '运动库管理' :
-             path === 'system' ? '系统管理' : path
-    })
-  })
-
-  return breadcrumbItems
+const isCollapsed = ref(true) // Be.run 风格侧边栏通常只显图标
+const activeMenu = computed(() => {
+  // 简化 active 状态
+  const path = route.path
+  if (path.includes('/member')) return '/admin/member/list'
+  if (path.includes('/coach')) return '/admin/coach/list'
+  if (path.includes('/course')) return '/admin/course/list'
+  if (path.includes('/exercise')) return '/admin/exercise/list'
+  if (path.includes('/system')) return '/admin/system/config'
+  return path
 })
 
-// 方法
-const toggleCollapse = () => {
-  isCollapsed.value = !isCollapsed.value
-}
+const userAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png')
+const userName = computed(() => authStore.userInfo?.nickname || 'Admin')
 
-const goToProfile = () => {
-  // 根据角色跳转到不同个人中心
-  const role = authStore.userInfo?.role
-  if (role === 'ROLE_SUPER_ADMIN' || role === 'ROLE_COACH') {
-    router.push('/admin/profile')
-  } else {
-    router.push('/app/profile')
-  }
-}
-
+const goToProfile = () => router.push('/admin/profile')
 const logout = () => {
   authStore.logout()
   router.push('/login')
 }
-
-// 监听路由变化，更新面包屑等
-watch(() => route.path, () => {
-  // 可以在这里添加页面访问统计等
-})
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .admin-layout {
   height: 100vh;
+  background-color: var(--bg-base);
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
-.header {
+.app-wrapper {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  padding: 24px;
+  gap: 32px;
+  max-width: 1600px;
+}
+
+/* 悬浮侧边栏 (胶囊风格) */
+.floating-sidebar {
+  width: 80px;
+  background: white;
+  border-radius: var(--border-radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.logo-area {
+  margin-bottom: 40px;
+}
+
+.be-menu {
+  border-right: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+}
+
+:deep(.menu-pill) {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-secondary);
+  
+  .el-icon {
+    margin: 0 !important;
+    font-size: 20px;
+  }
+  
+  &:hover {
+    background-color: var(--bg-lighter) !important;
+    color: var(--text-primary);
+  }
+  
+  &.is-active {
+    background-color: var(--accent-dark) !important;
+    color: var(--primary-color) !important;
+    box-shadow: 0 10px 20px rgba(36, 37, 41, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  /* 去除 element plus 默认的 active 样式 */
+  &::before {
+    display: none !important;
+  }
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.mini-profile {
+  cursor: pointer;
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.profile-avatar {
+  border: 2px solid white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* 右侧主体内容 */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 顶部导航 */
+.top-header {
+  display: flex;
   justify-content: space-between;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0 20px;
-  box-shadow: var(--shadow-base);
-  z-index: 100;
+  align-items: center;
+  padding: 8px 0 32px;
+  flex-shrink: 0;
 }
 
 .header-left {
   display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.collapse-icon {
-  font-size: 20px;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.collapse-icon:hover {
-  transform: scale(1.1);
-}
-
-.logo {
-  display: flex;
   flex-direction: column;
-  line-height: 1.2;
 }
 
-.logo-text {
-  font-size: 20px;
-  font-weight: 600;
+.welcome-text {
+  font-size: 28px;
+  margin: 0 0 4px;
+  color: var(--text-primary);
 }
 
-.logo-subtitle {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.header-right .user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: var(--border-radius-base);
-  transition: background-color 0.2s;
-}
-
-.header-right .user-info:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.user-name {
+.welcome-sub {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0;
   font-weight: 500;
 }
 
-.main-container {
-  flex: 1;
-  overflow: hidden;
-}
-
-.aside {
-  background-color: white;
-  box-shadow: var(--shadow-sm);
-  border-right: 1px solid var(--border-light);
-  transition: width 0.3s;
-}
-
-.side-menu {
-  border-right: none;
-  height: 100%;
-}
-
-.side-menu:not(.el-menu--collapse) {
-  width: 240px;
-}
-
-.main-content {
+.header-right {
   display: flex;
-  flex-direction: column;
-  padding: 0;
-  background-color: var(--bg-base);
-  overflow: auto;
+  align-items: center;
+  gap: 20px;
 }
 
-.breadcrumb {
-  padding: 16px 20px;
-  background-color: white;
-  border-bottom: 1px solid var(--border-light);
+.search-pill {
+  width: 300px;
 }
 
-.page-content {
+.upgrade-btn {
+  padding: 0 24px !important;
+}
+
+/* 页面内容区 */
+.page-scroll-area {
   flex: 1;
-  padding: 20px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: var(--border-radius-xl);
+  
+  /* 隐藏滚动条但保留功能 */
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
 }
 
 /* 页面切换动画 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-slide-enter-from {
   opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+@media (max-width: 768px) {
+  .app-wrapper {
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .floating-sidebar {
+    width: 60px;
+  }
+  
+  :deep(.menu-pill) {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .hidden-mobile {
+    display: none !important;
+  }
 }
 </style>

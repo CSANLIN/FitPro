@@ -1,101 +1,129 @@
 <template>
   <div class="dashboard-view">
-    <!-- 数据概览卡片 -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="8" :md="4" v-for="card in statCards" :key="card.label">
-        <el-card shadow="hover" class="stat-card" :style="{ borderTop: `3px solid ${card.color}` }">
-          <div class="stat-content">
-            <div class="stat-value" :style="{ color: card.color }">{{ card.value }}</div>
-            <div class="stat-label">{{ card.label }}</div>
-            <el-icon class="stat-icon" :style="{ color: card.color }">
-              <component :is="card.icon" />
-            </el-icon>
+    <!-- 顶部布局：左侧概览，右侧日程 -->
+    <el-row :gutter="24" class="top-row">
+      <!-- 左侧 Blob 大卡片 -->
+      <el-col :xs="24" :lg="16">
+        <div class="hero-overview-card">
+          <!-- 背景光晕 blobs -->
+          <div class="blob-yellow"></div>
+          <div class="blob-red"></div>
+          
+          <div class="hero-content">
+            <h2 class="hero-title">今日健身房运营数据</h2>
+            <p class="hero-sub">活跃会员与今日签到情况</p>
+            
+            <div class="hero-metrics">
+              <div class="metric-circle dark-circle">
+                <span class="m-value">{{ stats?.activeMemberships || 0 }}</span>
+                <span class="m-label">活跃会员</span>
+              </div>
+              <div class="metric-circle yellow-circle">
+                <span class="m-value">{{ stats?.todayCheckIns || 0 }}</span>
+                <span class="m-label">今日签到</span>
+              </div>
+              <div class="metric-circle red-circle">
+                <span class="m-value">{{ stats?.totalMembers || 0 }}</span>
+                <span class="m-label">总会员数</span>
+              </div>
+            </div>
+            
+            <div class="hero-legend">
+              <div class="legend-item"><span class="dot c-yellow"></span> 今日到店签到</div>
+              <div class="legend-item"><span class="dot c-red"></span> 平台总注册会员</div>
+              <div class="legend-item"><span class="dot c-dark"></span> 近期活跃锻炼用户</div>
+            </div>
           </div>
-        </el-card>
+        </div>
+      </el-col>
+
+      <!-- 右侧 暗色卡片 (日程/图鉴) -->
+      <el-col :xs="24" :lg="8">
+        <div class="dark-schedule-card">
+          <div class="card-header">
+            <h3 class="card-title">即将开始的课程</h3>
+            <span class="card-action">查看全部 <el-icon><ArrowRight /></el-icon></span>
+          </div>
+          
+          <!-- 简易日历/日程占位 -->
+          <div class="calendar-mini">
+            <div class="cal-days">
+              <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span class="active">S</span><span>S</span>
+            </div>
+            <div class="cal-dates">
+              <span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span class="active">29</span><span>30</span>
+            </div>
+          </div>
+          
+          <div class="schedule-list">
+            <div v-if="!stats?.upcomingScheduleList?.length" class="empty-text">今日暂无即将开始的课程。</div>
+            <div v-for="(item, index) in stats?.upcomingScheduleList?.slice(0, 3)" :key="item.id" class="s-item">
+              <div class="s-time">{{ item.startTime }}</div>
+              <div class="s-info">
+                <div class="s-name">{{ item.courseName || '课程#' + item.id }}</div>
+                <div class="s-coach">教练: {{ item.coachName }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </el-col>
     </el-row>
 
-    <!-- 图表区域 -->
-    <el-row :gutter="16" class="chart-row">
-      <el-col :xs="24" :md="12">
-        <el-card shadow="hover" class="chart-card">
-          <template #header>
-            <div class="card-header">
-              <span>签到趋势（近7日）</span>
+    <!-- 底部区域：图表与数据块 -->
+    <el-row :gutter="24" class="bottom-row">
+      <!-- 签到趋势图 -->
+      <el-col :xs="24" :lg="12">
+        <el-card class="premium-panel pill-card chart-card">
+          <div class="pill-card-header">
+            <div>
+              <h3 class="card-title">签到活跃趋势</h3>
+              <p class="card-sub">最近7日签到情况</p>
             </div>
-          </template>
+            <div class="action-btn"><el-icon><EditPen /></el-icon></div>
+          </div>
+          
           <div ref="checkInChartRef" class="chart-container"></div>
-          <div v-if="checkInTrendEmpty" class="chart-empty">
-            <el-empty description="暂无签到数据" :image-size="80" />
-          </div>
         </el-card>
       </el-col>
-      <el-col :xs="24" :md="12">
-        <el-card shadow="hover" class="chart-card">
-          <template #header>
-            <div class="card-header">
-              <span>会员注册趋势（近7日）</span>
-            </div>
-          </template>
-          <div ref="registerChartRef" class="chart-container"></div>
-          <div v-if="registerTrendEmpty" class="chart-empty">
-            <el-empty description="暂无注册数据" :image-size="80" />
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
 
-    <!-- 列表区域 -->
-    <el-row :gutter="16" class="list-row">
-      <el-col :xs="24" :md="12">
-        <el-card shadow="hover" class="list-card">
-          <template #header>
-            <div class="card-header">
-              <span>近期待办排课</span>
-              <el-tag v-if="stats?.upcomingSchedules" type="warning" size="small">
-                {{ stats.upcomingSchedules }} 项
-              </el-tag>
+      <!-- 其他零散数据块 -->
+      <el-col :xs="24" :lg="12">
+        <div class="small-cards-grid">
+          <el-card class="premium-panel pill-card small-stat">
+            <div class="stat-content">
+              <h3 class="card-title">课程总数</h3>
+              <p class="card-sub">可供会员预约</p>
             </div>
-          </template>
-          <div v-if="!stats?.upcomingScheduleList?.length" class="list-empty">
-            <el-empty description="暂无待办排课" :image-size="60" />
-          </div>
-          <div v-else class="schedule-list">
-            <div v-for="item in stats.upcomingScheduleList" :key="item.id" class="schedule-item">
-              <div class="schedule-info">
-                <span class="schedule-course">{{ item.courseName || '课程#' + item.id }}</span>
-                <span class="schedule-coach">{{ item.coachName }}</span>
-              </div>
-              <div class="schedule-time">
-                <el-tag size="small" effect="plain">
-                  {{ item.scheduleDate }} {{ item.startTime }}-{{ item.endTime }}
-                </el-tag>
-              </div>
+            <div class="stat-circle ring-orange">
+              <span class="s-val">{{ stats?.totalCourses || 0 }}</span>
             </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :md="12">
-        <el-card shadow="hover" class="list-card">
-          <template #header>
-            <div class="card-header">
-              <span>今日签到记录</span>
-              <el-tag v-if="stats?.todayCheckIns" type="success" size="small">
-                {{ stats.todayCheckIns }} 人
-              </el-tag>
+          </el-card>
+
+          <el-card class="premium-panel pill-card small-stat">
+            <div class="stat-content">
+              <h3 class="card-title">活跃教练</h3>
+              <p class="card-sub">平台专业教练</p>
             </div>
-          </template>
-          <div v-if="!stats?.todayCheckInList?.length" class="list-empty">
-            <el-empty description="今日暂无签到" :image-size="60" />
-          </div>
-          <div v-else class="checkin-list">
-            <div v-for="item in stats.todayCheckInList" :key="item.id" class="checkin-item">
-              <el-avatar :size="32" icon="UserFilled" />
-              <span class="checkin-user">{{ item.userName }}</span>
-              <span class="checkin-time">{{ item.checkInTime }}</span>
+            <div class="stat-circle ring-blue">
+              <span class="s-val">{{ stats?.totalCoaches || 0 }}</span>
             </div>
-          </div>
-        </el-card>
+          </el-card>
+
+          <el-card class="premium-panel pill-card progress-stat" style="grid-column: span 2;">
+            <div class="prog-header">
+              <h3 class="card-title">本周会员增长目标</h3>
+              <span class="prog-percent">75% 已达成</span>
+            </div>
+            <div class="prog-track">
+              <div class="prog-fill" style="width: 75%"></div>
+              <div class="prog-thumb" style="left: 75%"></div>
+            </div>
+            <div class="prog-labels">
+              <span>0 人</span>
+              <span>100 人</span>
+            </div>
+          </el-card>
+        </div>
       </el-col>
     </el-row>
   </div>
@@ -104,32 +132,13 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { dashboardApi } from '@/api/dashboard'
-import { User, Select, Ticket, Notebook, Calendar, UserFilled, Trophy } from '@element-plus/icons-vue'
+import { ArrowRight, EditPen } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 
 const stats = ref(null)
 const loading = ref(false)
 const checkInChartRef = ref(null)
-const registerChartRef = ref(null)
 let checkInChartInstance = null
-let registerChartInstance = null
-
-const statCards = computed(() => [
-  { label: '会员总数', value: stats.value?.totalMembers ?? '-', icon: User, color: '#409EFF' },
-  { label: '今日签到', value: stats.value?.todayCheckIns ?? '-', icon: Select, color: '#67C23A' },
-  { label: '有效会籍', value: stats.value?.activeMemberships ?? '-', icon: Ticket, color: '#E6A23C' },
-  { label: '课程总数', value: stats.value?.totalCourses ?? '-', icon: Notebook, color: '#F56C6C' },
-  { label: '待开课数', value: stats.value?.upcomingSchedules ?? '-', icon: Calendar, color: '#909399' },
-  { label: '教练总数', value: stats.value?.totalCoaches ?? '-', icon: UserFilled, color: '#9B59B6' }
-])
-
-const checkInTrendEmpty = computed(() => {
-  return stats.value?.checkInTrend?.every(item => item.count === 0)
-})
-
-const registerTrendEmpty = computed(() => {
-  return stats.value?.registerTrend?.every(item => item.count === 0)
-})
 
 const fetchStats = async () => {
   loading.value = true
@@ -145,7 +154,6 @@ const fetchStats = async () => {
 }
 
 const renderCharts = () => {
-  // 签到趋势图
   if (checkInChartRef.value && stats.value?.checkInTrend) {
     if (!checkInChartInstance) {
       checkInChartInstance = echarts.init(checkInChartRef.value)
@@ -153,60 +161,29 @@ const renderCharts = () => {
     const data = stats.value.checkInTrend
     checkInChartInstance.setOption({
       tooltip: { trigger: 'axis' },
-      grid: { left: 40, right: 20, bottom: 30, top: 20 },
+      grid: { left: 30, right: 20, bottom: 20, top: 20 },
       xAxis: {
         type: 'category',
         data: data.map(d => d.date.slice(5)),
-        axisLabel: { fontSize: 11 }
+        axisLabel: { color: '#8c8c93', fontWeight: 600, fontSize: 12 },
+        axisLine: { show: false },
+        axisTick: { show: false }
       },
       yAxis: {
-        type: 'value',
-        minInterval: 1
+        show: false,
+        type: 'value'
       },
       series: [{
         type: 'line',
         data: data.map(d => d.count),
-        smooth: true,
-        lineStyle: { color: '#67C23A', width: 3 },
-        itemStyle: { color: '#67C23A' },
+        smooth: 0.4,
+        symbol: 'none',
+        lineStyle: { color: '#ffcc2e', width: 4 },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(103, 194, 58, 0.3)' },
-            { offset: 1, color: 'rgba(103, 194, 58, 0.05)' }
+            { offset: 0, color: 'rgba(255, 204, 46, 0.4)' },
+            { offset: 1, color: 'rgba(255, 204, 46, 0)' }
           ])
-        }
-      }]
-    })
-  }
-
-  // 注册趋势图
-  if (registerChartRef.value && stats.value?.registerTrend) {
-    if (!registerChartInstance) {
-      registerChartInstance = echarts.init(registerChartRef.value)
-    }
-    const data = stats.value.registerTrend
-    registerChartInstance.setOption({
-      tooltip: { trigger: 'axis' },
-      grid: { left: 40, right: 20, bottom: 30, top: 20 },
-      xAxis: {
-        type: 'category',
-        data: data.map(d => d.date.slice(5)),
-        axisLabel: { fontSize: 11 }
-      },
-      yAxis: {
-        type: 'value',
-        minInterval: 1
-      },
-      series: [{
-        type: 'bar',
-        data: data.map(d => d.count),
-        barWidth: '40%',
-        itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#409EFF' },
-            { offset: 1, color: 'rgba(64, 158, 255, 0.3)' }
-          ]),
-          borderRadius: [4, 4, 0, 0]
         }
       }]
     })
@@ -217,151 +194,383 @@ onMounted(() => {
   fetchStats()
 })
 
-// 窗口大小变化时自适应图表
 watch(() => stats.value, () => {
   window.addEventListener('resize', () => {
     checkInChartInstance?.resize()
-    registerChartInstance?.resize()
   })
 })
 </script>
 
 <style scoped>
 .dashboard-view {
-  max-width: 1200px;
-}
-
-.stats-row {
-  margin-bottom: 16px;
-}
-
-.stat-card {
-  border-radius: 12px;
-  margin-bottom: 16px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
-
-.stat-content {
-  position: relative;
-  padding: 4px 0;
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: var(--el-text-color-secondary);
-  margin-top: 4px;
-}
-
-.stat-icon {
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 32px;
-  opacity: 0.2;
-}
-
-.chart-row {
-  margin-bottom: 16px;
-}
-
-.chart-card,
-.list-card {
-  border-radius: 12px;
-  margin-bottom: 16px;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-weight: 600;
-  font-size: 15px;
-}
-
-.chart-container {
-  height: 280px;
   width: 100%;
 }
 
-.chart-empty {
+.top-row { margin-bottom: 24px; }
+.bottom-row { margin-bottom: 24px; }
+
+.card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.card-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Hero Overview Card (Be.run Style) */
+.hero-overview-card {
+  background-color: #e5e2da;
+  border-radius: var(--border-radius-xl);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+}
+
+.blob-yellow {
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  width: 280px;
   height: 280px;
+  background: rgba(255, 204, 46, 0.9);
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.blob-red {
+  position: absolute;
+  bottom: 5%;
+  left: 30%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 107, 107, 0.85);
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--text-regular);
+  margin: 0 0 32px;
+  font-weight: 500;
+}
+
+.hero-metrics {
+  display: flex;
+  gap: 16px;
+  margin-top: auto;
+  margin-bottom: 40px;
+}
+
+.metric-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.m-value { font-size: 22px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.m-label { font-size: 12px; font-weight: 600; }
+
+.dark-circle { background: var(--accent-dark); color: white; }
+.dark-circle .m-label { color: #a0a0a0; }
+
+.yellow-circle { background: var(--primary-color); color: var(--text-primary); transform: translateY(-20px); }
+.yellow-circle .m-label { color: #8a6a00; }
+
+.red-circle { background: #ff6b6b; color: white; transform: translateY(10px); }
+.red-circle .m-label { color: #ffe0e0; }
+
+.hero-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dot {
+  width: 24px;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.c-yellow { background: var(--primary-color); }
+.c-red { background: #ff6b6b; }
+.c-dark { background: var(--accent-dark); }
+
+/* Dark Schedule Card */
+.dark-schedule-card {
+  background: var(--accent-dark);
+  border-radius: var(--border-radius-xl);
+  padding: 32px;
+  height: 100%;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.dark-schedule-card .card-title { color: white; }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.card-action {
+  font-size: 13px;
+  color: #8c8c93;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.calendar-mini {
+  margin-bottom: 32px;
+}
+
+.cal-days, .cal-dates {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.cal-days span {
+  width: 32px;
+  font-size: 12px;
+  color: #6a6a70;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.cal-dates span {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 50%;
+  color: white;
 }
 
-.list-empty {
-  padding: 20px 0;
+.cal-dates span.active {
+  background: var(--primary-color);
+  color: var(--text-primary);
 }
+.cal-days span.active { color: white; }
 
-.schedule-list,
-.checkin-list {
+.schedule-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 16px;
+  flex: 1;
 }
 
-.schedule-item {
+.empty-text {
+  font-size: 14px;
+  color: #6a6a70;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.s-item {
   display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.s-time {
+  font-size: 14px;
+  font-weight: 700;
+  color: #8c8c93;
+  width: 45px;
+}
+
+.s-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.s-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+}
+
+.s-coach {
+  font-size: 12px;
+  color: #6a6a70;
+}
+
+/* Pill Cards Bottom */
+.pill-card {
+  padding: 8px !important;
+  border-radius: var(--border-radius-xl) !important;
+  height: 100%;
+}
+
+.pill-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container {
+  height: 220px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.small-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 24px;
+  height: 100%;
+}
+
+.small-stat {
+  display: flex !important;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: 8px;
-  transition: background-color 0.2s;
 }
 
-.schedule-item:hover {
-  background-color: var(--el-fill-color-light);
-}
-
-.schedule-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.schedule-course {
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.schedule-coach {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.checkin-item {
+.stat-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: background-color 0.2s;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
 }
 
-.checkin-item:hover {
-  background-color: var(--el-fill-color-light);
+.ring-orange {
+  border: 4px solid #ffcc2e;
+  color: var(--text-primary);
 }
 
-.checkin-user {
-  flex: 1;
+.ring-blue {
+  border: 4px solid #4facfe;
+  color: var(--text-primary);
+}
+
+.progress-stat {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.prog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.prog-percent {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
-.checkin-time {
+.prog-track {
+  height: 12px;
+  background: var(--bg-base);
+  border-radius: 6px;
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.prog-fill {
+  height: 100%;
+  background: var(--accent-dark);
+  border-radius: 6px;
+}
+
+.prog-thumb {
+  width: 24px;
+  height: 24px;
+  background: var(--accent-dark);
+  border-radius: 50%;
+  position: absolute;
+  top: -6px;
+  transform: translateX(-50%);
+  border: 4px solid white;
+}
+
+.prog-labels {
+  display: flex;
+  justify-content: space-between;
   font-size: 12px;
-  color: var(--el-text-color-secondary);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 992px) {
+  .hero-overview-card { margin-bottom: 24px; }
+  .chart-card { margin-bottom: 24px; }
 }
 </style>

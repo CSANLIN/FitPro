@@ -50,7 +50,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "获取用户详情")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COACH') or #id == authentication.principal")
     public Result<UserVO> getDetail(@PathVariable Long id) {
         return Result.success(userService.getDetail(id));
     }

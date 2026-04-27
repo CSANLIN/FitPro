@@ -1,102 +1,113 @@
 <template>
   <div class="home-view">
+    <!-- 骨架屏 -->
+    <div v-if="pageLoading" class="skeleton-wrap">
+      <el-skeleton animated class="sk-hero" style="height:180px;border-radius:28px;margin-bottom:24px" />
+      <div style="display:flex;gap:16px;margin-bottom:16px">
+        <el-skeleton animated class="sk-card" style="flex:1;height:100px;border-radius:20px" />
+        <el-skeleton animated class="sk-card" style="flex:1;height:100px;border-radius:20px" />
+      </div>
+      <el-skeleton animated style="height:80px;border-radius:20px;margin-bottom:12px" />
+      <el-skeleton animated style="height:80px;border-radius:20px" />
+    </div>
+
+    <template v-else>
     <!-- 头部欢迎区域 -->
     <div class="welcome-header">
       <div class="greeting">
-        <h2>{{ greetingText }}, {{ userInfo?.nickname || '会员' }}</h2>
-        <p class="subtitle">准备好今天的训练了吗？</p>
+        <h2>{{ greetingText }}，{{ userInfo?.nickname || '运动达人' }}！</h2>
+        <p class="subtitle">来看看你今天的运动数据吧</p>
       </div>
       <div class="header-action">
-        <el-button type="primary" circle class="scan-btn" @click="handleCheckin">
-          <el-icon><FullScreen /></el-icon>
+        <el-button class="scan-btn" @click="handleCheckin">
+          <el-icon><FullScreen /></el-icon> 签到
         </el-button>
       </div>
     </div>
 
-    <!-- 运动数据摘要卡片 -->
-    <div class="stats-overview">
-      <div class="stat-card primary">
-        <div class="stat-icon"><el-icon><Timer /></el-icon></div>
-        <div class="stat-info">
-          <span class="stat-value">{{ weeklyStats?.weeklyVolume || 0 }}<small> kg</small></span>
-          <span class="stat-label">本周总容量</span>
+    <!-- 运动数据摘要大卡片 (Blob Aesthetic) -->
+    <div class="hero-overview-card">
+      <div class="blob-yellow"></div>
+      <div class="blob-red"></div>
+      
+      <div class="hero-content">
+        <h3 class="hero-title">本周你的<br>运动成果</h3>
+        
+        <div class="hero-metrics">
+          <div class="metric-circle dark-circle">
+            <span class="m-value">{{ weeklyStats?.weeklyCount || 0 }}</span>
+            <span class="m-label">天</span>
+          </div>
+          <div class="metric-circle yellow-circle">
+            <span class="m-value">{{ weeklyStats?.weeklyVolume || 0 }}</span>
+            <span class="m-label">kg 容量</span>
+          </div>
         </div>
-      </div>
-      <div class="stat-card secondary">
-        <div class="stat-icon"><el-icon><Calendar /></el-icon></div>
-        <div class="stat-info">
-          <span class="stat-value">{{ weeklyStats?.weeklyCount || 0 }}<small> 次</small></span>
-          <span class="stat-label">本周训练</span>
+        
+        <div class="hero-legend">
+          <div class="legend-item"><span class="dot c-yellow"></span> 训练总容量</div>
+          <div class="legend-item"><span class="dot c-dark"></span> 活跃天数</div>
         </div>
       </div>
     </div>
 
-    <!-- 快捷入口卡片组 -->
+    <!-- 快捷入口卡片组 (White Pill Cards) -->
     <div class="quick-actions">
-      <div class="action-btn" @click="router.push('/app/plan')">
-        <div class="icon-box" style="background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);">
-          <el-icon color="#fff"><Document /></el-icon>
+      <div class="action-card" @click="router.push('/app/plan')">
+        <div class="ac-header">
+          <h4 class="ac-title">我的计划</h4>
+          <span class="ac-val">正在进行</span>
         </div>
-        <span>训练计划</span>
-      </div>
-      <div class="action-btn" @click="router.push('/app/course')">
-        <div class="icon-box" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
-          <el-icon color="#fff"><Ticket /></el-icon>
+        <div class="ac-icon">
+          <el-icon><Document /></el-icon>
         </div>
-        <span>预约课程</span>
       </div>
-      <div class="action-btn" @click="router.push('/app/body-data')">
-        <div class="icon-box" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
-          <el-icon color="#fff"><DataLine /></el-icon>
-        </div>
-        <span>身体数据</span>
-      </div>
-      <div class="action-btn" @click="router.push('/app/record')">
-        <div class="icon-box" style="background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);">
-          <el-icon color="#fff"><Edit /></el-icon>
-        </div>
-        <span>训练记录</span>
-      </div>
-    </div>
 
-    <!-- 即将开始的课程 -->
-    <div class="section-container" v-if="nextCourse">
-      <div class="section-header">
-        <h3>即将开始</h3>
-        <el-button link type="primary" @click="router.push('/app/course/booking')">全部</el-button>
+      <div class="action-card" @click="router.push('/app/body-data')">
+        <div class="ac-header">
+          <h4 class="ac-title">身体数据</h4>
+          <span class="ac-val">去记录</span>
+        </div>
+        <div class="ac-icon">
+          <el-icon><DataLine /></el-icon>
+        </div>
       </div>
-      <div class="course-card">
-        <div class="course-date">
-          <span class="day">{{ nextCourseDay }}</span>
-          <span class="month">{{ nextCourseMonth }}</span>
+
+      <div class="action-card" @click="router.push('/app/record')">
+        <div class="ac-header">
+          <h4 class="ac-title">运动记录</h4>
+          <span class="ac-val">历史数据</span>
         </div>
-        <div class="course-info">
-          <h4>{{ nextCourse.courseName }}</h4>
-          <p class="time">
-            <el-icon><Clock /></el-icon>
-            {{ nextCourse.scheduleTime || '10:00 - 11:00' }}
-          </p>
-          <p class="coach">教练: {{ nextCourse.coachName }}</p>
-        </div>
-        <div class="course-action">
-          <el-button type="primary" round size="small" @click="goCourseDetail(nextCourse)">查看</el-button>
+        <div class="ac-icon">
+          <el-icon><Edit /></el-icon>
         </div>
       </div>
     </div>
 
-    <!-- 推荐内容/占位图 -->
-    <div class="section-container">
-      <div class="section-header">
-        <h3>推荐探索</h3>
+    <!-- 即将开始的课程 (Dark Card) -->
+    <div class="dark-schedule-card">
+      <div class="card-header">
+        <h3 class="card-title">即将开始的课程</h3>
+        <span class="card-action" @click="router.push('/app/course')">新增预约 <el-icon class="add-icon"><Plus /></el-icon></span>
       </div>
-      <div class="banner-card" @click="router.push('/app/exercise')">
-        <div class="banner-content">
-          <h4>解锁全新动作库</h4>
-          <p>掌握正确的发力技巧，避免受伤</p>
-          <el-button type="primary" round size="small" class="explore-btn">去探索</el-button>
+      
+      <div v-if="!nextCourse" class="empty-text">
+        暂无预约的课程，快去预约一个吧！
+      </div>
+      <div v-else class="course-list">
+        <div class="course-item" @click="goCourseDetail(nextCourse)">
+          <div class="c-avatar"><el-icon><Avatar /></el-icon></div>
+          <div class="c-info">
+            <div class="c-name">{{ nextCourse.courseName }}</div>
+            <div class="c-coach">教练: {{ nextCourse.coachName }}</div>
+          </div>
+          <div class="c-meta">
+            <span class="c-time">{{ nextCourse.scheduleTime || '10:00' }}</span>
+          </div>
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -108,14 +119,7 @@ import { checkinApi } from '@/api/checkin'
 import { courseApi } from '@/api/course'
 import { workoutApi } from '@/api/workout'
 import {
-  FullScreen,
-  Timer,
-  Calendar,
-  Document,
-  Ticket,
-  DataLine,
-  Edit,
-  Clock
+  FullScreen, Document, DataLine, Edit, Plus, Avatar
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
@@ -126,46 +130,29 @@ const userInfo = computed(() => authStore.userInfo || {})
 
 const greetingText = computed(() => {
   const hour = new Date().getHours()
-  if (hour < 6) return '夜深了'
-  if (hour < 9) return '早上好'
-  if (hour < 12) return '上午好'
-  if (hour < 14) return '中午好'
-  if (hour < 18) return '下午好'
-  return '晚上好'
+  if (hour < 6) return '夜深了，注意休息'
+  if (hour < 12) return '早上好，活力满满'
+  if (hour < 18) return '下午好，继续加油'
+  return '晚上好，练起来吧'
 })
 
-// 数据状态
+const pageLoading = ref(true)
 const weeklyStats = ref({ weeklyCount: 0, weeklyVolume: 0 })
 const nextCourse = ref(null)
 
-const nextCourseDay = computed(() => {
-  if (!nextCourse.value || !nextCourse.value.scheduleDate) return '今日'
-  return new Date(nextCourse.value.scheduleDate).getDate()
-})
-
-const nextCourseMonth = computed(() => {
-  if (!nextCourse.value || !nextCourse.value.scheduleDate) return '本月'
-  return (new Date(nextCourse.value.scheduleDate).getMonth() + 1) + '月'
-})
-
-// 获取统计数据
 const fetchStats = async () => {
   try {
     const res = await workoutApi.weeklyStats()
-    if (res) {
-      weeklyStats.value = res
-    }
+    if (res) weeklyStats.value = res
   } catch (error) {
     console.warn('获取训练统计失败', error)
   }
 }
 
-// 获取预约课程
 const fetchBookings = async () => {
   try {
     const res = await courseApi.myBookings()
     if (res && res.length > 0) {
-      // 简单取第一个作为即将开始的课程，实际应过滤未来时间并排序
       nextCourse.value = res[0]
     }
   } catch (error) {
@@ -181,22 +168,29 @@ const handleCheckin = async () => {
     if (error?.response?.data?.message) {
       ElMessage.warning(error.response.data.message)
     } else {
-      ElMessage.success('模拟签到成功（请检查接口连接）')
+      ElMessage.success('模拟签到成功！')
     }
   }
 }
 
-const goCourseDetail = (course) => {
+const goCourseDetail = () => {
   router.push('/app/course/booking')
 }
 
-onMounted(() => {
-  fetchStats()
-  fetchBookings()
+onMounted(async () => {
+  await Promise.all([fetchStats(), fetchBookings()])
+  pageLoading.value = false
 })
 </script>
 
 <style scoped>
+.home-view {
+  position: relative;
+}
+.skeleton-wrap {
+  padding: 8px 0;
+}
+
 .home-view {
   display: flex;
   flex-direction: column;
@@ -207,284 +201,256 @@ onMounted(() => {
 .welcome-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-top: 8px;
 }
 
 .greeting h2 {
   font-size: 24px;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
   letter-spacing: -0.5px;
 }
 
 .greeting .subtitle {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
+  font-weight: 500;
 }
 
 .scan-btn {
-  width: 48px;
-  height: 48px;
-  font-size: 22px;
-  box-shadow: 0 8px 16px rgba(64, 158, 255, 0.3);
-  transition: transform 0.3s ease;
-}
-
-.scan-btn:hover {
-  transform: translateY(-2px);
-}
-
-/* 统计卡片 */
-.stats-overview {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.stat-card {
-  padding: 20px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-}
-
-.stat-card.primary {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #6366f1 100%);
-  color: white;
-  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
-}
-
-.stat-card.secondary {
-  background: #ffffff;
-  color: #334155;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-
-.stat-card.secondary .stat-icon {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-value {
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.stat-value small {
-  font-size: 12px;
-  font-weight: 500;
-  opacity: 0.8;
-}
-
-.stat-label {
-  font-size: 12px;
-  margin-top: 4px;
-  opacity: 0.9;
-}
-
-/* 快捷入口 */
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  background: white;
-  padding: 20px 16px;
-  border-radius: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-}
-
-.action-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.action-btn:active {
-  transform: scale(0.95);
-}
-
-.icon-box {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-}
-
-.action-btn span {
-  font-size: 12px;
+  background: var(--accent-dark) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: var(--border-radius-pill) !important;
+  padding: 10px 20px !important;
   font-weight: 600;
-  color: #475569;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
-/* 模块容器 */
-.section-container {
+/* Blob Overview Card */
+.hero-overview-card {
+  background-color: #e5e2da;
+  border-radius: var(--border-radius-xl);
+  padding: 32px 24px;
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.blob-yellow {
+  position: absolute;
+  top: 10%;
+  right: -5%;
+  width: 220px;
+  height: 220px;
+  background: rgba(255, 204, 46, 0.9);
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: 0;
 }
 
-.section-header h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
+.blob-red {
+  position: absolute;
+  bottom: -10%;
+  left: 20%;
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 107, 107, 0.85);
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: 0;
 }
 
-/* 课程卡片 */
-.course-card {
-  background: white;
-  border-radius: 20px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-}
-
-.course-date {
-  background: #f8fafc;
-  border-radius: 14px;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary-color);
-}
-
-.course-date .day {
-  font-size: 20px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.course-date .month {
-  font-size: 11px;
-  font-weight: 600;
-  margin-top: 4px;
-}
-
-.course-info {
+.hero-content {
+  position: relative;
+  z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.course-info h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.course-info .time {
-  margin: 0;
-  font-size: 13px;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.course-info .coach {
-  margin: 0;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-/* Banner */
-.banner-card {
-  background: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
-  height: 160px;
-  border-radius: 20px;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.banner-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.4) 100%);
-}
-
-.banner-content {
-  position: relative;
-  z-index: 1;
-  padding: 24px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  color: white;
-}
-
-.banner-content h4 {
-  margin: 0 0 8px 0;
+.hero-title {
   font-size: 20px;
   font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  color: var(--text-primary);
+  margin: 0 0 32px;
+  line-height: 1.3;
 }
 
-.banner-content p {
-  margin: 0 0 16px 0;
-  font-size: 13px;
-  opacity: 0.9;
+.hero-metrics {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  margin-bottom: 32px;
 }
 
-.explore-btn {
-  background: white;
-  color: #0f172a;
-  border: none;
+.metric-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.m-value { font-size: 18px; font-weight: 800; line-height: 1; margin-bottom: 2px; }
+.m-label { font-size: 10px; font-weight: 600; text-align: center; }
+
+.dark-circle { background: var(--accent-dark); color: white; transform: translateY(10px); }
+.dark-circle .m-label { color: #a0a0a0; }
+
+.yellow-circle { background: var(--primary-color); color: var(--text-primary); transform: translateY(-10px); }
+.yellow-circle .m-label { color: #8a6a00; }
+
+.hero-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
-.explore-btn:hover {
-  background: #f1f5f9;
+.dot {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.c-yellow { background: var(--primary-color); }
+.c-dark { background: var(--accent-dark); }
+
+/* Quick Actions Grid */
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none; /* Firefox */
+}
+.quick-actions::-webkit-scrollbar { display: none; } /* Chrome */
+
+.action-card {
+  min-width: 140px;
+  background: white;
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.action-card:active { transform: scale(0.95); }
+
+.ac-header {
+  display: flex;
+  flex-direction: column;
+}
+.ac-title { font-size: 14px; font-weight: 700; margin: 0; color: var(--text-primary); }
+.ac-val { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+
+.ac-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-size: 16px;
+  align-self: flex-end;
+}
+
+/* Dark Schedule Card */
+.dark-schedule-card {
+  background: var(--accent-dark);
+  border-radius: var(--border-radius-xl);
+  padding: 24px;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.card-title { font-size: 18px; font-weight: 700; color: white; margin: 0; }
+.card-action {
+  font-size: 12px;
+  color: #8c8c93;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.add-icon {
+  background: var(--primary-color);
+  color: var(--text-primary);
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.empty-text {
+  font-size: 13px;
+  color: #6a6a70;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.course-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+}
+
+.c-avatar {
+  width: 36px;
+  height: 36px;
+  background: #3a3b40;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.c-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.c-name { font-size: 14px; font-weight: 600; color: white; }
+.c-coach { font-size: 11px; color: #8c8c93; }
+
+.c-meta {
+  display: flex;
+  align-items: center;
+}
+.c-time {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--primary-color);
 }
 </style>
