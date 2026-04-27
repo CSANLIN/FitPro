@@ -1,186 +1,240 @@
 <template>
   <div class="profile-view">
-    <h1>个人中心</h1>
-
-    <el-tabs v-model="activeTab" class="profile-tabs">
-      <!-- 基本信息 -->
-      <el-tab-pane label="基本信息" name="profile">
-        <el-card class="profile-card">
-          <template #header>
-            <div class="card-header">
-              <span>个人信息</span>
-              <el-button type="primary" size="small" @click="handleSaveProfile" :loading="profileLoading">
-                保存修改
-              </el-button>
+    <!-- ===== 区域一：高级用户信息卡片 ===== -->
+    <div class="user-hero">
+      <div class="hero-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+      </div>
+      <div class="hero-glass">
+        <div class="hero-content">
+          <div class="avatar-wrapper" @click="openEditProfile">
+            <el-avatar :size="80" :src="userInfo.avatar" class="user-avatar">
+              {{ userInfo.nickname?.charAt(0) || 'U' }}
+            </el-avatar>
+            <div class="edit-badge"><el-icon><Edit /></el-icon></div>
+          </div>
+          <div class="hero-text">
+            <div class="hero-name">
+              {{ userInfo.nickname || '运动健将' }}
+              <el-tag :type="roleTagType" size="small" effect="dark" round class="hero-role-tag">
+                {{ roleLabel }}
+              </el-tag>
             </div>
-          </template>
-
-          <el-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-width="100px">
-            <el-row :gutter="20">
-              <el-col :span="24">
-                <el-form-item label="头像">
-                  <div class="avatar-upload">
-                    <el-avatar :size="100" :src="profileForm.avatar" />
-                    <div class="avatar-upload-actions">
-                      <el-button type="primary" size="small" @click="triggerAvatarUpload">
-                        更换头像
-                      </el-button>
-                      <input
-                        ref="avatarInputRef"
-                        type="file"
-                        accept="image/*"
-                        style="display: none"
-                        @change="handleAvatarChange"
-                      />
-                      <el-button size="small" @click="profileForm.avatar = ''" v-if="profileForm.avatar">
-                        移除
-                      </el-button>
-                    </div>
-                  </div>
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="用户名" prop="username">
-                  <el-input v-model="profileForm.username" disabled />
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="角色" prop="role">
-                  <el-input v-model="profileForm.role" disabled />
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="昵称" prop="nickname">
-                  <el-input v-model="profileForm.nickname" placeholder="请输入昵称" />
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="手机号" prop="phone">
-                  <el-input v-model="profileForm.phone" placeholder="请输入手机号" />
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="邮箱" prop="email">
-                  <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="性别" prop="gender">
-                  <el-select v-model="profileForm.gender" placeholder="请选择性别" style="width: 100%">
-                    <el-option label="未知" :value="0" />
-                    <el-option label="男" :value="1" />
-                    <el-option label="女" :value="2" />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="生日" prop="birthday">
-                  <el-date-picker
-                    v-model="profileForm.birthday"
-                    type="date"
-                    placeholder="选择生日"
-                    style="width: 100%"
-                    value-format="YYYY-MM-DD"
-                  />
-                </el-form-item>
-              </el-col>
-            </el-row>
-          </el-form>
-        </el-card>
-      </el-tab-pane>
-
-      <!-- 修改密码 -->
-      <el-tab-pane label="修改密码" name="password">
-        <el-card class="password-card">
-          <template #header>
-            <div class="card-header">
-              <span>修改密码</span>
+            <div class="hero-phone">
+              <el-icon><Iphone /></el-icon> {{ userInfo.phone || '未绑定手机号' }}
             </div>
-          </template>
+          </div>
+        </div>
+        
+        <div class="hero-stats">
+          <div class="stat-block">
+            <div class="stat-num">{{ statsData.streakDays }}</div>
+            <div class="stat-desc">连续签到</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-block">
+            <div class="stat-num">{{ statsData.monthCount }}</div>
+            <div class="stat-desc">本月打卡</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-block" @click="goMembership" style="cursor: pointer;">
+            <div class="stat-num highlight">{{ membershipText || '--' }}</div>
+            <div class="stat-desc">会籍状态 <el-icon><ArrowRight /></el-icon></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
-            <el-form-item label="原密码" prop="oldPassword">
-              <el-input
-                v-model="passwordForm.oldPassword"
-                type="password"
-                placeholder="请输入原密码"
-                show-password
-              />
-            </el-form-item>
+    <!-- ===== 区域二：功能列表 ===== -->
+    <div class="menu-group">
+      <div class="menu-title">数据与记录</div>
+      <div class="menu-list">
+        <div class="menu-item" @click="goBodyData">
+          <div class="menu-icon" style="background: #e0f2fe; color: #0ea5e9;"><el-icon><DataLine /></el-icon></div>
+          <div class="menu-content">
+            <span class="menu-label">身体数据</span>
+            <span class="menu-hint">记录你的蜕变</span>
+          </div>
+          <el-icon class="menu-arrow"><ArrowRight /></el-icon>
+        </div>
+        <div class="menu-item" @click="goRecord">
+          <div class="menu-icon" style="background: #f3e8ff; color: #a855f7;"><el-icon><List /></el-icon></div>
+          <div class="menu-content">
+            <span class="menu-label">训练记录</span>
+            <span class="menu-hint">查看历史表现</span>
+          </div>
+          <el-icon class="menu-arrow"><ArrowRight /></el-icon>
+        </div>
+      </div>
+    </div>
 
-            <el-form-item label="新密码" prop="newPassword">
-              <el-input
-                v-model="passwordForm.newPassword"
-                type="password"
-                placeholder="请输入新密码"
-                show-password
-              />
-            </el-form-item>
+    <div class="menu-group">
+      <div class="menu-title">账户安全</div>
+      <div class="menu-list">
+        <div class="menu-item" @click="openChangePassword">
+          <div class="menu-icon" style="background: #fee2e2; color: #ef4444;"><el-icon><Lock /></el-icon></div>
+          <div class="menu-content">
+            <span class="menu-label">修改密码</span>
+          </div>
+          <el-icon class="menu-arrow"><ArrowRight /></el-icon>
+        </div>
+        <div class="menu-item" @click="handleFeedback">
+          <div class="menu-icon" style="background: #fef3c7; color: #f59e0b;"><el-icon><ChatLineSquare /></el-icon></div>
+          <div class="menu-content">
+            <span class="menu-label">帮助与反馈</span>
+          </div>
+          <el-icon class="menu-arrow"><ArrowRight /></el-icon>
+        </div>
+      </div>
+    </div>
 
-            <el-form-item label="确认密码" prop="confirmPassword">
-              <el-input
-                v-model="passwordForm.confirmPassword"
-                type="password"
-                placeholder="请再次输入新密码"
-                show-password
-              />
-            </el-form-item>
-
-            <el-form-item>
-              <el-button type="primary" @click="handleChangePassword" :loading="passwordLoading">
-                确认修改
-              </el-button>
-              <el-button @click="resetPasswordForm">重置</el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
-      </el-tab-pane>
-    </el-tabs>
-
+    <!-- ===== 退出登录 ===== -->
     <div class="logout-section">
-      <el-button type="danger" @click="handleLogout" :loading="logoutLoading">
-        <el-icon><SwitchButton /></el-icon>
-        退出登录
+      <el-button color="#f87171" plain @click="handleLogout" :loading="logoutLoading" class="logout-btn" round>
+        退出当前账号
       </el-button>
     </div>
+
+    <!-- ===== Dialog：编辑资料 ===== -->
+    <el-dialog v-model="editDialogVisible" title="编辑个人资料" width="90%" max-width="520px" top="5vh" destroy-on-close class="custom-dialog">
+      <el-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-width="70px" label-position="left">
+        <div class="avatar-upload-container">
+          <el-avatar :size="80" :src="profileForm.avatar" class="edit-avatar-preview">
+            {{ userInfo.nickname?.charAt(0) || 'U' }}
+          </el-avatar>
+          <div class="avatar-actions">
+            <el-button type="primary" size="small" round @click="triggerAvatarUpload">更换头像</el-button>
+            <input ref="avatarInputRef" type="file" accept="image/*" style="display:none" @change="handleAvatarChange" />
+          </div>
+        </div>
+        
+        <el-form-item label="昵称" prop="nickname">
+          <el-input v-model="profileForm.nickname" placeholder="请输入昵称" maxlength="20" />
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="profileForm.phone" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="性别" prop="gender">
+          <el-radio-group v-model="profileForm.gender">
+            <el-radio :label="1">男</el-radio>
+            <el-radio :label="2">女</el-radio>
+            <el-radio :label="0">保密</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="生日" prop="birthday">
+          <el-date-picker v-model="profileForm.birthday" type="date" placeholder="选择生日" style="width:100%" value-format="YYYY-MM-DD" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="editDialogVisible = false" round>取消</el-button>
+          <el-button type="primary" @click="handleSaveProfile" :loading="profileLoading" round>保存修改</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- ===== Dialog：修改密码 ===== -->
+    <el-dialog v-model="passwordDialogVisible" title="修改密码" width="90%" max-width="460px" top="20vh" destroy-on-close class="custom-dialog">
+      <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-position="top">
+        <el-form-item label="原密码" prop="oldPassword">
+          <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" show-password />
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="passwordDialogVisible = false" round>取消</el-button>
+          <el-button type="primary" @click="handleChangePassword" :loading="passwordLoading" round>确认修改</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { userApi } from '@/api/user'
-import { SwitchButton } from '@element-plus/icons-vue'
+import { checkinApi } from '@/api/checkin'
+import { membershipApi } from '@/api/membership'
+import {
+  DataLine, Lock, List, ChatLineSquare, Edit, Iphone, ArrowRight
+} from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
-// 标签页
-const activeTab = ref('profile')
+// ===================== 用户信息 =====================
+const userInfo = computed(() => authStore.userInfo || {})
 
-// 表单引用
+const roleTagType = computed(() => {
+  const map = { SUPER_ADMIN: 'danger', COACH: 'warning', MEMBER: 'primary' }
+  return map[userInfo.value.role] || 'info'
+})
+
+const roleLabel = computed(() => {
+  const map = { SUPER_ADMIN: '管理员', COACH: '教练', MEMBER: 'VIP会员' }
+  return map[userInfo.value.role] || userInfo.value.role
+})
+
+// ===================== 快捷统计 =====================
+const statsLoading = ref(false)
+const statsData = reactive({ streakDays: 0, monthCount: 0 })
+const membershipText = ref('')
+
+const fetchStats = async () => {
+  statsLoading.value = true
+  try {
+    const [stats, memberships] = await Promise.allSettled([
+      checkinApi.myStats(),
+      membershipApi.myActiveMembership()
+    ])
+    if (stats.status === 'fulfilled' && stats.value) {
+      statsData.streakDays = stats.value.streakDays ?? 0
+      statsData.monthCount = stats.value.monthCount ?? 0
+    }
+    if (memberships.status === 'fulfilled' && memberships.value) {
+      const m = memberships.value
+      if (m.remainingDays != null && m.remainingDays > 0) {
+        membershipText.value = `剩 ${m.remainingDays} 天`
+      } else if (m.remainingTimes != null && m.remainingTimes > 0) {
+        membershipText.value = `剩 ${m.remainingTimes} 次`
+      } else {
+        membershipText.value = m.cardName || '已激活'
+      }
+    } else {
+      membershipText.value = '去开通'
+    }
+  } catch (e) {
+    console.warn('获取统计信息失败:', e)
+  } finally {
+    statsLoading.value = false
+  }
+}
+
+// ===================== 功能导航 =====================
+const goBodyData = () => router.push('/app/body-data')
+const goMembership = () => router.push('/app/membership')
+const goRecord = () => router.push('/app/record')
+const handleFeedback = () => {
+  ElMessage.info('帮助反馈功能开发中，敬请期待')
+}
+
+// ===================== 编辑资料 =====================
+const editDialogVisible = ref(false)
 const profileFormRef = ref()
-const passwordFormRef = ref()
+const profileLoading = ref(false)
 const avatarInputRef = ref()
 
-// 加载状态
-const logoutLoading = ref(false)
-const profileLoading = ref(false)
-const passwordLoading = ref(false)
-
-// 个人信息表单
 const profileForm = reactive({
-  username: '',
-  role: '',
   nickname: '',
   avatar: '',
   phone: '',
@@ -189,31 +243,74 @@ const profileForm = reactive({
   birthday: ''
 })
 
-// 密码修改表单
+const profileRules = {
+  nickname: [
+    { required: true, message: '请输入昵称', trigger: 'blur' },
+    { min: 1, max: 20, message: '昵称长度在 1 到 20 个字符', trigger: 'blur' }
+  ],
+  phone: [{ pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }]
+}
+
+const openEditProfile = () => {
+  const u = userInfo.value
+  profileForm.nickname = u.nickname || ''
+  profileForm.avatar = u.avatar || ''
+  profileForm.phone = u.phone || ''
+  profileForm.email = u.email || ''
+  profileForm.gender = u.gender ?? 0
+  profileForm.birthday = u.birthday || ''
+  editDialogVisible.value = true
+}
+
+const handleSaveProfile = async () => {
+  try {
+    await profileFormRef.value.validate()
+    profileLoading.value = true
+    const data = {
+      nickname: profileForm.nickname,
+      avatar: profileForm.avatar,
+      phone: profileForm.phone,
+      email: profileForm.email,
+      gender: profileForm.gender,
+      birthday: profileForm.birthday
+    }
+    await userApi.updateProfile(data)
+    authStore.setUserInfo({ ...authStore.userInfo, ...data })
+    ElMessage.success('资料已更新')
+    editDialogVisible.value = false
+  } catch (error) {
+    if (error?.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
+    }
+  } finally {
+    profileLoading.value = false
+  }
+}
+
+const triggerAvatarUpload = () => avatarInputRef.value?.click()
+
+const handleAvatarChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (e) => { profileForm.avatar = e.target.result }
+  reader.readAsDataURL(file)
+  event.target.value = ''
+}
+
+// ===================== 修改密码 =====================
+const passwordDialogVisible = ref(false)
+const passwordFormRef = ref()
+const passwordLoading = ref(false)
+
 const passwordForm = reactive({
   oldPassword: '',
   newPassword: '',
   confirmPassword: ''
 })
 
-// 表单验证规则
-const profileRules = {
-  nickname: [
-    { required: true, message: '请输入昵称', trigger: 'blur' },
-    { min: 1, max: 20, message: '昵称长度在 1 到 20 个字符', trigger: 'blur' }
-  ],
-  phone: [
-    { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
-  ],
-  email: [
-    { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
-  ]
-}
-
 const passwordRules = {
-  oldPassword: [
-    { required: true, message: '请输入原密码', trigger: 'blur' }
-  ],
+  oldPassword: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
   newPassword: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
     { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' }
@@ -233,167 +330,351 @@ const passwordRules = {
   ]
 }
 
-// 初始化个人信息
-const initProfile = () => {
-  const userInfo = authStore.userInfo
-  if (userInfo) {
-    profileForm.username = userInfo.username || ''
-    profileForm.role = userInfo.role || ''
-    profileForm.nickname = userInfo.nickname || ''
-    profileForm.avatar = userInfo.avatar || ''
-    profileForm.phone = userInfo.phone || ''
-    profileForm.email = userInfo.email || ''
-    profileForm.gender = userInfo.gender || 0
-    profileForm.birthday = userInfo.birthday || ''
-  }
+const openChangePassword = () => {
+  passwordForm.oldPassword = ''
+  passwordForm.newPassword = ''
+  passwordForm.confirmPassword = ''
+  passwordDialogVisible.value = true
 }
 
-// 保存个人信息
-const handleSaveProfile = async () => {
-  try {
-    await profileFormRef.value.validate()
-    profileLoading.value = true
-
-    const updateData = {
-      nickname: profileForm.nickname,
-      avatar: profileForm.avatar,
-      phone: profileForm.phone,
-      email: profileForm.email,
-      gender: profileForm.gender,
-      birthday: profileForm.birthday
-    }
-
-    await userApi.updateProfile(updateData)
-
-    // 更新本地用户信息
-    const updatedUserInfo = { ...authStore.userInfo, ...updateData }
-    authStore.setUserInfo(updatedUserInfo)
-
-    ElMessage.success('个人信息更新成功')
-  } catch (error) {
-    console.error('保存个人信息失败:', error)
-    ElMessage.error(error.response?.data?.message || '保存失败，请稍后重试')
-  } finally {
-    profileLoading.value = false
-  }
-}
-
-// 触发头像上传
-const triggerAvatarUpload = () => {
-  avatarInputRef.value?.click()
-}
-
-// 处理头像文件选择
-const handleAvatarChange = (event) => {
-  const file = event.target.files[0]
-  if (!file) return
-
-  // 简单的前端预览（实际项目中应上传到服务器）
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    profileForm.avatar = e.target.result
-  }
-  reader.readAsDataURL(file)
-
-  // 清空 input 值，允许重复选择同一文件
-  event.target.value = ''
-}
-
-// 修改密码
 const handleChangePassword = async () => {
   try {
     await passwordFormRef.value.validate()
     passwordLoading.value = true
-
     await userApi.updatePassword({
       oldPassword: passwordForm.oldPassword,
       newPassword: passwordForm.newPassword,
       confirmPassword: passwordForm.confirmPassword
     })
-
     ElMessage.success('密码修改成功，请重新登录')
-
-    // 密码修改成功后自动登出
+    passwordDialogVisible.value = false
     await authStore.logout()
     router.push('/login')
   } catch (error) {
-    console.error('修改密码失败:', error)
-    ElMessage.error(error.response?.data?.message || '修改失败，请稍后重试')
+    if (error?.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
+    }
   } finally {
     passwordLoading.value = false
   }
 }
 
-// 重置密码表单
-const resetPasswordForm = () => {
-  passwordForm.oldPassword = ''
-  passwordForm.newPassword = ''
-  passwordForm.confirmPassword = ''
-  nextTick(() => {
-    passwordFormRef.value?.clearValidate()
-  })
-}
+// ===================== 退出登录 =====================
+const logoutLoading = ref(false)
 
-// 退出登录
 const handleLogout = async () => {
-  logoutLoading.value = true
   try {
+    await ElMessageBox.confirm('确定要退出当前账号吗？', '提示', {
+      confirmButtonText: '退出',
+      cancelButtonText: '取消',
+      type: 'warning',
+      customClass: 'custom-message-box'
+    })
+    logoutLoading.value = true
     await authStore.logout()
     router.push('/login')
-  } catch (error) {
-    console.error('登出失败:', error)
-    // 即使登出失败，也清除本地状态并跳转到登录页
-    authStore.clearAuth()
-    router.push('/login')
+  } catch {
+    // cancelled or error
   } finally {
     logoutLoading.value = false
   }
 }
 
-// 页面加载时初始化
 onMounted(() => {
-  initProfile()
+  fetchStats()
 })
 </script>
 
 <style scoped>
 .profile-view {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.profile-tabs {
-  margin-top: 20px;
-}
-
-.card-header {
+  padding-bottom: 24px;
   display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ===== 高级用户信息卡片 ===== */
+.user-hero {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #6366f1 100%);
+  padding: 2px;
+  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.25);
+}
+
+.hero-bg-shapes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.shape-1 {
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.2);
+  top: -50px;
+  right: -20px;
+}
+
+.shape-2 {
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.1);
+  bottom: -40px;
+  left: -40px;
+}
+
+.hero-glass {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 22px;
+  padding: 24px 20px 20px;
+}
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.avatar-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.user-avatar {
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.edit-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: white;
+  color: var(--primary-color);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+}
+
+.hero-text {
+  color: white;
+  flex: 1;
+}
+
+.hero-name {
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.hero-role-tag {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.hero-phone {
+  font-size: 13px;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-stats {
+  display: flex;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  padding: 16px;
   justify-content: space-between;
   align-items: center;
 }
 
-.avatar-upload {
+.stat-block {
+  flex: 1;
+  text-align: center;
+  color: white;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stat-num {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-num.highlight {
+  color: #fde047;
+}
+
+.stat-desc {
+  font-size: 11px;
+  opacity: 0.8;
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: center;
+  gap: 2px;
 }
 
-.avatar-upload-actions {
+/* ===== 菜单列表 ===== */
+.menu-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.profile-card,
-.password-card {
-  margin-top: 20px;
+.menu-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748b;
+  padding-left: 8px;
 }
 
+.menu-list {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.menu-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 68px;
+  right: 16px;
+  height: 1px;
+  background: #f1f5f9;
+}
+
+.menu-item:hover {
+  background: #f8fafc;
+}
+
+.menu-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.menu-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.menu-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.menu-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.menu-arrow {
+  color: #cbd5e1;
+  font-size: 16px;
+}
+
+/* ===== 退出登录 ===== */
 .logout-section {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-light);
-  text-align: center;
+  margin-top: 10px;
+  padding: 0 16px;
+}
+
+.logout-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ===== 弹窗样式调整 ===== */
+.avatar-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.edit-avatar-preview {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-size: 32px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .hero-glass {
+    padding: 20px 16px 16px;
+  }
+  
+  .user-avatar {
+    width: 64px !important;
+    height: 64px !important;
+  }
+  
+  .hero-name {
+    font-size: 18px;
+  }
+  
+  .menu-list {
+    border-radius: 16px;
+  }
 }
 </style>

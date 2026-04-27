@@ -1,70 +1,74 @@
 <template>
   <div class="workout-plan-view">
     <div class="page-header">
-      <h2>训练计划</h2>
-      <el-button type="primary" @click="showCreateDialog">
+      <div class="header-text">
+        <h2 class="page-title">训练计划</h2>
+        <p class="page-subtitle">制定目标，科学规划，见证每一次进步</p>
+      </div>
+      <el-button type="primary" round class="create-btn" @click="showCreateDialog">
         <el-icon><Plus /></el-icon>新建计划
       </el-button>
     </div>
 
-    <!-- 本周统计卡片 -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :span="12">
-        <el-card shadow="hover" class="stat-card">
-          <div class="stat-value">{{ weeklyStats.weeklyCount }}</div>
-          <div class="stat-label">本周训练次数</div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card shadow="hover" class="stat-card">
-          <div class="stat-value">{{ weeklyStats.weeklyVolume }}kg</div>
-          <div class="stat-label">本周总训练量</div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <!-- 本周统计卡片 (Premium) -->
+    <div class="stats-overview">
+      <div class="stat-card gradient-primary">
+        <div class="stat-icon"><el-icon><Calendar /></el-icon></div>
+        <div class="stat-info">
+          <span class="stat-value">{{ weeklyStats.weeklyCount }}</span>
+          <span class="stat-label">本周训练次数</span>
+        </div>
+      </div>
+      <div class="stat-card gradient-secondary">
+        <div class="stat-icon"><el-icon><Timer /></el-icon></div>
+        <div class="stat-info">
+          <span class="stat-value">{{ weeklyStats.weeklyVolume }}<small>kg</small></span>
+          <span class="stat-label">本周总训练量</span>
+        </div>
+      </div>
+    </div>
 
     <!-- 计划列表 -->
-    <el-card v-loading="loading" class="plan-card">
-      <template #header>
-        <div class="card-header">
-          <span>我的计划</span>
-          <el-select v-model="statusFilter" placeholder="筛选状态" size="small" clearable @change="fetchPlans">
-            <el-option label="进行中" value="ACTIVE" />
-            <el-option label="已完成" value="COMPLETED" />
-            <el-option label="已取消" value="CANCELLED" />
-          </el-select>
-        </div>
-      </template>
+    <div class="plan-section">
+      <div class="section-header">
+        <h3>我的计划</h3>
+        <el-select v-model="statusFilter" placeholder="全部状态" class="glass-select" clearable @change="fetchPlans">
+          <el-option label="进行中" value="ACTIVE" />
+          <el-option label="已完成" value="COMPLETED" />
+          <el-option label="已取消" value="CANCELLED" />
+        </el-select>
+      </div>
 
-      <el-empty v-if="!loading && plans.length === 0" description="暂无训练计划" />
+      <div v-loading="loading" class="plan-list">
+        <el-empty v-if="!loading && plans.length === 0" description="暂无训练计划，快去新建一个吧！" />
 
-      <div v-else class="plan-list">
-        <div v-for="plan in plans" :key="plan.id" class="plan-item">
-          <div class="plan-info" @click="showPlanDetail(plan.id)">
-            <h3 class="plan-name">{{ plan.name }}</h3>
-            <p class="plan-desc">{{ plan.description || '暂无描述' }}</p>
-            <div class="plan-meta">
-              <span>{{ plan.startDate }} ~ {{ plan.endDate || '长期' }}</span>
-              <el-tag size="small" :type="statusType(plan.status)">
+        <div v-else v-for="plan in plans" :key="plan.id" class="premium-plan-card">
+          <div class="plan-content" @click="showPlanDetail(plan.id)">
+            <div class="plan-header">
+              <h3 class="plan-name">{{ plan.name }}</h3>
+              <el-tag size="small" :type="statusType(plan.status)" effect="dark" round>
                 {{ statusLabel(plan.status) }}
               </el-tag>
-              <span class="day-count">{{ plan.dayCount }}天/周</span>
+            </div>
+            <p class="plan-desc">{{ plan.description || '定制化训练方案，帮助你快速达成健身目标。' }}</p>
+            <div class="plan-meta">
+              <div class="meta-item"><el-icon><Clock /></el-icon> {{ plan.startDate }} ~ {{ plan.endDate || '长期' }}</div>
+              <div class="meta-item"><el-icon><Calendar /></el-icon> 每周 {{ plan.dayCount }} 练</div>
             </div>
           </div>
+          
           <div class="plan-actions">
-            <el-button size="small" @click="showPlanDetail(plan.id)">查看</el-button>
             <el-button
-              size="small"
               type="success"
+              round
               v-if="plan.status === 'ACTIVE'"
               @click="startWorkout(plan)"
+              class="action-btn"
             >开始训练</el-button>
-            <el-popconfirm
-              title="确定删除该计划？"
-              @confirm="handleDeletePlan(plan.id)"
-            >
+            <el-button round @click="showPlanDetail(plan.id)" class="action-btn">查看</el-button>
+            <el-popconfirm title="确定删除该计划？" @confirm="handleDeletePlan(plan.id)">
               <template #reference>
-                <el-button size="small" type="danger">删除</el-button>
+                <el-button type="danger" plain round class="action-btn">删除</el-button>
               </template>
             </el-popconfirm>
           </div>
@@ -76,22 +80,19 @@
             v-model:current-page="query.pageNum"
             :page-size="query.pageSize"
             :total="total"
+            background
             layout="prev, pager, next"
             @current-change="fetchPlans"
           />
         </div>
       </div>
-    </el-card>
+    </div>
 
-    <!-- 计划详情弹窗 -->
-    <el-dialog
-      v-model="detailVisible"
-      :title="currentPlan?.name"
-      width="700px"
-      top="5vh"
-      destroy-on-close
-    >
+    <!-- 详情和创建弹窗同样保持不变但可以应用全局样式 -->
+    <!-- 由于弹窗结构较复杂，这里保留功能逻辑，样式上跟随主CSS优化 -->
+    <el-dialog v-model="detailVisible" :title="currentPlan?.name" width="700px" top="5vh" destroy-on-close class="custom-dialog">
       <template v-if="currentPlan">
+        <!-- 弹窗内容省略以保持代码简洁，原有逻辑可用 -->
         <el-descriptions :column="2" border class="detail-desc">
           <el-descriptions-item label="计划名称" :span="2">{{ currentPlan.name }}</el-descriptions-item>
           <el-descriptions-item label="状态" :span="1">
@@ -120,15 +121,9 @@
       </template>
     </el-dialog>
 
-    <!-- 新建计划弹窗 -->
-    <el-dialog
-      v-model="createVisible"
-      title="新建训练计划"
-      width="800px"
-      top="5vh"
-      destroy-on-close
-    >
+    <el-dialog v-model="createVisible" title="新建训练计划" width="800px" top="5vh" destroy-on-close class="custom-dialog">
       <el-form ref="formRef" :model="planForm" :rules="formRules" label-width="100px">
+        <!-- 弹窗内容省略以保持代码简洁，原有逻辑可用 -->
         <el-form-item label="计划名称" prop="name">
           <el-input v-model="planForm.name" placeholder="为计划起个名字" maxlength="100" />
         </el-form-item>
@@ -214,14 +209,14 @@
           </div>
         </div>
 
-        <el-button type="primary" plain @click="addDay" class="add-day-btn">
+        <el-button type="primary" plain @click="addDay" class="add-day-btn" round>
           <el-icon><Plus /></el-icon>添加训练日
         </el-button>
       </el-form>
 
       <template #footer>
-        <el-button @click="createVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="handleCreatePlan">保存</el-button>
+        <el-button @click="createVisible = false" round>取消</el-button>
+        <el-button type="primary" :loading="saving" @click="handleCreatePlan" round>保存计划</el-button>
       </template>
     </el-dialog>
   </div>
@@ -233,7 +228,7 @@ import { useRouter } from 'vue-router'
 import { workoutApi } from '@/api/workout'
 import { exerciseApi } from '@/api/exercise'
 import { ElMessage } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Clock, Calendar, Timer } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
@@ -429,117 +424,215 @@ onMounted(() => {
 
 <style scoped>
 .workout-plan-view {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
+  padding-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-top: 8px;
 }
 
-.page-header h2 {
+.page-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #64748b;
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
 }
 
-.stats-row {
-  margin-bottom: 16px;
+.create-btn {
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+/* 统计卡片 */
+.stats-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .stat-card {
-  text-align: center;
-  border-radius: 12px;
+  padding: 24px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #6366f1 100%);
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  backdrop-filter: blur(4px);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-value {
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--el-color-primary);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.stat-value small {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: 4px;
 }
 
 .stat-label {
   font-size: 13px;
-  color: var(--el-text-color-secondary);
   margin-top: 4px;
+  opacity: 0.9;
 }
 
-.plan-card {
-  border-radius: 12px;
+/* 计划列表 */
+.plan-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.card-header {
+.section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.section-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+:deep(.glass-select .el-input__wrapper) {
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
 }
 
 .plan-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.plan-item {
+.premium-plan-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 8px;
-  transition: background-color 0.2s;
+  padding: 20px 24px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 }
 
-.plan-item:hover {
-  background-color: var(--el-fill-color-light);
+.premium-plan-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border-color: #e2e8f0;
 }
 
-.plan-info {
+.plan-content {
   flex: 1;
   cursor: pointer;
+  padding-right: 20px;
+}
+
+.plan-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .plan-name {
-  margin: 0 0 4px;
-  font-size: 16px;
-  font-weight: 600;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .plan-desc {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   font-size: 13px;
-  color: var(--el-text-color-secondary);
+  color: #64748b;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .plan-meta {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
+  gap: 16px;
 }
 
-.day-count {
-  background: var(--el-fill-color);
-  padding: 2px 8px;
-  border-radius: 4px;
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
 }
 
 .plan-actions {
   display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-  margin-left: 16px;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.action-btn {
+  width: 100px;
 }
 
 .pagination-wrap {
   display: flex;
   justify-content: center;
   margin-top: 16px;
-  padding: 8px 0;
 }
 
 /* 详情弹窗 */
@@ -594,5 +687,23 @@ onMounted(() => {
 .add-day-btn {
   width: 100%;
   margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .premium-plan-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .plan-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+  
+  .action-btn {
+    width: auto;
+  }
 }
 </style>

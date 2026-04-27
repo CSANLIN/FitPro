@@ -1,74 +1,84 @@
 <template>
   <div class="membership-view">
-    <h2 class="page-title">我的会籍</h2>
+    <div class="page-header">
+      <h2 class="page-title">会籍中心</h2>
+      <p class="page-subtitle">尊享特权，畅想无尽运动乐趣</p>
+    </div>
 
     <!-- 加载状态 -->
     <div v-if="loading" v-loading="loading" style="min-height: 200px"></div>
 
     <template v-else>
-      <!-- 活跃会籍卡片 -->
+      <!-- 活跃会籍卡片 (Premium VIP Card) -->
       <div v-if="activeMembership" class="active-card-wrapper">
-        <div class="membership-card" :class="cardTheme(activeMembership.cardType)">
-          <div class="card-header">
-            <span class="card-name">{{ activeMembership.cardName }}</span>
-            <el-tag size="small" :type="statusType(activeMembership.status)" effect="dark">
+        <div class="vip-card premium-shadow" :class="cardTheme(activeMembership.cardType)">
+          <!-- 卡片背景装饰 -->
+          <div class="card-deco deco-1"></div>
+          <div class="card-deco deco-2"></div>
+          
+          <div class="card-top">
+            <div class="brand">FitPro VIP</div>
+            <el-tag size="small" :type="statusType(activeMembership.status)" effect="dark" class="status-tag" round>
               {{ statusLabel(activeMembership.status) }}
             </el-tag>
           </div>
-          <div class="card-body">
-            <div class="card-stat" v-if="activeMembership.cardType !== 'TIMES'">
-              <span class="stat-value">{{ activeMembership.remainingDays ?? '--' }}</span>
-              <span class="stat-label">剩余天数</span>
-            </div>
-            <div class="card-stat" v-if="activeMembership.cardType === 'TIMES'">
-              <span class="stat-value">{{ activeMembership.remainingTimes ?? '--' }}</span>
-              <span class="stat-label">剩余次数</span>
-            </div>
-            <div class="card-stat">
-              <span class="stat-value">{{ activeMembership.cardPrice }}元</span>
-              <span class="stat-label">卡种价格</span>
-            </div>
+          
+          <div class="card-middle">
+            <h3 class="card-name">{{ activeMembership.cardName }}</h3>
+            <div class="card-price">¥{{ activeMembership.cardPrice }}</div>
           </div>
-          <div class="card-footer">
-            <span>开始: {{ formatDate(activeMembership.startDate) }}</span>
-            <span v-if="activeMembership.endDate">到期: {{ formatDate(activeMembership.endDate) }}</span>
+          
+          <div class="card-bottom">
+            <div class="stat-group">
+              <div class="stat-item" v-if="activeMembership.cardType !== 'TIMES'">
+                <span class="label">剩余天数</span>
+                <span class="value">{{ activeMembership.remainingDays ?? '--' }}</span>
+              </div>
+              <div class="stat-item" v-if="activeMembership.cardType === 'TIMES'">
+                <span class="label">剩余次数</span>
+                <span class="value">{{ activeMembership.remainingTimes ?? '--' }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">卡种类型</span>
+                <span class="value">{{ typeLabel(activeMembership.cardType) }}</span>
+              </div>
+            </div>
+            
+            <div class="validity">
+              {{ formatDate(activeMembership.startDate) }} 
+              <span v-if="activeMembership.endDate">至 {{ formatDate(activeMembership.endDate) }}</span>
+              <span v-else>至 无限期</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <el-empty v-else description="暂无活跃会籍" class="no-membership" />
+      <el-empty v-else description="您当前没有活跃的会籍卡" class="no-membership">
+        <el-button color="#10b981" round @click="goMembershipManage" size="large">立即开通会籍</el-button>
+      </el-empty>
 
       <!-- 历史会籍 -->
-      <el-card class="history-card" v-if="historyMemberships.length > 0">
-        <template #header>
-          <span>历史会籍</span>
-        </template>
-        <el-table :data="historyMemberships" stripe size="small" style="width: 100%">
-          <el-table-column prop="cardName" label="卡种" width="100" />
-          <el-table-column prop="cardType" label="类型" width="70" align="center">
-            <template #default="{ row }">
-              {{ typeLabel(row.cardType) }}
-            </template>
-          </el-table-column>
-          <el-table-column label="状态" width="80" align="center">
-            <template #default="{ row }">
-              <el-tag :type="statusType(row.status)" size="small">
-                {{ statusLabel(row.status) }}
+      <div class="history-section" v-if="historyMemberships.length > 0">
+        <h3 class="section-title">历史会籍</h3>
+        <div class="history-list">
+          <div v-for="item in historyMemberships" :key="item.id" class="history-item">
+            <div class="history-icon" :class="cardTheme(item.cardType)">
+              <el-icon><Ticket /></el-icon>
+            </div>
+            <div class="history-info">
+              <div class="history-name">{{ item.cardName }}</div>
+              <div class="history-meta">
+                {{ formatDate(item.startDate) }} ~ {{ item.endDate ? formatDate(item.endDate) : '不限' }}
+              </div>
+            </div>
+            <div class="history-status">
+              <el-tag :type="statusType(item.status)" size="small" round>
+                {{ statusLabel(item.status) }}
               </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="有效期" min-width="180">
-            <template #default="{ row }">
-              {{ formatDate(row.startDate) }} ~ {{ row.endDate ? formatDate(row.endDate) : '不限' }}
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" width="160">
-            <template #default="{ row }">
-              {{ formatDate(row.createdAt) }}
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
+            </div>
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -76,6 +86,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { membershipApi } from '@/api/membership'
+import { ElMessage } from 'element-plus'
+import { Ticket } from '@element-plus/icons-vue'
 
 const loading = ref(false)
 const memberships = ref([])
@@ -93,7 +105,7 @@ const typeLabel = (val) => ({
 }[val] || val)
 
 const statusLabel = (val) => ({
-  ACTIVE: '活跃', FROZEN: '冻结', EXPIRED: '已过期', CANCELLED: '已取消'
+  ACTIVE: '活跃', FROZEN: '已冻结', EXPIRED: '已过期', CANCELLED: '已取消'
 }[val] || val)
 
 const statusType = (val) => ({
@@ -104,7 +116,7 @@ const cardTheme = (type) => {
   const themes = {
     MONTH: 'theme-blue',
     QUARTER: 'theme-green',
-    YEAR: 'theme-purple',
+    YEAR: 'theme-black',
     TIMES: 'theme-orange'
   }
   return themes[type] || 'theme-blue'
@@ -112,7 +124,11 @@ const cardTheme = (type) => {
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '--'
-  return dateStr.substring(0, 10)
+  return dateStr.substring(0, 10).replace(/-/g, '/')
+}
+
+const goMembershipManage = () => {
+  ElMessage.info('请前往健身房前台咨询办理会籍')
 }
 
 const fetchMemberships = async () => {
@@ -133,92 +149,235 @@ onMounted(() => {
 
 <style scoped>
 .membership-view {
-  max-width: 900px;
+  max-width: 800px;
   margin: 0 auto;
+  padding-bottom: 40px;
 }
 
-.page-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 20px;
-}
-
-.active-card-wrapper {
+.page-header {
+  margin-top: 8px;
   margin-bottom: 24px;
 }
 
-.membership-card {
-  border-radius: 16px;
-  padding: 24px;
-  color: white;
-  position: relative;
-  overflow: hidden;
+.page-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  color: #1e293b;
+  letter-spacing: -0.5px;
 }
 
-.membership-card::before {
-  content: '';
+.page-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* VIP 卡片设计 */
+.active-card-wrapper {
+  margin-bottom: 32px;
+  perspective: 1000px;
+}
+
+.vip-card {
+  position: relative;
+  border-radius: 24px;
+  padding: 32px;
+  color: white;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  transition: transform 0.5s ease;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.vip-card:hover {
+  transform: translateY(-8px) rotateX(2deg);
+}
+
+.theme-blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 20px 40px rgba(79, 172, 254, 0.3); }
+.theme-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); box-shadow: 0 20px 40px rgba(56, 239, 125, 0.3); }
+.theme-black { background: linear-gradient(135deg, #232526 0%, #414345 100%); box-shadow: 0 20px 40px rgba(35, 37, 38, 0.3); color: #e2e8f0;}
+.theme-orange { background: linear-gradient(135deg, #f12711 0%, #f5af19 100%); box-shadow: 0 20px 40px rgba(245, 175, 25, 0.3); }
+
+/* 装饰背景 */
+.card-deco {
   position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 200px;
-  height: 200px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
 }
 
-.theme-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.theme-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.theme-purple { background: linear-gradient(135deg, #7F00FF 0%, #E100FF 100%); }
-.theme-orange { background: linear-gradient(135deg, #f12711 0%, #f5af19 100%); }
+.deco-1 {
+  width: 300px;
+  height: 300px;
+  top: -100px;
+  right: -50px;
+}
 
-.card-header {
+.deco-2 {
+  width: 150px;
+  height: 150px;
+  bottom: -50px;
+  left: -20px;
+}
+
+/* 卡片内容 */
+.card-top, .card-middle, .card-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+.card-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+}
+
+.brand {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.status-tag {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  backdrop-filter: blur(4px);
+}
+
+.card-middle {
+  margin: 24px 0;
 }
 
 .card-name {
-  font-size: 18px;
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.card-price {
+  font-size: 16px;
+  opacity: 0.9;
   font-weight: 600;
 }
 
-.card-body {
+.card-bottom {
   display: flex;
-  gap: 40px;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
-.card-stat {
+.stat-group {
+  display: flex;
+  gap: 32px;
+}
+
+.stat-item {
   display: flex;
   flex-direction: column;
 }
 
-.stat-value {
-  font-size: 32px;
+.stat-item .label {
+  font-size: 11px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.stat-item .value {
+  font-size: 20px;
   font-weight: 700;
+  letter-spacing: 1px;
 }
 
-.stat-label {
+.validity {
   font-size: 12px;
-  opacity: 0.9;
-  margin-top: 4px;
-}
-
-.card-footer {
-  display: flex;
-  gap: 24px;
-  font-size: 12px;
-  opacity: 0.85;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding-top: 12px;
+  opacity: 0.8;
+  font-weight: 500;
+  letter-spacing: 1px;
 }
 
 .no-membership {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 0;
   margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
-.history-card {
+/* 历史列表 */
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s;
+}
+
+.history-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.history-icon {
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  margin-right: 16px;
+}
+
+.history-info {
+  flex: 1;
+}
+
+.history-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.history-meta {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+  .card-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  
+  .stat-group {
+    gap: 20px;
+  }
 }
 </style>

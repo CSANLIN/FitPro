@@ -16,6 +16,7 @@ const AdminDashboard = () => import('@/views/admin/DashboardView.vue')
 const ExerciseManage = () => import('@/views/exercise/ExerciseManageView.vue')
 
 // 会员端子路由（后续填充）
+const AppHome = () => import('@/views/app/HomeView.vue')
 const AppProfile = () => import('@/views/app/ProfileView.vue')
 const AppBodyData = () => import('@/views/app/BodyDataView.vue')
 const ExerciseList = () => import('@/views/exercise/ExerciseListView.vue')
@@ -154,8 +155,17 @@ const router = createRouter({
         requiresAuth: true,
         roles: ['ROLE_MEMBER']
       },
-      redirect: '/app/profile',
+      redirect: '/app/home',
       children: [
+        {
+          path: 'home',
+          name: 'AppHome',
+          component: AppHome,
+          meta: {
+            title: '首页',
+            icon: 'HomeFilled'
+          }
+        },
         {
           path: 'profile',
           name: 'AppProfile',
@@ -315,7 +325,7 @@ router.beforeEach(async (to, from, next) => {
       if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
         next('/admin/dashboard')
       } else {
-        next('/app/profile')
+        next('/app/home')
       }
     } else {
       // 本地没有用户信息，尝试获取
@@ -326,7 +336,7 @@ router.beforeEach(async (to, from, next) => {
         if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
           next('/admin/dashboard')
         } else {
-          next('/app/profile')
+          next('/app/home')
         }
       } catch (error) {
         // 获取用户信息失败，可能是token无效，清除认证状态并停留在登录页
