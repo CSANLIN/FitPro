@@ -56,7 +56,6 @@
               <span>会员管理</span>
             </template>
             <el-menu-item index="/admin/member/list">会员列表</el-menu-item>
-            <el-menu-item index="/admin/member/add">新增会员</el-menu-item>
           </el-sub-menu>
 
           <el-sub-menu index="coach">
@@ -65,7 +64,6 @@
               <span>教练管理</span>
             </template>
             <el-menu-item index="/admin/coach/list">教练列表</el-menu-item>
-            <el-menu-item index="/admin/coach/add">新增教练</el-menu-item>
           </el-sub-menu>
 
           <el-sub-menu index="course">
@@ -109,6 +107,7 @@
             </template>
             <el-menu-item index="/admin/system/announcement">公告管理</el-menu-item>
             <el-menu-item index="/admin/system/log">操作日志</el-menu-item>
+            <el-menu-item index="/admin/system/config">系统配置</el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>

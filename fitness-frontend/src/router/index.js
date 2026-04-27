@@ -14,6 +14,13 @@ const ForbiddenView = () => import('@/views/error/ForbiddenView.vue')
 // 管理端子路由
 const AdminDashboard = () => import('@/views/admin/DashboardView.vue')
 const ExerciseManage = () => import('@/views/exercise/ExerciseManageView.vue')
+const MemberList = () => import('@/views/admin/MemberListView.vue')
+const MemberDetail = () => import('@/views/admin/MemberDetailView.vue')
+const CoachList = () => import('@/views/admin/CoachListView.vue')
+const CourseManage = () => import('@/views/admin/CourseManageView.vue')
+const AnnouncementManage = () => import('@/views/admin/AnnouncementManageView.vue')
+const OperationLog = () => import('@/views/admin/OperationLogView.vue')
+const SystemConfig = () => import('@/views/admin/SystemConfigView.vue')
 
 // 会员端子路由（后续填充）
 const AppHome = () => import('@/views/app/HomeView.vue')
@@ -82,6 +89,66 @@ const router = createRouter({
             icon: 'Dashboard'
           }
         },
+        // 会员管理
+        {
+          path: 'member/list',
+          name: 'MemberList',
+          component: MemberList,
+          meta: {
+            title: '会员列表',
+            icon: 'User'
+          }
+        },
+        {
+          path: 'member/detail/:id',
+          name: 'MemberDetail',
+          component: MemberDetail,
+          meta: {
+            title: '会员详情',
+            icon: 'User',
+            hidden: true
+          }
+        },
+        // 教练管理
+        {
+          path: 'coach/list',
+          name: 'CoachList',
+          component: CoachList,
+          meta: {
+            title: '教练列表',
+            icon: 'UserFilled'
+          }
+        },
+        // 课程管理
+        {
+          path: 'course/list',
+          name: 'CourseManage',
+          component: CourseManage,
+          meta: {
+            title: '课程列表',
+            icon: 'Calendar'
+          }
+        },
+        // 排课管理
+        {
+          path: 'course/schedule',
+          name: 'ScheduleManage',
+          component: ScheduleManage,
+          meta: {
+            title: '排课管理',
+            icon: 'Calendar'
+          }
+        },
+        // 训练模板管理
+        {
+          path: 'workout/templates',
+          name: 'WorkoutTemplateManage',
+          component: WorkoutTemplateManage,
+          meta: {
+            title: '训练模板',
+            icon: 'List'
+          }
+        },
         // 运动库管理
         {
           path: 'exercise/category',
@@ -101,36 +168,6 @@ const router = createRouter({
             icon: 'Basketball'
           }
         },
-        // 训练模板管理
-        {
-          path: 'workout/templates',
-          name: 'WorkoutTemplateManage',
-          component: WorkoutTemplateManage,
-          meta: {
-            title: '训练模板',
-            icon: 'List'
-          }
-        },
-        // 课程管理
-        {
-          path: 'course/list',
-          name: 'CourseManage',
-          component: ScheduleManage,
-          meta: {
-            title: '课程列表',
-            icon: 'Calendar'
-          }
-        },
-        // 排课管理
-        {
-          path: 'course/schedule',
-          name: 'ScheduleManage',
-          component: ScheduleManage,
-          meta: {
-            title: '排课管理',
-            icon: 'Calendar'
-          }
-        },
         // 会籍管理
         {
           path: 'membership',
@@ -139,6 +176,34 @@ const router = createRouter({
           meta: {
             title: '会籍管理',
             icon: 'Ticket'
+          }
+        },
+        // 系统管理
+        {
+          path: 'system/announcement',
+          name: 'AnnouncementManage',
+          component: AnnouncementManage,
+          meta: {
+            title: '公告管理',
+            icon: 'Warning'
+          }
+        },
+        {
+          path: 'system/log',
+          name: 'OperationLog',
+          component: OperationLog,
+          meta: {
+            title: '操作日志',
+            icon: 'Document'
+          }
+        },
+        {
+          path: 'system/config',
+          name: 'SystemConfig',
+          component: SystemConfig,
+          meta: {
+            title: '系统配置',
+            icon: 'Setting'
           }
         }
         // 其他管理端路由后续添加

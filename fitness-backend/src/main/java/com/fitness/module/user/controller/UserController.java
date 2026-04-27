@@ -43,14 +43,14 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "分页查询用户列表（管理端）")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COACH')")
     public Result<PageResult<UserVO>> list(UserQueryDTO query) {
         return Result.success(userService.pageList(query));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "获取用户详情")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or #id == authentication.principal")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COACH')")
     public Result<UserVO> getDetail(@PathVariable Long id) {
         return Result.success(userService.getDetail(id));
     }

@@ -47,6 +47,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Spring AOP Starter: 支持面向切面编程，用于操作日志记录 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- Spring Data Redis Starter: 提供对 Redis 缓存的操作支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

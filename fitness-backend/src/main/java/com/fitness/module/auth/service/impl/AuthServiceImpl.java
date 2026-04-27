@@ -68,7 +68,12 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(encryptedPassword);
         user.setNickname(dto.getNickname());
         user.setPhone(dto.getPhone());
-        user.setRole("MEMBER"); // 注册用户默认角色为 MEMBER
+        // 允许注册时指定角色，但限制只能为 MEMBER 或 COACH
+        String role = dto.getRole() != null ? dto.getRole() : "MEMBER";
+        if (!"MEMBER".equals(role) && !"COACH".equals(role)) {
+            role = "MEMBER";
+        }
+        user.setRole(role);
         user.setStatus(0); // 状态正常
 
         // 6. 保存用户

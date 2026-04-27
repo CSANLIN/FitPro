@@ -3,7 +3,50 @@
 > 格式: `## [日期] Phase X.X — 任务标题`
 > 状态标记同 engineering_tasks: `[x]` 已完成 · `[~]` 进行中 · `[!]` 阻塞
 
-## [2026-04-27] Phase 4.1 — 会员端前端界面全面美化与体验重构
+## [2026-04-27] Phase 4.1 — 仪表盘
+
+**完成内容**
+- 创建 `module/admin/` 模块，包含 DashboardService / DashboardController
+- `DashboardStatsVO` 统计：会员数、签到数、课程数、教练数、待开课数
+- 近7日签到趋势（折线图）、注册趋势（柱状图）
+- 待办排课列表、今日签到记录
+- 前端 `DashboardView.vue`：6张数据卡片 + ECharts 图表 + 列表
+
+## [2026-04-27] Phase 4.2 — 会员管理增强
+
+**完成内容**
+- 会员列表页 `MemberListView.vue`：搜索/筛选/分页 + 简要详情弹窗 + 状态切换
+- 会员详情页 `MemberDetailView.vue`：基本信息卡片 + 会籍管理（办卡/续费/冻结/退卡）+ 签到记录
+
+## [2026-04-27] Phase 4.3 — 教练与课程管理
+
+**完成内容**
+- 教练列表页 `CoachListView.vue`：搜索筛选 + 新增教练弹窗 + 状态切换
+- 课程管理页 `CourseManageView.vue`：课程 CRUD + 上下架 + 删除
+
+## [2026-04-27] Phase 4.4 — 系统管理
+
+**完成内容**
+- 公告模块后端：AnnouncementEntity → Mapper → Service → Controller（CRUD + 置顶 + 发布/草稿）
+- 操作日志后端：OperationLogEntity → Mapper → Service → Controller（分页 + 筛选）
+- LogAspect AOP 切面：自动记录 POST/PUT/DELETE 操作的耗时、IP、状态
+- 公告管理页 `AnnouncementManageView.vue`：列表 + 新增/编辑弹窗 + 发布/置顶/删除
+- 操作日志页 `OperationLogView.vue`：搜索筛选 + 表格 + 详情弹窗
+- 系统配置页 `SystemConfigView.vue`：基础设置表单 + 系统信息卡
+- 统一管理端 API `src/api/admin.js`
+- 补全所有管理端路由
+- 修复 AuthServiceImpl 角色硬编码，支持 COACH 注册
+- 放宽 UserController 权限，允许 COACH 查看用户列表/详情
+
+**关键决策**
+- 操作日志采用 AOP 切面自动记录，只拦截 POST/PUT/DELETE 操作，GET 不记录
+- 系统配置页前端直接用默认值，后端暂不实现持久化接口
+- ECharts 采用按需渲染，图表数据为空时显示空状态占位
+
+**遗留问题**
+- ECharts 打包体积较大（~1.1MB），后续可考虑按需导入
+- 系统配置功能未接入后端持久化，仅前端展示
+- 操作日志 AOP 暂未实现请求参数脱敏
 
 **完成内容**
 - 路由与布局重构 (`AppLayout.vue`, `router/index.js`)：

@@ -196,3 +196,52 @@
 ---
 
 <!-- PLACEHOLDER_PHASE4 -->
+
+## Phase 4 — 管理端完善 ✅
+
+### 4.1 仪表盘
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 4.1.1 | 仪表盘后端统计 | `module/admin/service/DashboardService.java` + `impl/`, `module/admin/controller/DashboardController.java` | 统计会员数/签到数/课程数/教练数/待开课数 | `[x]` |
+| 4.1.2 | 仪表盘 VO | `module/admin/vo/DashboardStatsVO.java` | 含嵌套 VO: ChartDataItem, CourseBookingRank, UpcomingSchedule, LatestCheckIn | `[x]` |
+| 4.1.3 | 仪表盘前端 API | `src/api/dashboard.js` | GET /api/admin/dashboard/stats | `[x]` |
+| 4.1.4 | 仪表盘页面 | `src/views/admin/DashboardView.vue` | 6个数据卡片 + ECharts 折线图/柱状图 + 待办排课 + 今日签到 | `[x]` |
+
+### 4.2 会员管理
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 4.2.1 | 会员列表页 | `src/views/admin/MemberListView.vue` | 搜索/筛选/分页 + 简要详情弹窗 + 状态切换 | `[x]` |
+| 4.2.2 | 会员详情页 | `src/views/admin/MemberDetailView.vue` | 基本信息 + 会籍列表 + 签到记录 + 办卡/续费/冻结/退卡操作 | `[x]` |
+
+### 4.3 教练与课程管理
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 4.3.1 | 教练管理页 | `src/views/admin/CoachListView.vue` | 列表搜索筛选 + 新增教练弹窗 + 状态切换 | `[x]` |
+| 4.3.2 | 课程管理页 | `src/views/admin/CourseManageView.vue` | 课程 CRUD + 上下架 + 搜索筛选 | `[x]` |
+
+### 4.4 系统管理
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 4.4.1 | 公告 Entity/Service/Controller | `module/system/entity/AnnouncementEntity.java`, service/, controller/ | 公告 CRUD + 置顶 + 发布/草稿切换 | `[x]` |
+| 4.4.2 | 操作日志 Entity/Service/Controller | `module/system/entity/OperationLogEntity.java`, service/, controller/ | 日志分页查询 + 模块/操作筛选 + 关键词搜索 | `[x]` |
+| 4.4.3 | 操作日志 AOP 切面 | `module/system/aop/LogAspect.java` | 自动记录 POST/PUT/DELETE 操作 + 耗时 + IP + 状态 | `[x]` |
+| 4.4.4 | 管理端 API 封装 | `src/api/admin.js` | 会员/教练/公告/日志/系统配置统一 API | `[x]` |
+| 4.4.5 | 管理端路由 | `src/router/index.js` | 补充所有管理端路由：member/detail, coach/list, course/list, system/* | `[x]` |
+| 4.4.6 | 公告管理页 | `src/views/admin/AnnouncementManageView.vue` | 公告列表 + 新增/编辑弹窗 + 发布/置顶/删除操作 | `[x]` |
+| 4.4.7 | 操作日志页 | `src/views/admin/OperationLogView.vue` | 日志搜索筛选 + 表格展示 + 详情弹窗 | `[x]` |
+| 4.4.8 | 系统配置页 | `src/views/admin/SystemConfigView.vue` | 系统设置表单 + 系统信息卡片 | `[x]` |
+
+### 4.5 其他
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 4.5.1 | 注册允许 COACH 角色 | `module/auth/service/impl/AuthServiceImpl.java` | 注册时支持指定 COACH/MEMBER 角色 | `[x]` |
+| 4.5.2 | 用户控制器权限放宽 | `module/user/controller/UserController.java` | 允许 COACH 角色查询用户列表和详情 | `[x]` |
+| 4.5.3 | AdminLayout 菜单更新 | `src/layout/AdminLayout.vue` | 移除不存在的菜单项，增加系统配置入口 | `[x]` |
+| 4.5.4 | AOP 依赖 | `pom.xml` | 添加 spring-boot-starter-aop | `[x]` |
+
+**M4 里程碑验收**: 管理后台全部页面可用 + 仪表盘数据统计 + 会员详情管理 + 教练管理 + 课程维护 + 公告管理 + 操作日志
