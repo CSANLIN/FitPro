@@ -209,9 +209,10 @@ public class DashboardServiceImpl implements DashboardService {
         for (CheckInEntity entity : entities) {
             LatestCheckIn ci = new LatestCheckIn();
             ci.setId(entity.getId());
-            // 尝试获取用户名，如果没有，默认
             ci.setUserName("用户" + entity.getUserId());
-            ci.setCheckInTime(entity.getCheckInTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            ci.setCheckInTime(entity.getCheckInTime() != null
+                    ? entity.getCheckInTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    : "");
             list.add(ci);
         }
         return list;

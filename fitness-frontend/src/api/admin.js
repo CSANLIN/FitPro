@@ -14,7 +14,7 @@ export const adminApi = {
   // ====== 课程管理 ======
   listCourses: (params) => request.get('/courses', { params }),
   createCourse: (data) => request.post('/courses', data),
-  updateCourse: (id, data) => request.put(`/courses/${id}`, data),
+  updateCourse: (id, data) => request.put('/courses', { ...data, id }),
   deleteCourse: (id) => request.delete(`/courses/${id}`),
   listAllBookings: (params) => request.get('/course-bookings', { params }),
 

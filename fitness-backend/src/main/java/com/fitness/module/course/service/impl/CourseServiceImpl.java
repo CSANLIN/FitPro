@@ -98,7 +98,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, CourseEntity>
             throw new BusinessException(404, "课程不存在");
         }
 
-        int newStatus = entity.getStatus() == 1 ? 0 : 1;
+        int newStatus = entity.getStatus() != null && entity.getStatus() == 1 ? 0 : 1;
         entity.setStatus(newStatus);
         this.updateById(entity);
 

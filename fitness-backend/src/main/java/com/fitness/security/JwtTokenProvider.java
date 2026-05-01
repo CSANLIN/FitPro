@@ -30,7 +30,7 @@ public class JwtTokenProvider {
 
     public String generateAccessToken(Long userId, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
+        claims.put("userId", String.valueOf(userId));
         claims.put("role", role);
         claims.put("type", "access");
 
@@ -48,7 +48,7 @@ public class JwtTokenProvider {
 
     public String generateRefreshToken(Long userId) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
+        claims.put("userId", String.valueOf(userId));
         claims.put("type", "refresh");
 
         Date now = new Date();

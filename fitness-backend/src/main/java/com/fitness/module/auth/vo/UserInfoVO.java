@@ -1,5 +1,7 @@
 package com.fitness.module.auth.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 @Schema(description = "用户信息响应")
 public class UserInfoVO {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(description = "用户ID", example = "123456789")
     private Long id;
 

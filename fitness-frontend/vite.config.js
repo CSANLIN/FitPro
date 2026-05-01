@@ -29,5 +29,17 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  // Vitest 测试配置
+  test: {
+    environment: 'happy-dom',
+    setupFiles: './src/test/setup.js',
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    css: false,
+    server: {
+      deps: {
+        inline: ['element-plus']
+      }
+    }
   }
 })

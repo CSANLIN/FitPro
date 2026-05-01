@@ -183,7 +183,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         }
 
         // 切换状态（0正常 ↔ 1禁用）
-        Integer newStatus = user.getStatus() == 0 ? 1 : 0;
+        Integer currentStatus = user.getStatus();
+        Integer newStatus = (currentStatus != null && currentStatus == 0) ? 1 : 0;
         user.setStatus(newStatus);
         this.updateById(user);
         log.info("用户状态切换成功: userId={}, newStatus={}", id, newStatus);

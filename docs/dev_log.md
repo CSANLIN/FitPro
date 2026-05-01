@@ -525,3 +525,35 @@
 - 管理端分类管理和动作管理合并在一个页面中（`ExerciseManageView.vue`）用 Tab 切换，两种管理模式下各有独立的 CRUD 逻辑
 - 删除分类时校验分类下是否有动作，有动作则禁止删除
 
+## [2026-04-29] Phase 5.3 — 测试
+
+**完成内容**
+- **Service 层单元测试（72个用例）**：
+  - `AuthServiceImplTest.java`（19个）— 注册/登录/刷新Token/登出/获取用户信息，覆盖用户名重复、手机号重复、密码不匹配、用户禁用等异常场景
+  - `CourseBookingServiceImplTest.java`（10个）— 预约/取消/容量控制，覆盖排课不存在、状态异常、重复预约、乐观锁失败等
+  - `CourseScheduleServiceImplTest.java`（7个）— 排课创建/冲突检测/取消，覆盖课程不存在、已下架、时间冲突等
+  - `CheckInServiceImplTest.java`（9个）— 签到/重复签到/会籍校验/次卡扣次数自动过期/连续签到统计
+  - `MembershipServiceImplTest.java`（27个）— 卡种CRUD+上下架切换、办卡(期限卡+次卡)、续费、冻结/解冻、退卡、查询方法
+- **Controller 层接口测试（18个用例）**：
+  - `AuthControllerTest.java`（6个）— 登录/注册/获取用户信息，含参数校验异常验证
+  - `CourseBookingControllerTest.java`（5个）— 预约/取消/我的预约列表/管理端列表
+  - `CheckInControllerTest.java`（6个）— 签到/签到统计/签到记录/管理端查询
+- **端到端流程测试（1个用例）**：
+  - `FullBusinessFlowE2ETest.java` — 注册→登录→查看信息→预约→查看预约→取消→签到→统计→业务异常处理全链路
+- **前端组件测试（25个用例）**：
+  - 安装 Vitest 4.1 + @vue/test-utils 2.4 + happy-dom 20.9
+  - `stores/__tests__/auth.spec.js`（21个）— Auth Store 全量测试：初始状态、setToken/clearAuth、login/register/logout、refreshAccessToken、fetchUserInfo、init
+  - `views/error/__tests__/NotFoundView.spec.js`（2个）— 404 页面渲染、按钮存在性
+  - `views/error/__tests__/ForbiddenView.spec.js`（2个）— 403 页面渲染、按钮存在性
+
+**关键决策**
+- 使用 Mockito + ArgumentCaptor 而非 argThat 避免类型推断问题
+- Controller 测试使用 Standalone MockMvc + SecurityContextHolder 手动设置，避免加载完整 Spring 上下文
+- 使用 `doAnswer` 模拟 mapper.insert() 设置自增 ID（MyBatis-Plus 雪花算法）
+- 所有测试使用 MockitoExtension，不依赖外部数据库或 Redis，测试速度快（22秒跑完91个用例）
+
+**遗留问题**
+- 前端组件测试后来完成：安装 Vitest + @vue/test-utils + happy-dom，编写 3 个测试文件共 25 个用例
+- 数据库集成测试未实现（需 H2 内存数据库支持）
+- 定时任务（会籍到期检查、排课状态更新）未编写测试
+

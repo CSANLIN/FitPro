@@ -8,7 +8,9 @@
 
 ### 1.1 后端项目初始化
 
-| # | 任务 | 产出文件 | 验收标准 | 状态 |
+| # | 任务 | xxxxxxxxxx graph TB    subgraph 路由层        R1[/ - 登录页]        R2[/admin - 管理端布局]        R3[/app - 会员端布局]    end​    subgraph 管理端页面        R2 --> P1[Dashboard 仪表盘]        R2 --> P2[会员管理]        R2 --> P3[教练管理]        R2 --> P4[课程管理]        R2 --> P5[运动库管理]        R2 --> P6[系统管理]    end​    subgraph 会员端页面        R3 --> P7[个人中心]        R3 --> P8[课程预约]        R3 --> P9[训练计划]        R3 --> P10[签到打卡]    end​    subgraph 状态管理 Pinia        S1[useAuthStore]        S2[useUserStore]        S3[useCourseStore]    end​    subgraph API 层        A1[authApi]        A2[userApi]        A3[courseApi]        A4[workoutApi]        A5[exerciseApi]        A6[membershipApi]    end​    P1 & P2 & P3 & P4 & P5 & P6 & P7 & P8 & P9 & P10 --> S1 & S2 & S3    S1 & S2 & S3 --> A1 & A2 & A3 & A4 & A5 & A6mermaid#mermaidChart6{font-family:sans-serif;font-size:16px;fill:var(--text-color);}#mermaidChart6 .error-icon{fill:#552222;}#mermaidChart6 .error-text{fill:#552222;stroke:#552222;}#mermaidChart6 .edge-thickness-normal{stroke-width:2px;}#mermaidChart6 .edge-thickness-thick{stroke-width:3.5px;}#mermaidChart6 .edge-pattern-solid{stroke-dasharray:0;}#mermaidChart6 .edge-pattern-dashed{stroke-dasharray:3;}#mermaidChart6 .edge-pattern-dotted{stroke-dasharray:2;}#mermaidChart6 .marker{fill:#333333;stroke:#333333;}#mermaidChart6 .marker.cross{stroke:#333333;}#mermaidChart6 svg{font-family:sans-serif;font-size:16px;}#mermaidChart6 :root{--mermaid-alt-font-family:sans-serif;}Syntax error in textmermaid version 10.9.1ERROR: [Mermaid] Lexical error on line 3. Unrecognized text.
+...层        R1[/ - 登录页]        R2[/admin 
+----------------------^ | 验收标准 | 状态 |
 |---|------|----------|----------|------|
 | 1.1.1 | Spring Initializr 创建项目 (Java 17, Spring Boot 3.2, Maven) | `fitness-backend/` 整个目录 | `mvn compile` 通过 | `[x]` |
 | 1.1.2 | pom.xml 补充依赖 | `pom.xml` | 依赖: mybatis-plus-spring-boot3-starter 3.5.x, spring-boot-starter-data-redis, knife4j-openapi3-jakarta-spring-boot-starter 4.x, lombok, hutool-all, mapstruct, jjwt 0.12.x, spring-boot-starter-security, spring-boot-starter-validation | `[x]` |
@@ -245,3 +247,51 @@
 | 4.5.4 | AOP 依赖 | `pom.xml` | 添加 spring-boot-starter-aop | `[x]` |
 
 **M4 里程碑验收**: 管理后台全部页面可用 + 仪表盘数据统计 + 会员详情管理 + 教练管理 + 课程维护 + 公告管理 + 操作日志
+
+---
+
+## Phase 5 — 完善与部署
+
+### 5.1 数据可视化 ✅
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 5.1.1 | 身体数据趋势图 | `src/views/profile/BodyDataView.vue` | 体重/体脂折线图展示历史趋势 | `[x]` |
+| 5.1.2 | 训练统计图表 | `src/views/workout/WorkoutStatsView.vue` | 训练量/频次统计图表 | `[x]` |
+| 5.1.3 | 仪表盘图表优化 | `src/views/admin/DashboardView.vue` | ECharts 折线图/柱状图完善 | `[x]` |
+| 5.1.4 | 图表响应式适配 | DashboardView.vue / BodyDataView.vue | 屏幕自适应 | `[~]` |
+
+### 5.2 前端体验优化 ✅
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 5.2.1 | 移动端响应式适配 | 多个页面 | 移动端自适应布局 | `[~]` |
+| 5.2.2 | 加载状态 / 骨架屏 | 多个页面 | v-loading + 骨架屏 | `[x]` |
+| 5.2.3 | 空状态提示 | 多个页面 | 空数据展示 | `[x]` |
+| 5.2.4 | 消息通知组件 | `src/components/` | 通知组件 | `[x]` |
+| 5.2.5 | 表单校验完善 | 多个页面 | 完整校验规则 | `[x]` |
+
+### 5.3 测试 ✅
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 5.3.1 | AuthService 单元测试 | `module/auth/service/impl/AuthServiceImplTest.java` | 19个测试用例覆盖注册/登录/刷新/登出 | `[x]` |
+| 5.3.2 | CourseBookingService 单元测试 | `module/course/service/impl/CourseBookingServiceImplTest.java` | 10个测试用例覆盖预约/取消/容量控制 | `[x]` |
+| 5.3.3 | CourseScheduleService 单元测试 | `module/course/service/impl/CourseScheduleServiceImplTest.java` | 7个测试用例覆盖排课创建/冲突检测/取消 | `[x]` |
+| 5.3.4 | CheckInService 单元测试 | `module/checkin/service/impl/CheckInServiceImplTest.java` | 9个测试用例覆盖签到/会籍校验/统计 | `[x]` |
+| 5.3.5 | MembershipService 单元测试 | `module/membership/service/impl/MembershipServiceImplTest.java` | 27个测试用例覆盖卡种CRUD/办卡/续费/冻结/解冻/退卡 | `[x]` |
+| 5.3.6 | AuthController 接口测试 | `module/auth/controller/AuthControllerTest.java` | 6个测试用例覆盖登录/注册/获取用户信息 | `[x]` |
+| 5.3.7 | CourseBookingController 接口测试 | `module/course/controller/CourseBookingControllerTest.java` | 5个测试用例覆盖预约/取消/列表 | `[x]` |
+| 5.3.8 | CheckInController 接口测试 | `module/checkin/controller/CheckInControllerTest.java` | 6个测试用例覆盖签到/统计/管理端查询 | `[x]` |
+| 5.3.9 | 端到端流程测试 | `e2e/FullBusinessFlowE2ETest.java` | 1个全流程用例：注册→登录→预约→取消→签到→统计→异常处理 | `[x]` |
+
+### 5.4 部署
+
+| # | 任务 | 产出文件 | 验收标准 | 状态 |
+|---|------|----------|----------|------|
+| 5.4.1 | Docker Compose 编排 | `docker-compose.yml` | MySQL+Redis+Backend+Nginx 容器编排 | `[ ]` |
+| 5.4.2 | Nginx 配置 | `nginx/conf.d/fitpro.conf` | 静态资源 + API 反代 | `[ ]` |
+| 5.4.3 | 前端打包优化 | `vite.config.js` | gzip + 分包 | `[ ]` |
+| 5.4.4 | README 部署文档 | `README.md` | 部署步骤 + 配置说明 | `[ ]` |
+
+**M5 里程碑验收**: Docker 一键部署 + 文档齐全

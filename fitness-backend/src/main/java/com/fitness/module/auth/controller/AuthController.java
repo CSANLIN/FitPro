@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -44,8 +46,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(summary = "用户登出")
-    public Result<Void> logout(@RequestBody String refreshToken) {
-        authService.logout(refreshToken);
+    public Result<Void> logout(@RequestBody Map<String, String> body) {
+        authService.logout(body.get("refreshToken"));
         return Result.success();
     }
 
