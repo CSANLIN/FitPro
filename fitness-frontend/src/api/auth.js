@@ -34,7 +34,7 @@ export const authApi = {
    * @param {string} refreshToken - 刷新令牌
    * @returns {Promise<void>}
    */
-  logout: (refreshToken) => request.post('/auth/logout', refreshToken),
+  logout: (refreshToken) => request.post('/auth/logout', { refreshToken }),
 
   /**
    * 获取当前用户信息

@@ -65,6 +65,7 @@
         LEFT JOIN sys_user su ON wp.user_id = su.id
         LEFT JOIN sys_user sc ON wp.coach_id = sc.id
         <where>
+            AND wp.deleted = 0
             <if test="keyword != null and keyword != ''">
                 AND wp.name LIKE CONCAT('%', #{keyword}, '%')
             </if>
@@ -92,7 +93,7 @@
         FROM workout_plan wp
         LEFT JOIN sys_user su ON wp.user_id = su.id
         LEFT JOIN sys_user sc ON wp.coach_id = sc.id
-        WHERE wp.id = #{planId}
+        WHERE wp.id = #{planId} AND wp.deleted = 0
     </select>
 
     <select id="selectPlanDays" resultMap="PlanDayMap">

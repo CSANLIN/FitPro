@@ -58,6 +58,14 @@
           </div>
           <el-icon class="menu-arrow"><ArrowRight /></el-icon>
         </div>
+        <div class="menu-item" @click="goBooking">
+          <div class="menu-icon" style="background: #e0ffe0; color: #10b981;"><el-icon><Ticket /></el-icon></div>
+          <div class="menu-content">
+            <span class="menu-label">我的预约</span>
+            <span class="menu-hint">查看已预约的课程</span>
+          </div>
+          <el-icon class="menu-arrow"><ArrowRight /></el-icon>
+        </div>
         <div class="menu-item" @click="goRecord">
           <div class="menu-icon" style="background: #f3e8ff; color: #a855f7;"><el-icon><List /></el-icon></div>
           <div class="menu-content">
@@ -165,7 +173,7 @@ import { userApi } from '@/api/user'
 import { checkinApi } from '@/api/checkin'
 import { membershipApi } from '@/api/membership'
 import {
-  DataLine, Lock, List, ChatLineSquare, Edit, Iphone, ArrowRight
+  DataLine, Lock, List, ChatLineSquare, Edit, Iphone, ArrowRight, Ticket
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -224,6 +232,7 @@ const fetchStats = async () => {
 const goBodyData = () => router.push('/app/body-data')
 const goMembership = () => router.push('/app/membership')
 const goRecord = () => router.push('/app/record')
+const goBooking = () => router.push('/app/course/booking')
 const handleFeedback = () => {
   ElMessage.info('帮助反馈功能开发中，敬请期待')
 }

@@ -324,7 +324,7 @@ const showPlanDetail = async (id) => {
 
 // 开始训练
 const startWorkout = (plan) => {
-  router.push({ name: 'AppWorkoutRecord', query: { planId: plan.id } })
+  router.push({ name: 'AppWorkoutSession', query: { planId: plan.id } })
 }
 
 // 删除计划
@@ -335,6 +335,7 @@ const handleDeletePlan = async (id) => {
     await fetchPlans()
   } catch (e) {
     console.error('删除计划失败:', e)
+    ElMessage.error(e?.response?.data?.message || e?.message || '删除失败')
   }
 }
 

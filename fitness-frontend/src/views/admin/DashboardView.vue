@@ -109,18 +109,13 @@
             </div>
           </el-card>
 
-          <el-card class="premium-panel pill-card progress-stat" style="grid-column: span 2;">
-            <div class="prog-header">
-              <h3 class="card-title">本周会员增长目标</h3>
-              <span class="prog-percent">75% 已达成</span>
+          <el-card class="premium-panel pill-card small-stat">
+            <div class="stat-content">
+              <h3 class="card-title">系统会员</h3>
+              <p class="card-sub">已注册用户数</p>
             </div>
-            <div class="prog-track">
-              <div class="prog-fill" style="width: 75%"></div>
-              <div class="prog-thumb" style="left: 75%"></div>
-            </div>
-            <div class="prog-labels">
-              <span>0 人</span>
-              <span>100 人</span>
+            <div class="stat-circle ring-green">
+              <span class="s-val">{{ stats?.totalMembers || 0 }}</span>
             </div>
           </el-card>
         </div>
@@ -484,8 +479,7 @@ watch(() => stats.value, () => {
 
 .small-cards-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 24px;
   height: 100%;
 }
@@ -517,60 +511,16 @@ watch(() => stats.value, () => {
   color: var(--text-primary);
 }
 
-.progress-stat {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.prog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.prog-percent {
-  font-size: 14px;
-  font-weight: 700;
+.ring-green {
+  border: 4px solid #10b981;
   color: var(--text-primary);
-}
-
-.prog-track {
-  height: 12px;
-  background: var(--bg-base);
-  border-radius: 6px;
-  position: relative;
-  margin-bottom: 12px;
-}
-
-.prog-fill {
-  height: 100%;
-  background: var(--accent-dark);
-  border-radius: 6px;
-}
-
-.prog-thumb {
-  width: 24px;
-  height: 24px;
-  background: var(--accent-dark);
-  border-radius: 50%;
-  position: absolute;
-  top: -6px;
-  transform: translateX(-50%);
-  border: 4px solid white;
-}
-
-.prog-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
 }
 
 @media (max-width: 992px) {
   .hero-overview-card { margin-bottom: 24px; }
   .chart-card { margin-bottom: 24px; }
+  .small-cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>

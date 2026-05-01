@@ -76,11 +76,6 @@
             <span class="date-text">{{ formatDate(row.createdAt) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="档案管理" width="120" fixed="right" align="center">
-          <template #default="{ row }">
-            <el-button link type="primary" class="action-btn" @click="router.push(`/admin/member/detail/${row.id}`)">详细档案</el-button>
-          </template>
-        </el-table-column>
       </el-table>
       <div class="pagination-wrapper">
         <el-pagination 
@@ -105,6 +100,9 @@
         </el-form-item>
         <el-form-item label="初始密码" prop="password" v-if="!isEditing">
           <el-input v-model="form.password" type="password" placeholder="教练初始登录密码" show-password class="premium-input" />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword" v-if="!isEditing">
+          <el-input v-model="form.confirmPassword" type="password" placeholder="再次输入密码" show-password class="premium-input" />
         </el-form-item>
         <el-form-item label="教练花名 (Nickname)" prop="nickname">
           <el-input v-model="form.nickname" placeholder="对外展示的称呼" class="premium-input" />
@@ -148,11 +146,12 @@ const isEditing = ref(false)
 
 const searchForm = reactive({ keyword: '', status: null })
 const pagination = reactive({ pageNum: 1, pageSize: 10, total: 0 })
-const form = reactive({ username: '', password: '', nickname: '', phone: '', email: '' })
+const form = reactive({ username: '', password: '', confirmPassword: '', nickname: '', phone: '', email: '' })
 
 const formRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入初始密码', trigger: 'blur' }],
+  confirmPassword: [{ required: true, message: '请再次输入密码', trigger: 'blur' }],
   nickname: [{ required: true, message: '请输入教练花名', trigger: 'blur' }]
 }
 
@@ -178,7 +177,7 @@ const resetSearch = () => { searchForm.keyword = ''; searchForm.status = null; p
 
 const showCreateDialog = () => {
   isEditing.value = false
-  form.username = ''; form.password = ''; form.nickname = ''; form.phone = ''; form.email = ''
+  form.username = ''; form.password = ''; form.confirmPassword = ''; form.nickname = ''; form.phone = ''; form.email = ''
   dialogVisible.value = true
 }
 
@@ -187,7 +186,7 @@ const handleSave = async () => {
   if (!valid) return
   saving.value = true
   try {
-    await authApi.register({ ...form, role: 'COACH' })
+    await authApi.register({ username: form.username, password: form.password, confirmPassword: form.confirmPassword, nickname: form.nickname, phone: form.phone, email: form.email, role: 'COACH' })
     ElMessage.success('教练账号下发成功')
     dialogVisible.value = false
     await fetchData()

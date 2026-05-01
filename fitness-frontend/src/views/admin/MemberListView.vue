@@ -164,7 +164,6 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="detailDialogVisible = false" round>关闭档案</el-button>
-          <el-button type="primary" color="#3b82f6" @click="goToDetailView" round>查看深度数据</el-button>
         </div>
       </template>
     </el-dialog>
@@ -173,12 +172,10 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { userApi } from '@/api/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
-const router = useRouter()
 
 // 搜索表单
 const searchForm = reactive({
@@ -319,13 +316,6 @@ const handleViewDetail = async (row) => {
   }
 }
 
-// 跳转到深度详情页
-const goToDetailView = () => {
-  detailDialogVisible.value = false
-  router.push(`/admin/member/detail/${currentUser.value.id}`)
-}
-
-// 分页大小改变
 const handleSizeChange = (size) => {
   pagination.pageSize = size
   pagination.pageNum = 1

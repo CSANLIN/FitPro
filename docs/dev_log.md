@@ -3,6 +3,49 @@
 > 格式: `## [日期] Phase X.X — 任务标题`
 > 状态标记同 engineering_tasks: `[x]` 已完成 · `[~]` 进行中 · `[!]` 阻塞
 
+## [2026-05-02] Bug修复与功能完善 — 训练会话/仪表盘/多项Bug
+
+**完成内容**
+
+- **退出登录修复** — `auth.js` 中 `logout` 请求格式从纯字符串改为 `{ refreshToken }` 对象，匹配 Spring Boot `@RequestBody Map` 反序列化，解决退出时总提示"服务器错误"问题
+
+- **教练添加确认密码修复** — CoachListView.vue 补充 `confirmPassword` 输入框、表单数据和校验规则，匹配后端 RegisterDTO 的 `@NotBlank` 验证
+
+- **教练资源管理优化** — 移除 CoachListView.vue 中"档案管理"列（该列错误地链接到会员详情页）
+
+- **会员管理优化** — 移除 MemberListView.vue 弹窗中"查看深度数据"按钮及相关未使用代码
+
+- **仪表盘重构** — 移除"本周会员增长目标"模块（该模块使用占位数据无实际功能），改为显示"系统会员"数量，网格从 2×2 改为 3 列布局
+
+- **训练计划删除修复** — WorkoutPlanMapper.xml 中 `selectPlanVOPage` 和 `selectPlanDetail` 查询增加 `AND wp.deleted = 0` 过滤条件。根因：`BaseEntity` 的 `@TableLogic` 使 MyBatis-Plus 执行逻辑删除（SET deleted=1），但自定义 XML 查询未过滤已删除记录，导致计划删除后仍显示；再次删除时 `getById` 因 `@TableLogic` 返回 null 抛出"计划不存在"
+
+- **签到功能修复** — HomeView.vue 中 `handleCheckin` 移除误导性的"模拟签到成功"兜底逻辑，改为真实错误提示，签到后刷新预约数据
+
+- **身体数据保存修复** — 表单初始值从 `undefined` 改为 `null`（避免 el-input-number 兼容问题），`recordDate` 默认使用当天日期，添加 ElMessage 错误提示
+
+- **课程预约入口** — ProfileView.vue "数据与记录"菜单组添加"我的预约"菜单项，点击跳转至课程预约页
+
+- **训练会话系统 (全新功能)** — 新建 `WorkoutSessionView.vue` 沉浸式训练体验：
+  - 根据 `planId` 加载计划，通过 `getDay()` 匹配当天训练日动作
+  - 逐组打勾完成（点击卡片标记完成）
+  - 组间休息倒计时（支持跳过，最后5秒红闪脉冲动画）
+  - 实时进度条 + 动作导航点
+  - 全部完成后展示训练统计（动作数/总组数/总容量）
+  - 提交训练记录到历史记录
+  - 支持中途退出确认
+  - 新增路由 `/app/session`，`WorkoutPlanView` 中"开始训练"按钮导航至新会话页
+
+**关键决策**
+- 训练会话使用独立组件而非改造 WorkoutRecordView 弹窗，避免弹窗式体验打断用户训练节奏
+- 休息定时器使用 `setInterval` 实现，组件卸载时在 `onUnmounted` 清理，防止内存泄漏
+- 倒计时最后 5 秒红闪脉冲动画提示，增强训练临场感
+- 训练记录提交复用已有的 `workoutApi.createRecord` API
+
+**遗留问题**
+- 训练会话中每组使用相同的 weight/reps 值（从计划模板读取），暂不支持训练中实时调整重量
+- 训练会话时长未精确记录（开始和结束时间使用近似值）
+- 仪表盘"课程总数"/"活跃教练"/"系统会员"数据来自 DashboardService，需确认接口数据准确性
+
 ## [2026-04-28] Phase 5.1 — 数据可视化
 
 **完成内容**

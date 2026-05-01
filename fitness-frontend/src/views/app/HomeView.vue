@@ -164,12 +164,10 @@ const handleCheckin = async () => {
   try {
     await checkinApi.checkIn()
     ElMessage.success('签到成功！')
+    await fetchBookings()
   } catch (error) {
-    if (error?.response?.data?.message) {
-      ElMessage.warning(error.response.data.message)
-    } else {
-      ElMessage.success('模拟签到成功！')
-    }
+    const msg = error?.response?.data?.message || error?.message || '签到失败'
+    ElMessage.warning(msg)
   }
 }
 

@@ -184,13 +184,13 @@ const latestRecord = ref(null)
 
 // 录入表单
 const form = reactive({
-  weight: undefined,
-  height: undefined,
-  bodyFat: undefined,
-  chest: undefined,
-  waist: undefined,
-  hip: undefined,
-  recordDate: '',
+  weight: null,
+  height: null,
+  bodyFat: null,
+  chest: null,
+  waist: null,
+  hip: null,
+  recordDate: new Date().toISOString().split('T')[0],
   remark: ''
 })
 
@@ -298,13 +298,13 @@ const rules = {
 const disableFutureDate = (time) => time.getTime() > Date.now()
 
 const resetForm = () => {
-  form.weight = undefined
-  form.height = undefined
-  form.bodyFat = undefined
-  form.chest = undefined
-  form.waist = undefined
-  form.hip = undefined
-  form.recordDate = ''
+  form.weight = null
+  form.height = null
+  form.bodyFat = null
+  form.chest = null
+  form.waist = null
+  form.hip = null
+  form.recordDate = new Date().toISOString().split('T')[0]
   form.remark = ''
   formRef.value?.clearValidate()
 }

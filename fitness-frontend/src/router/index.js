@@ -31,6 +31,7 @@ const ExerciseList = () => import('@/views/exercise/ExerciseListView.vue')
 // 训练模块
 const WorkoutPlan = () => import('@/views/workout/WorkoutPlanView.vue')
 const WorkoutRecord = () => import('@/views/workout/WorkoutRecordView.vue')
+const WorkoutSession = () => import('@/views/workout/WorkoutSessionView.vue')
 const WorkoutTemplateManage = () => import('@/views/workout/WorkoutTemplateManageView.vue')
 
 // 课程模块
@@ -277,6 +278,17 @@ const router = createRouter({
           meta: {
             title: '训练记录',
             icon: 'Edit'
+          }
+        },
+        // 训练会话（开始训练）
+        {
+          path: 'session',
+          name: 'AppWorkoutSession',
+          component: WorkoutSession,
+          meta: {
+            title: '训练中',
+            icon: 'Edit',
+            hidden: true
           }
         },
         // 课程列表
