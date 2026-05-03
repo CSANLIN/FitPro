@@ -202,7 +202,7 @@ import { ArrowLeft, Plus, User, Iphone, Message, Ticket, Calendar, Trophy } from
 
 const route = useRoute()
 const router = useRouter()
-const memberId = Number(route.params.id)
+const memberId = route.params.id
 
 const loading = ref(false)
 const member = ref(null)

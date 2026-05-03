@@ -86,7 +86,7 @@
             <div class="set-info">{{ set.weight || 0 }}kg × {{ set.reps }}次</div>
             <div class="set-status">
               <el-icon v-if="set.done" color="#10b981" :size="24"><CircleCheckFilled /></el-icon>
-              <el-icon v-else :size="24"><Circle /></el-icon>
+              <el-icon v-else :size="24"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></el-icon>
             </div>
           </div>
         </div>
@@ -155,12 +155,12 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { workoutApi } from '@/api/workout'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Clock, CircleCheckFilled, Circle, Select } from '@element-plus/icons-vue'
+import { ArrowLeft, Clock, CircleCheckFilled, Select } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
 
-const planId = Number(route.query.planId)
+const planId = route.query.planId
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
@@ -175,6 +175,7 @@ const restCountdown = ref(0)
 let timerInterval = null
 
 const sessionNote = ref('')
+const sessionStartTime = ref(null)
 
 // 获取计划的今日训练
 const fetchPlanDetail = async () => {
@@ -214,10 +215,15 @@ const fetchPlanDetail = async () => {
       }))
     }))
 
-    todayWorkout.value = { dayName: day.name || '训练日', items }
+    sessionStartTime.value = new Date()
+    todayWorkout.value = { dayName: day.name || '训练日', planDayId: day.id, items }
   } catch (e) {
     console.error('获取计划详情失败:', e)
-    error.value = '获取训练计划失败，请稍后重试'
+    const serverMsg = e?.response?.data?.message || e?.message || ''
+    error.value = serverMsg || '获取训练计划失败，请稍后重试'
+    if (e?.response?.status === 404) {
+      error.value = '训练计划不存在，可能已被删除'
+    }
   } finally {
     loading.value = false
   }
@@ -371,13 +377,15 @@ const submitSession = async () => {
       })
     }
 
-    const now = new Date()
-    const startTime = now.toISOString().slice(0, 19).replace('T', ' ')
-    const endTime = startTime // 近似
+    const endTimeDate = new Date()
+    const startTime = sessionStartTime.value
+      ? sessionStartTime.value.toISOString().slice(0, 19).replace('T', ' ')
+      : endTimeDate.toISOString().slice(0, 19).replace('T', ' ')
+    const endTime = endTimeDate.toISOString().slice(0, 19).replace('T', ' ')
 
     const data = {
       name: plan.value?.name ? `${plan.value.name} - ${todayWorkout.value.dayName}` : '今日训练',
-      planDayId: null,
+      planDayId: todayWorkout.value.planDayId || null,
       startTime,
       endTime,
       note: sessionNote.value || null,

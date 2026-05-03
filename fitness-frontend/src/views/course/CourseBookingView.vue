@@ -82,6 +82,12 @@
                 <span>{{ item.location }}</span>
               </div>
             </div>
+            <div class="course-price" v-if="item.price && parseFloat(item.price) > 0">
+              <span class="price-tag">¥{{ item.price }}</span>
+            </div>
+            <div class="course-price" v-else>
+              <span class="free-tag">免费</span>
+            </div>
           </div>
           
           <!-- 右侧操作 -->
@@ -156,12 +162,14 @@
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { courseApi } from '@/api/course'
+import { paymentApi } from '@/api/payment'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Clock, User, Location, Ticket } from '@element-plus/icons-vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const courseList = ref([])
 const schedules = ref([])
@@ -172,7 +180,7 @@ const courseName = ref(route.query.courseName || '')
 const dateRange = ref(null)
 
 const query = reactive({
-  courseId: route.query.courseId ? Number(route.query.courseId) : null,
+  courseId: route.query.courseId || null,
   startDate: '',
   endDate: ''
 })
@@ -261,6 +269,31 @@ const fetchSchedules = async () => {
 }
 
 const handleBook = async (item) => {
+  // 如果课程有价格，走支付流程
+  if (item.price && parseFloat(item.price) > 0) {
+    try {
+      const order = await paymentApi.createOrder({ scheduleId: item.id })
+      // 跳转到支付页面，带上相关信息
+      router.push({
+        name: 'Payment',
+        params: { orderNo: order.orderNo },
+        query: {
+          scheduleId: item.id,
+          amount: item.price,
+          courseName: item.courseName,
+          scheduleDate: item.scheduleDate,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          coachName: item.coachName
+        }
+      })
+    } catch (e) {
+      ElMessage.error(e.response?.data?.message || '创建订单失败')
+    }
+    return
+  }
+
+  // 免费课程直接预约
   try {
     await courseApi.book(item.id)
     ElMessage.success('预约成功')
