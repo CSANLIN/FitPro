@@ -3,6 +3,7 @@ package com.fitness.module.course.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -29,6 +30,9 @@ public class CourseVO {
 
     @Schema(description = "最大容量")
     private Integer maxCapacity;
+
+    @Schema(description = "课程价格")
+    private BigDecimal price;
 
     @Schema(description = "状态 0下架 1上架")
     private Integer status;

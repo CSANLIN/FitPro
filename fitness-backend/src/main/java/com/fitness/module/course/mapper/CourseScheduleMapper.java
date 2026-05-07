@@ -3,6 +3,8 @@ package com.fitness.module.course.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.fitness.module.course.entity.CourseScheduleEntity;
 import com.fitness.module.course.vo.ScheduleVO;
+import com.fitness.module.coach.vo.CoachScheduleVO;
+import com.fitness.module.coach.vo.CourseRankVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
@@ -28,4 +30,11 @@ public interface CourseScheduleMapper extends BaseMapper<CourseScheduleEntity> {
             "AND current_count < max_capacity")
     int updateCurrentCount(@Param("scheduleId") Long scheduleId,
                            @Param("expectedCount") Integer expectedCount);
+
+    List<CoachScheduleVO> selectCoachScheduleVO(
+            @Param("coachId") Long coachId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    List<CourseRankVO> selectCourseRankByCoach(@Param("coachId") Long coachId);
 }

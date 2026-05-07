@@ -49,3 +49,21 @@ dist/
 .cache/
 .env.local
 .env.*.local
+
+# Docs (只保留 README.md)
+docs/
+
+# Temp files
+bash.exe.stackdump
+temp_fix.js
+
+# Uploads
+uploads/
+fitness-backend/uploads/
+
+# References
+参考文献/
+论文格式要求/
+
+# Personal memory
+memory/

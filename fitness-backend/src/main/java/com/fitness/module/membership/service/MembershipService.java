@@ -36,5 +36,10 @@ public interface MembershipService {
 
     MembershipVO getActiveMembership(Long userId);
 
+    /**
+     * 检查用户是否有有效会籍，没有则抛出 BusinessException
+     */
+    void requireActiveMembership(Long userId);
+
     List<MembershipVO> listAll();
 }

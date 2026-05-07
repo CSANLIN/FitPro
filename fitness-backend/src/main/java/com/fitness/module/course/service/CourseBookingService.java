@@ -18,4 +18,6 @@ public interface CourseBookingService extends IService<CourseBookingEntity> {
     List<BookingVO> listBySchedule(Long scheduleId);
 
     List<BookingVO> listAll();
+
+    List<BookingVO> listByCoach(Long coachId);
 }

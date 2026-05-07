@@ -124,6 +124,26 @@
     <el-dialog v-model="createVisible" title="新建训练计划" width="800px" top="5vh" destroy-on-close class="custom-dialog">
       <el-form ref="formRef" :model="planForm" :rules="formRules" label-width="100px">
         <!-- 弹窗内容省略以保持代码简洁，原有逻辑可用 -->
+        <el-form-item label="选择会员" prop="userId" v-if="isAdmin">
+          <el-select v-model="planForm.userId" placeholder="选择要分配计划的会员" filterable style="width: 100%">
+            <el-option v-for="m in memberList" :key="m.id" :label="m.nickname" :value="m.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="选择会员" prop="userId" v-if="isAdmin">
+          <el-select v-model="planForm.userId" placeholder="选择要分配计划的会员" filterable style="width: 100%">
+            <el-option v-for="m in memberList" :key="m.id" :label="m.nickname" :value="m.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="选择会员" prop="userId" v-if="isAdmin">
+          <el-select v-model="planForm.userId" placeholder="选择要分配计划的会员" filterable style="width: 100%">
+            <el-option v-for="m in memberList" :key="m.id" :label="m.nickname" :value="m.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="选择会员" prop="userId" v-if="isAdmin">
+          <el-select v-model="planForm.userId" placeholder="选择要分配计划的会员" filterable style="width: 100%">
+            <el-option v-for="m in memberList" :key="m.id" :label="m.nickname" :value="m.id" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="计划名称" prop="name">
           <el-input v-model="planForm.name" placeholder="为计划起个名字" maxlength="100" />
         </el-form-item>
@@ -227,8 +247,13 @@ import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { workoutApi } from '@/api/workout'
 import { exerciseApi } from '@/api/exercise'
+import { userApi } from '@/api/user'
+import { useAuthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
 import { Plus, Clock, Calendar, Timer } from '@element-plus/icons-vue'
+
+const authStore = useAuthStore()
+const isAdmin = authStore.userInfo?.role === 'SUPER_ADMIN'
 
 const router = useRouter()
 
@@ -243,6 +268,7 @@ const saving = ref(false)
 const currentPlan = ref(null)
 const templates = ref([])
 const exercises = ref([])
+const memberList = ref([])
 const weeklyStats = ref({ weeklyCount: 0, weeklyVolume: 0 })
 const formRef = ref(null)
 
@@ -254,6 +280,7 @@ const query = reactive({
 })
 
 const planForm = reactive({
+  userId: null,
   name: '',
   description: '',
   startDate: '',
@@ -327,6 +354,16 @@ const startWorkout = (plan) => {
   router.push({ name: 'AppWorkoutSession', query: { planId: plan.id } })
 }
 
+const fetchMembers = async () => {
+  if (!isAdmin) return
+  try {
+    const res = await userApi.list({ role: 'MEMBER', pageNum: 1, pageSize: 999 })
+    memberList.value = res.list || []
+  } catch (e) {
+    console.error('获取会员列表失败:', e)
+  }
+}
+
 // 删除计划
 const handleDeletePlan = async (id) => {
   try {
@@ -341,12 +378,14 @@ const handleDeletePlan = async (id) => {
 
 // 新建计划弹窗
 const showCreateDialog = () => {
+  planForm.userId = null
   planForm.name = ''
   planForm.description = ''
   planForm.startDate = ''
   planForm.endDate = ''
   planForm.days = []
   createVisible.value = true
+  if (isAdmin) fetchMembers()
 }
 
 // 添加训练日
@@ -409,6 +448,7 @@ const handleCreatePlan = async () => {
     await fetchPlans()
   } catch (e) {
     console.error('创建计划失败:', e)
+    ElMessage.error(e.response?.data?.message || '创建计划失败')
   } finally {
     saving.value = false
   }

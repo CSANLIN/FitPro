@@ -9,11 +9,13 @@
     <div class="type-tabs-wrapper">
       <el-tabs v-model="courseType" @tab-change="handleTypeChange" class="premium-tabs">
         <el-tab-pane label="全部课程" name=""></el-tab-pane>
-        <el-tab-pane label="瑜伽" name="YOGA"></el-tab-pane>
-        <el-tab-pane label="搏击" name="BOXING"></el-tab-pane>
-        <el-tab-pane label="动感单车" name="SPINNING"></el-tab-pane>
-        <el-tab-pane label="HIIT" name="HIIT"></el-tab-pane>
-        <el-tab-pane label="其他" name="OTHER"></el-tab-pane>
+        <el-tab-pane label="瑜伽" name="瑜伽"></el-tab-pane>
+        <el-tab-pane label="力量训练" name="力量训练"></el-tab-pane>
+        <el-tab-pane label="有氧运动" name="有氧运动"></el-tab-pane>
+        <el-tab-pane label="舞蹈" name="舞蹈"></el-tab-pane>
+        <el-tab-pane label="格斗" name="格斗"></el-tab-pane>
+        <el-tab-pane label="综合体能" name="综合"></el-tab-pane>
+        <el-tab-pane label="其他" name="其他"></el-tab-pane>
       </el-tabs>
     </div>
 
@@ -84,13 +86,7 @@ const courseType = ref('')
 // Use a better default image for the premium look
 const defaultImage = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80'
 
-const typeLabel = (val) => ({
-  YOGA: '瑜伽',
-  BOXING: '搏击',
-  SPINNING: '动感单车',
-  HIIT: 'HIIT',
-  OTHER: '其他'
-}[val] || val)
+const typeLabel = (val) => val || '其他'
 
 const fetchCourses = async () => {
   loading.value = true

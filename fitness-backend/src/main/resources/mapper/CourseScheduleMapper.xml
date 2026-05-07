@@ -19,6 +19,7 @@
         <result column="status" property="status"/>
         <result column="created_at" property="createdAt"/>
         <result column="booked" property="booked"/>
+        <result column="price" property="price"/>
     </resultMap>
 
     <select id="selectScheduleVOByDateRange" resultMap="ScheduleVOMap">
@@ -28,6 +29,7 @@
             c.name AS course_name,
             c.cover_image AS course_cover,
             c.course_type,
+            c.price,
             cs.coach_id,
             su.nickname AS coach_name,
             cs.schedule_date,
@@ -46,9 +48,10 @@
                 FALSE AS booked
             </if>
         FROM course_schedule cs
-        INNER JOIN course c ON cs.course_id = c.id
+        INNER JOIN course c ON cs.course_id = c.id AND c.deleted = 0
         LEFT JOIN sys_user su ON cs.coach_id = su.id
         <where>
+            AND cs.status = 'UPCOMING'
             <if test="startDate != null">
                 AND cs.schedule_date >= #{startDate}
             </if>
@@ -63,5 +66,61 @@
             </if>
         </where>
         ORDER BY cs.schedule_date ASC, cs.start_time ASC
+    </select>
+
+    <resultMap id="CoachScheduleVOMap" type="com.fitness.module.coach.vo.CoachScheduleVO">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="course_name" property="courseName"/>
+        <result column="course_cover" property="courseCover"/>
+        <result column="course_type" property="courseType"/>
+        <result column="duration_minutes" property="durationMinutes"/>
+        <result column="schedule_date" property="scheduleDate"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="location" property="location"/>
+        <result column="current_count" property="currentCount"/>
+        <result column="max_capacity" property="maxCapacity"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <select id="selectCoachScheduleVO" resultMap="CoachScheduleVOMap">
+        SELECT
+            cs.id,
+            cs.course_id,
+            c.name AS course_name,
+            c.cover_image AS course_cover,
+            c.course_type,
+            c.duration_minutes,
+            cs.schedule_date,
+            cs.start_time,
+            cs.end_time,
+            cs.location,
+            cs.current_count,
+            cs.max_capacity,
+            cs.status
+        FROM course_schedule cs
+        INNER JOIN course c ON cs.course_id = c.id
+        WHERE cs.coach_id = #{coachId}
+        <if test="startDate != null">
+            AND cs.schedule_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND cs.schedule_date &lt;= #{endDate}
+        </if>
+        ORDER BY cs.schedule_date DESC, cs.start_time DESC
+    </select>
+
+    <select id="selectCourseRankByCoach" resultType="com.fitness.module.coach.vo.CourseRankVO">
+        SELECT
+            c.name AS courseName,
+            COUNT(cb.id) AS bookingCount
+        FROM course_schedule cs
+        INNER JOIN course c ON cs.course_id = c.id
+        LEFT JOIN course_booking cb ON cs.id = cb.schedule_id
+        WHERE cs.coach_id = #{coachId}
+        GROUP BY c.id, c.name
+        ORDER BY bookingCount DESC
+        LIMIT 10
     </select>
 </mapper>

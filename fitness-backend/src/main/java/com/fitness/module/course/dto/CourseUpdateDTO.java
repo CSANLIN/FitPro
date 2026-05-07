@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Schema(description = "更新课程请求")
 public class CourseUpdateDTO {
@@ -37,4 +39,7 @@ public class CourseUpdateDTO {
     @Min(value = 1, message = "最大容量至少1人")
     @Schema(description = "最大容量")
     private Integer maxCapacity;
+
+    @Schema(description = "课程价格(默认0免费)")
+    private BigDecimal price;
 }

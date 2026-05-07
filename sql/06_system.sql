@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS sys_announcement (
     status      TINYINT      NOT NULL DEFAULT 0 COMMENT '状态 0草稿 1发布',
     created_by  BIGINT       NOT NULL COMMENT '创建人ID',
     publish_at  DATETIME     DEFAULT NULL COMMENT '发布时间',
+    deleted     TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除 0否 1是',
     created_at  DATETIME     NOT NULL COMMENT '创建时间',
     updated_at  DATETIME     NOT NULL COMMENT '更新时间',
     PRIMARY KEY (id),

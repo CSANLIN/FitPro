@@ -75,6 +75,7 @@ public class AuthServiceImpl implements AuthService {
         }
         user.setRole(role);
         user.setStatus(0); // 状态正常
+        user.setEmail(dto.getEmail());
 
         // 6. 保存用户
         userMapper.insert(user);
@@ -83,10 +84,14 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getRole());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 
-        // 8. 存储 Refresh Token 到 Redis
+        // 8. 存储 Refresh Token 到 Redis（失败不影响注册）
         String refreshTokenKey = REFRESH_TOKEN_KEY_PREFIX + user.getId();
-        redisTemplate.opsForValue().set(refreshTokenKey, refreshToken,
-                jwtTokenProvider.getRefreshTokenExpire(), TimeUnit.SECONDS);
+        try {
+            redisTemplate.opsForValue().set(refreshTokenKey, refreshToken,
+                    jwtTokenProvider.getRefreshTokenExpire(), TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("Redis 不可用，Refresh Token 未持久化", e);
+        }
 
         // 9. 返回 TokenVO
         TokenVO tokenVO = new TokenVO();
@@ -124,10 +129,14 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getRole());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 
-        // 5. 存储 Refresh Token 到 Redis
+        // 5. 存储 Refresh Token 到 Redis（失败不影响登录）
         String refreshTokenKey = REFRESH_TOKEN_KEY_PREFIX + user.getId();
-        redisTemplate.opsForValue().set(refreshTokenKey, refreshToken,
-                jwtTokenProvider.getRefreshTokenExpire(), TimeUnit.SECONDS);
+        try {
+            redisTemplate.opsForValue().set(refreshTokenKey, refreshToken,
+                    jwtTokenProvider.getRefreshTokenExpire(), TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("Redis 不可用，Refresh Token 未持久化", e);
+        }
 
         // 6. 返回 TokenVO
         TokenVO tokenVO = new TokenVO();
@@ -154,7 +163,12 @@ public class AuthServiceImpl implements AuthService {
 
         // 3. 从 Redis 中获取存储的 Refresh Token
         String refreshTokenKey = REFRESH_TOKEN_KEY_PREFIX + userId;
-        String storedRefreshToken = (String) redisTemplate.opsForValue().get(refreshTokenKey);
+        String storedRefreshToken = null;
+        try {
+            storedRefreshToken = (String) redisTemplate.opsForValue().get(refreshTokenKey);
+        } catch (Exception e) {
+            log.warn("Redis 不可用，跳过 Refresh Token 校验", e);
+        }
 
         // 4. 验证 Refresh Token 是否与存储的一致
         if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
@@ -199,13 +213,16 @@ public class AuthServiceImpl implements AuthService {
         Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
 
         // 3. 从 Redis 中删除 Refresh Token
-        String refreshTokenKey = REFRESH_TOKEN_KEY_PREFIX + userId;
-        Boolean deleted = redisTemplate.delete(refreshTokenKey);
-
-        if (Boolean.TRUE.equals(deleted)) {
-            log.info("用户登出成功: userId={}", userId);
-        } else {
-            log.warn("用户登出时未找到 Refresh Token: userId={}", userId);
+        try {
+            String refreshTokenKey = REFRESH_TOKEN_KEY_PREFIX + userId;
+            Boolean deleted = redisTemplate.delete(refreshTokenKey);
+            if (Boolean.TRUE.equals(deleted)) {
+                log.info("用户登出成功: userId={}", userId);
+            } else {
+                log.warn("用户登出时未找到 Refresh Token: userId={}", userId);
+            }
+        } catch (Exception e) {
+            log.warn("Redis 不可用，跳过删除 Refresh Token", e);
         }
     }
 

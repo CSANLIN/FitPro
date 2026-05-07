@@ -2,6 +2,7 @@ package com.fitness.module.workout.controller;
 
 import com.fitness.common.PageResult;
 import com.fitness.common.Result;
+import com.fitness.module.membership.service.MembershipService;
 import com.fitness.module.workout.dto.WorkoutRecordCreateDTO;
 import com.fitness.module.workout.dto.WorkoutRecordQueryDTO;
 import com.fitness.module.workout.service.WorkoutRecordService;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class WorkoutRecordController {
 
     private final WorkoutRecordService workoutRecordService;
+    private final MembershipService membershipService;
 
     @GetMapping
     @Operation(summary = "分页查询当前用户训练记录")
@@ -41,6 +43,7 @@ public class WorkoutRecordController {
     @Operation(summary = "创建训练记录")
     public Result<WorkoutRecordDetailVO> create(@RequestBody @Valid WorkoutRecordCreateDTO dto) {
         Long userId = getCurrentUserId();
+        membershipService.requireActiveMembership(userId);
         return Result.success(workoutRecordService.create(dto, userId));
     }
 

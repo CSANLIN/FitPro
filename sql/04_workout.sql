@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS workout_template (
     coach_id     BIGINT       DEFAULT NULL COMMENT '创建教练ID',
     target_type  VARCHAR(20)  DEFAULT NULL COMMENT '目标 FAT_LOSS/MUSCLE_GAIN/SHAPE',
     difficulty   VARCHAR(20)  DEFAULT NULL COMMENT '难度',
+    deleted      TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除 0否 1是',
     created_at   DATETIME     NOT NULL COMMENT '创建时间',
     updated_at   DATETIME     NOT NULL COMMENT '更新时间',
     PRIMARY KEY (id)
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS workout_plan (
     start_date  DATE         NOT NULL COMMENT '开始日期',
     end_date    DATE         DEFAULT NULL COMMENT '结束日期',
     status      VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE' COMMENT '状态 ACTIVE/COMPLETED/CANCELLED',
+    deleted     TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除 0否 1是',
     created_at  DATETIME     NOT NULL COMMENT '创建时间',
     updated_at  DATETIME     NOT NULL COMMENT '更新时间',
     PRIMARY KEY (id),

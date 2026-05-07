@@ -4,19 +4,25 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fitness.common.exception.BusinessException;
 import com.fitness.module.course.entity.CourseBookingEntity;
+import com.fitness.module.course.entity.CourseEntity;
 import com.fitness.module.course.entity.CourseScheduleEntity;
 import com.fitness.module.course.mapper.CourseBookingMapper;
+import com.fitness.module.course.mapper.CourseMapper;
 import com.fitness.module.course.mapper.CourseScheduleMapper;
 import com.fitness.module.course.service.CourseBookingService;
 import com.fitness.module.course.vo.BookingVO;
 import com.fitness.module.course.vo.MyBookingVO;
+import com.fitness.module.payment.entity.PaymentOrderEntity;
+import com.fitness.module.payment.mapper.PaymentOrderMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Slf4j
@@ -27,6 +33,8 @@ public class CourseBookingServiceImpl extends ServiceImpl<CourseBookingMapper, C
 
     private final CourseScheduleMapper courseScheduleMapper;
     private final CourseBookingMapper courseBookingMapper;
+    private final CourseMapper courseMapper;
+    private final PaymentOrderMapper paymentOrderMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -39,17 +47,44 @@ public class CourseBookingServiceImpl extends ServiceImpl<CourseBookingMapper, C
         if (!"UPCOMING".equals(schedule.getStatus())) {
             throw new BusinessException(1001, "该课程已不在可预约状态");
         }
-        if (!schedule.getScheduleDate().isAfter(LocalDate.now())) {
-            throw new BusinessException(1001, "该课程已开始或已结束");
+        // 过去日期的课程不可预约
+        if (schedule.getScheduleDate().isBefore(LocalDate.now())) {
+            throw new BusinessException(1001, "该课程已结束");
+        }
+        // 今天的课程，若已过开始时间则不可预约
+        if (schedule.getScheduleDate().isEqual(LocalDate.now())
+                && schedule.getStartTime() != null
+                && LocalTime.now().isAfter(schedule.getStartTime())) {
+            throw new BusinessException(1001, "该课程已开始");
         }
 
         // 校验不可重复预约
-        long existingCount = this.count(new LambdaQueryWrapper<CourseBookingEntity>()
+        CourseBookingEntity existingBooking = this.getOne(new LambdaQueryWrapper<CourseBookingEntity>()
                 .eq(CourseBookingEntity::getUserId, userId)
-                .eq(CourseBookingEntity::getScheduleId, scheduleId)
-                .eq(CourseBookingEntity::getStatus, "BOOKED"));
-        if (existingCount > 0) {
-            throw new BusinessException(1001, "您已预约过该课程");
+                .eq(CourseBookingEntity::getScheduleId, scheduleId));
+        if (existingBooking != null) {
+            if ("BOOKED".equals(existingBooking.getStatus())) {
+                throw new BusinessException(1001, "您已预约过该课程");
+            }
+            // 取消后重新预约：复用已有记录，更新状态和时间为新预约
+            existingBooking.setStatus("BOOKED");
+            existingBooking.setBookedAt(LocalDateTime.now());
+            existingBooking.setCancelledAt(null);
+            this.updateById(existingBooking);
+            return;
+        }
+
+        // 校验付费课程已支付
+        CourseEntity course = courseMapper.selectById(schedule.getCourseId());
+        if (course != null && course.getPrice() != null
+                && course.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+            long paidCount = paymentOrderMapper.selectCount(new LambdaQueryWrapper<PaymentOrderEntity>()
+                    .eq(PaymentOrderEntity::getUserId, userId)
+                    .eq(PaymentOrderEntity::getScheduleId, scheduleId)
+                    .eq(PaymentOrderEntity::getStatus, "SUCCESS"));
+            if (paidCount == 0) {
+                throw new BusinessException(1001, "该课程需先支付才能预约");
+            }
         }
 
         // 乐观锁：原子更新当前预约人数（容量控制）
@@ -114,5 +149,10 @@ public class CourseBookingServiceImpl extends ServiceImpl<CourseBookingMapper, C
     @Override
     public List<BookingVO> listAll() {
         return courseBookingMapper.selectBookingVOAll();
+    }
+
+    @Override
+    public List<BookingVO> listByCoach(Long coachId) {
+        return courseBookingMapper.selectBookingVOByCoachId(coachId);
     }
 }

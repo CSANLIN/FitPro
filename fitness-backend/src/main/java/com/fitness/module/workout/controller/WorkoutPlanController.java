@@ -2,6 +2,7 @@ package com.fitness.module.workout.controller;
 
 import com.fitness.common.PageResult;
 import com.fitness.common.Result;
+import com.fitness.module.membership.service.MembershipService;
 import com.fitness.module.workout.dto.WorkoutPlanCreateDTO;
 import com.fitness.module.workout.dto.WorkoutPlanQueryDTO;
 import com.fitness.module.workout.service.WorkoutPlanService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class WorkoutPlanController {
 
     private final WorkoutPlanService workoutPlanService;
+    private final MembershipService membershipService;
 
     @GetMapping
     @Operation(summary = "分页查询训练计划（会员端查看自己的，教练/管理端查看全部）")
@@ -36,6 +38,11 @@ public class WorkoutPlanController {
     @GetMapping("/{id}")
     @Operation(summary = "获取计划详情（含训练日和动作）")
     public Result<WorkoutPlanDetailVO> getDetail(@PathVariable Long id) {
+        Long userId = getCurrentUserId();
+        String role = getCurrentUserRole();
+        if ("MEMBER".equals(role)) {
+            membershipService.requireActiveMembership(userId);
+        }
         return Result.success(workoutPlanService.getDetail(id));
     }
 
@@ -44,6 +51,9 @@ public class WorkoutPlanController {
     public Result<WorkoutPlanDetailVO> create(@RequestBody @Valid WorkoutPlanCreateDTO dto) {
         Long userId = getCurrentUserId();
         String role = getCurrentUserRole();
+        if ("MEMBER".equals(role)) {
+            membershipService.requireActiveMembership(userId);
+        }
         Long coachId = role.contains("MEMBER") ? null : userId;
         return Result.success(workoutPlanService.create(dto, userId, coachId));
     }

@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 AntPathRequestMatcher.antMatcher("/api/auth/**"),
                                 AntPathRequestMatcher.antMatcher("/api/health"),
+                                AntPathRequestMatcher.antMatcher("/api/files/**"),
                                 AntPathRequestMatcher.antMatcher("/doc.html"),
                                 AntPathRequestMatcher.antMatcher("/webjars/**"),
                                 AntPathRequestMatcher.antMatcher("/v3/api-docs/**"),

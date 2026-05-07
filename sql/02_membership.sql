@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS member_membership (
     remaining_times  INT         DEFAULT NULL COMMENT '剩余次数',
     status           VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT '状态 ACTIVE/FROZEN/EXPIRED/CANCELLED',
     frozen_at        DATETIME    DEFAULT NULL COMMENT '冻结时间',
+    deleted          TINYINT     NOT NULL DEFAULT 0 COMMENT '逻辑删除 0否 1是',
     created_at       DATETIME    NOT NULL COMMENT '创建时间',
     updated_at       DATETIME    NOT NULL COMMENT '更新时间',
     PRIMARY KEY (id),

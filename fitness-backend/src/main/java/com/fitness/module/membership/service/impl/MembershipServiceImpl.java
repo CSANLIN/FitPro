@@ -251,6 +251,14 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
+    public void requireActiveMembership(Long userId) {
+        MembershipVO active = getActiveMembership(userId);
+        if (active == null) {
+            throw new BusinessException(1001, "请先办理会籍后再使用此功能");
+        }
+    }
+
+    @Override
     public List<MembershipVO> listAll() {
         return membershipMapper.selectAllMembershipVO();
     }

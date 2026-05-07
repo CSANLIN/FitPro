@@ -21,7 +21,9 @@
     </div>
 
     <template v-else-if="error">
-      <el-empty :description="error" />
+      <el-empty :description="error">
+        <el-button type="primary" round @click="goBack">返回计划列表</el-button>
+      </el-empty>
     </template>
 
     <template v-else-if="!todayWorkout">

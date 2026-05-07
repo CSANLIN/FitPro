@@ -5,6 +5,7 @@ import com.fitness.module.course.dto.BookingCreateDTO;
 import com.fitness.module.course.service.CourseBookingService;
 import com.fitness.module.course.vo.BookingVO;
 import com.fitness.module.course.vo.MyBookingVO;
+import com.fitness.module.membership.service.MembershipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,12 +23,14 @@ import java.util.List;
 public class CourseBookingController {
 
     private final CourseBookingService courseBookingService;
+    private final MembershipService membershipService;
 
     @PostMapping
     @Operation(summary = "预约课程（会员端）")
     @PreAuthorize("hasRole('MEMBER')")
     public Result<Void> book(@RequestBody @Valid BookingCreateDTO dto) {
         Long userId = getCurrentUserId();
+        membershipService.requireActiveMembership(userId);
         courseBookingService.book(userId, dto.getScheduleId());
         return Result.success();
     }

@@ -5,9 +5,6 @@
         <h2 class="page-title">训练记录</h2>
         <p class="page-subtitle">回望汗水，见证每一次超越</p>
       </div>
-      <el-button type="primary" color="#10b981" round class="create-btn" @click="showCreateDialog">
-        <el-icon><Plus /></el-icon>记录训练
-      </el-button>
     </div>
 
     <!-- 本周训练概览 -->
@@ -129,138 +126,30 @@
       </template>
     </el-dialog>
 
-    <!-- 新建记录弹窗 -->
-    <el-dialog v-model="createVisible" title="记录本次训练" width="750px" top="3vh" destroy-on-close class="custom-dialog">
-      <el-form ref="recordFormRef" :model="recordForm" :rules="recordRules" label-position="top">
-        <div class="form-grid-2">
-          <el-form-item label="训练名称" prop="name">
-            <el-input v-model="recordForm.name" placeholder="例如：今日胸背超级组" maxlength="100" />
-          </el-form-item>
-          <el-form-item label="关联计划">
-            <el-select v-model="recordForm.planDayId" placeholder="选择计划中的某一天(可选)" clearable filterable style="width: 100%">
-              <el-option-group v-for="plan in planOptions" :key="plan.id" :label="plan.name">
-                <el-option
-                  v-for="day in plan.days"
-                  :key="day.id"
-                  :label="plan.name + ' - 周' + '一二三四五六日'[day.dayOfWeek - 1]"
-                  :value="day.id"
-                />
-              </el-option-group>
-            </el-select>
-          </el-form-item>
-        </div>
 
-        <div class="form-grid-2">
-          <el-form-item label="开始时间">
-            <el-date-picker
-              v-model="recordForm.startTime"
-              type="datetime"
-              placeholder="选填"
-              style="width: 100%"
-              value-format="YYYY-MM-DD HH:mm:ss"
-            />
-          </el-form-item>
-          <el-form-item label="结束时间">
-            <el-date-picker
-              v-model="recordForm.endTime"
-              type="datetime"
-              placeholder="选填"
-              style="width: 100%"
-              value-format="YYYY-MM-DD HH:mm:ss"
-            />
-          </el-form-item>
-        </div>
-
-        <el-form-item label="训练感受/备注">
-          <el-input v-model="recordForm.note" type="textarea" :rows="2" placeholder="记录下今天的状态吧..." />
-        </el-form-item>
-
-        <el-divider border-style="dashed">训练内容</el-divider>
-
-        <div v-for="(item, index) in recordForm.items" :key="index" class="item-row premium-shadow">
-          <div class="item-header">
-            <span class="item-label">动作 {{ index + 1 }}</span>
-            <el-button type="danger" size="small" plain round @click="removeItem(index)">移除动作</el-button>
-          </div>
-          
-          <div class="item-main-inputs">
-            <el-form-item label="选择动作" :prop="`items.${index}.exerciseId`" :rules="recordRules.exerciseId" class="flex-item">
-              <el-select v-model="item.exerciseId" placeholder="选择或搜索动作" filterable style="width: 100%">
-                <el-option v-for="e in exercises" :key="e.id" :label="e.name" :value="e.id" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="训练组数" class="flex-item-small">
-              <el-input-number v-model="item.groups" :min="1" :max="20" style="width: 100%" controls-position="right" />
-            </el-form-item>
-          </div>
-
-          <!-- 每组详情 -->
-          <div class="sets-container">
-            <div v-for="g in item.groups" :key="g" class="set-row">
-              <span class="set-label">第 {{ g }} 组</span>
-              <el-input-number v-model="item.sets[g - 1].weight" :min="0" :step="0.5" placeholder="重量(kg)" style="width: 120px" controls-position="right" />
-              <el-input-number v-model="item.sets[g - 1].reps" :min="1" :max="999" placeholder="次数" style="width: 120px" controls-position="right" />
-              <el-checkbox v-model="item.sets[g - 1].completed" border class="checkbox-btn">已完成</el-checkbox>
-            </div>
-          </div>
-        </div>
-
-        <el-button type="primary" plain @click="addItem" class="add-item-btn" round>
-          <el-icon><Plus /></el-icon>添加新动作
-        </el-button>
-      </el-form>
-
-      <template #footer>
-        <el-button @click="createVisible = false" round>取消</el-button>
-        <el-button type="primary" color="#10b981" :loading="saving" @click="handleCreateRecord" round>保存记录</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, onActivated } from 'vue'
 import { workoutApi } from '@/api/workout'
-import { exerciseApi } from '@/api/exercise'
 import { ElMessage } from 'element-plus'
-import { Plus, Clock, Timer, Medal, TrendCharts, Calendar } from '@element-plus/icons-vue'
-
-const route = useRoute()
+import { Clock, Timer, Medal, TrendCharts, Calendar } from '@element-plus/icons-vue'
 
 // 数据
 const records = ref([])
 const total = ref(0)
 const loading = ref(false)
 const detailVisible = ref(false)
-const createVisible = ref(false)
 const weeklyStats = ref(null)
-const saving = ref(false)
 const currentRecord = ref(null)
-const exercises = ref([])
-const planOptions = ref([])
 const dateRange = ref(null)
-const recordFormRef = ref(null)
 
-const query = reactive({
+const query = {
   startDate: null,
   endDate: null,
   pageNum: 1,
   pageSize: 20
-})
-
-const recordForm = reactive({
-  name: '',
-  planDayId: null,
-  startTime: null,
-  endTime: null,
-  note: '',
-  items: []
-})
-
-const recordRules = {
-  name: [{ required: true, message: '请输入训练名称', trigger: 'blur' }],
-  exerciseId: [{ required: true, message: '请选择动作', trigger: 'change' }]
 }
 
 // 时间处理辅助函数
@@ -312,26 +201,6 @@ const fetchRecords = async () => {
   }
 }
 
-const fetchExercises = async () => {
-  try {
-    const res = await exerciseApi.list({ pageNum: 1, pageSize: 999 })
-    exercises.value = res.list || []
-  } catch (e) {
-    console.error('获取动作失败:', e)
-  }
-}
-
-const fetchPlanOptions = async () => {
-  try {
-    const res = await workoutApi.listPlans({ status: 'ACTIVE', pageSize: 50 })
-    const planList = res.list || []
-    const detailPromises = planList.map(p => workoutApi.getPlanDetail(p.id).catch(() => null))
-    planOptions.value = (await Promise.all(detailPromises)).filter(Boolean)
-  } catch (e) {
-    console.error('获取计划选项失败:', e)
-  }
-}
-
 // 记录详情
 const showRecordDetail = async (id) => {
   try {
@@ -353,87 +222,14 @@ const handleDeleteRecord = async (id) => {
   }
 }
 
-// 新建记录
-const showCreateDialog = () => {
-  recordForm.name = ''
-  recordForm.planDayId = null
-  recordForm.startTime = null
-  recordForm.endTime = null
-  recordForm.note = ''
-  recordForm.items = []
-  createVisible.value = true
-}
-
-const addItem = () => {
-  recordForm.items.push({
-    exerciseId: null,
-    groups: 4,
-    sets: Array.from({ length: 4 }, () => ({
-      weight: 0,
-      reps: 12,
-      completed: false
-    }))
-  })
-}
-
-const removeItem = (index) => {
-  recordForm.items.splice(index, 1)
-}
-
-const handleCreateRecord = async () => {
-  const valid = await recordFormRef.value.validate().catch(() => false)
-  if (!valid) return
-
-  saving.value = true
-  try {
-    const items = []
-    recordForm.items.forEach((item) => {
-      item.sets.forEach((set, idx) => {
-        items.push({
-          exerciseId: item.exerciseId,
-          setNumber: idx + 1,
-          reps: set.reps,
-          weight: set.weight > 0 ? set.weight : null,
-          completed: set.completed ? 1 : 0
-        })
-      })
-    })
-
-    const data = {
-      name: recordForm.name,
-      planDayId: recordForm.planDayId || null,
-      startTime: recordForm.startTime || null,
-      endTime: recordForm.endTime || null,
-      note: recordForm.note || null,
-      items
-    }
-
-    await workoutApi.createRecord(data)
-    ElMessage.success('训练记录保存成功')
-    createVisible.value = false
-    await fetchRecords()
-  } catch (e) {
-    console.error('创建记录失败:', e)
-  } finally {
-    saving.value = false
-  }
-}
-
-watch(() => route.query.planId, (planId) => {
-  if (planId) {
-    showCreateDialog()
-  }
-})
-
 onMounted(() => {
   fetchRecords()
-  fetchExercises()
-  fetchPlanOptions()
   fetchWeeklyStats()
+})
 
-  if (route.query.planId) {
-    showCreateDialog()
-  }
+onActivated(() => {
+  fetchRecords()
+  fetchWeeklyStats()
 })
 </script>
 

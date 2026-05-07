@@ -26,9 +26,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -180,13 +178,21 @@ public class DashboardServiceImpl implements DashboardService {
                         .orderByAsc(CourseScheduleEntity::getStartTime)
                         .last("LIMIT 10"));
 
+        // 批量加载课程信息
+        Set<Long> courseIds = entities.stream().map(CourseScheduleEntity::getCourseId).collect(Collectors.toSet());
+        Map<Long, String> courseNames = new HashMap<>();
+        if (!courseIds.isEmpty()) {
+            courseMapper.selectList(new LambdaQueryWrapper<CourseEntity>().in(CourseEntity::getId, courseIds))
+                    .forEach(c -> courseNames.put(c.getId(), c.getName()));
+        }
+
         List<UpcomingSchedule> list = new ArrayList<>();
         DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
         for (CourseScheduleEntity entity : entities) {
             UpcomingSchedule item = new UpcomingSchedule();
             item.setId(entity.getId());
-            item.setCourseName("课程#" + entity.getCourseId());
+            item.setCourseName(courseNames.getOrDefault(entity.getCourseId(), "课程#" + entity.getCourseId()));
             item.setScheduleDate(entity.getScheduleDate() != null ? entity.getScheduleDate().format(dateFmt) : "");
             item.setStartTime(entity.getStartTime() != null ? entity.getStartTime().format(timeFmt) : "");
             item.setEndTime(entity.getEndTime() != null ? entity.getEndTime().format(timeFmt) : "");

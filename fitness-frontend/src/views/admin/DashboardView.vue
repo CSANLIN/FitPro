@@ -516,6 +516,11 @@ watch(() => stats.value, () => {
   color: var(--text-primary);
 }
 
+.ring-green {
+  border: 4px solid #10b981;
+  color: var(--text-primary);
+}
+
 @media (max-width: 992px) {
   .hero-overview-card { margin-bottom: 24px; }
   .chart-card { margin-bottom: 24px; }

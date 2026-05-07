@@ -4,7 +4,7 @@
 
 ### 1.1 项目背景
 
-FitPro 是一个面向中小型健身房的综合管理系统，提供会员管理、课程预约、训练计划制定、身体数据追踪等核心功能。系统分为 **用户端（会员/教练）** 和 **管理端（管理员）**，采用前后端分离架构。
+FitPro 是一个面向中小型健身房的综合管理系统，提供会员管理、课程预约、训练计划制定、身体数据追踪、AI 健身助手等核心功能。系统分为 **会员端**、**教练端** 和 **管理端** 三端，采用前后端分离架构。
 
 ### 1.2 项目目标
 
@@ -22,17 +22,19 @@ FitPro 是一个面向中小型健身房的综合管理系统，提供会员管�
 ### 2.1 用户角色
 
 ```
-┌─────────────────────────────────────────────┐
-│              系统角色划分                      │
-├──────────┬──────────┬───────────────────────┤
-│  超级管理员  │   教练    │       会员            │
-│ SUPER_ADMIN│  COACH   │      MEMBER          │
-├──────────┼──────────┼───────────────────────┤
-│ 全部权限    │ 课程管理  │ 个人信息管理           │
-│ 用户管理    │ 训练计划  │ 课程预约              │
-│ 系统配置    │ 会员指导  │ 训练记录              │
-│ 数据统计    │ 排课查看  │ 身体数据追踪           │
-└──────────┴──────────┴───────────────────────┘
+┌──────────────────────────────────────────────────┐
+│                   系统角色划分                      │
+├──────────────┬──────────────┬────────────────────┤
+│  超级管理员     │     教练       │       会员         │
+│ SUPER_ADMIN   │    COACH      │      MEMBER       │
+├──────────────┼──────────────┼────────────────────┤
+│ 仪表盘/数据统计 │ 课程编排/排课   │ 个人信息管理         │
+│ 会员/教练管理   │ 授课分析/统计   │ 课程预约/取消        │
+│ 课程/运动库管理 │ 学员管理/分析   │ 训练计划/会话/记录    │
+│ 会籍/支付管理   │ 训练模板管理    │ 身体数据追踪/趋势     │
+│ 公告/日志/配置  │               │ 会籍信息/签到打卡     │
+│              │               │ AI 健身助手对话      │
+└──────────────┴──────────────┴────────────────────┘
 ```
 
 ### 2.2 功能模块总览
@@ -40,52 +42,67 @@ FitPro 是一个面向中小型健身房的综合管理系统，提供会员管�
 ```mermaid
 mindmap
   root((FitPro 健身管理系统))
-    用户端
+    会员端
       认证模块
         注册
         登录
-        找回密码
+        JWT 双Token
       个人中心
         个人信息
         身体数据
         数据趋势图
       训练模块
         训练计划
-        训练记录
+        训练会话
+        训练记录统计
         运动库浏览
       课程模块
         课程列表
         课程预约
-        预约记录
+        我的预约
       会员服务
         会籍信息
         签到打卡
-        消息通知
+      AI 健身助手
+        流式对话
+        个性化指导
+        周/月训练总结
+    教练端
+      课程编排
+        排课日历
+        创建/取消排课
+      授课分析
+        出勤率统计
+        时段分布
+        课程排行
+      学员管理
+        学员列表
+        预约/出勤分析
     管理端
       仪表盘
-        数据概览
-        趋势图表
+        数据概览卡片
+        签到/注册趋势图
         待办事项
       会员管理
-        会员列表
-        会籍管理
-        签到记录
+        会员列表/详情
+        会籍办卡/续费/冻结/退卡
       教练管理
         教练列表
-        排课管理
-        绩效统计
+        启用/禁用
       课程管理
-        课程维护
-        排课日历
-        预约管理
+        课程CRUD
+        上下架
+        排课管理
       运动库管理
-        动作分类
-        动作维护
-        训练模板
+        分类管理
+        动作管理
+      会籍管理
+        卡种管理
+        会籍记录
       系统管理
         公告管理
-        系统配置
         操作日志
+        系统配置
 ```
 
 ### 2.3 详细功能说明
@@ -135,7 +152,25 @@ mindmap
 | 签到记录     | 查看会员到店签到历史                      | P1     |
 | 会员画像     | 活跃度、消费、训练数据综合展示            | P2     |
 
-#### 模块六：系统管理（管理端）
+#### 模块六：AI 健身助手（会员端）
+
+| 功能         | 描述                                      | 优先级 |
+| ------------ | ----------------------------------------- | ------ |
+| 流式对话     | 基于 DeepSeek 大模型，SSE 流式实时回复    | P0     |
+| 个性化指导   | 采集用户训练数据构建 System Prompt         | P0     |
+| 训练分析     | 基于真实训练记录生成周/月训练总结          | P1     |
+| 对话历史     | 保留最近 20 条对话上下文                  | P1     |
+
+#### 模块七：教练端
+
+| 功能         | 描述                                      | 优先级 |
+| ------------ | ----------------------------------------- | ------ |
+| 课程编排     | 教练创建个人排课，查看预约学员列表        | P0     |
+| 授课分析     | 出勤率、热门课程排行、时段分布统计        | P1     |
+| 学员管理     | 查看学员预约次数、出勤率、最近上课日期    | P1     |
+| 训练模板     | 创建和管理训练计划模板                    | P1     |
+
+#### 模块八：系统管理（管理端）
 
 | 功能         | 描述                                      | 优先级 |
 | ------------ | ----------------------------------------- | ------ |
@@ -151,120 +186,150 @@ mindmap
 
 | 层次       | 技术                        | 版本    | 说明                     |
 | ---------- | --------------------------- | ------- | ------------------------ |
-| **后端框架** | Spring Boot                | 3.2.x   | 主体框架                 |
-| **安全认证** | Spring Security + JWT      | —       | 权限认证                 |
-| **ORM**     | MyBatis-Plus               | 3.5.x   | 数据持久层               |
+| **后端框架** | Spring Boot                | 3.2.5   | 主体框架                 |
+| **安全认证** | Spring Security + JWT      | —       | 双Token无状态认证        |
+| **ORM**     | MyBatis-Plus               | 3.5.7   | 数据持久层               |
 | **数据库**   | MySQL                      | 8.0     | 主数据库                 |
 | **缓存**     | Redis                      | 7.x     | Token/热数据缓存         |
-| **接口文档** | Knife4j (Swagger)          | 4.x     | API 文档自动生成         |
-| **前端框架** | Vue 3                      | 3.4.x   | 渐进式 JS 框架           |
+| **接口文档** | Knife4j (OpenAPI 3)        | 4.4.0   | API 文档自动生成         |
+| **AI SDK**   | DeepSeek API (兼容OpenAI)  | —       | AI 健身助手推理引擎       |
+| **前端框架** | Vue 3 (Composition API)    | 3.4.x   | 渐进式 JS 框架           |
 | **构建工具** | Vite                       | 5.x     | 前端构建                 |
 | **UI 框架**  | Element Plus               | 2.x     | 后台 UI 组件库           |
 | **状态管理** | Pinia                      | 2.x     | Vue 状态管理             |
 | **路由**     | Vue Router                 | 4.x     | 前端路由                 |
-| **HTTP**     | Axios                      | 1.x     | HTTP 请求库              |
+| **HTTP**     | Axios + Fetch API          | 1.x     | HTTP 请求库（SSE用Fetch） |
 | **图表**     | ECharts                    | 5.x     | 数据可视化               |
-| **工具**     | Lombok, Hutool, MapStruct  | —       | 后端工具库               |
+| **工具**     | Lombok, Hutool 5.8.26      | —       | 后端工具库               |
 
 ### 3.2 项目结构
 
 ```
 f:\Project\
-├── fitness-backend/                 # Spring Boot 后端
+├── docker-compose.yml               # 4服务编排（MySQL+Redis+Backend+Nginx）
+├── Dockerfile                       # 后端多阶段构建（Maven编译+JRE运行）
+├── fitness-backend/                 # Spring Boot 3.2 后端
 │   ├── src/main/java/com/fitness/
-│   │   ├── FitnessApplication.java  # 启动类
-│   │   ├── config/                  # 配置类
-│   │   │   ├── SecurityConfig.java
-│   │   │   ├── CorsConfig.java
-│   │   │   ├── MybatisPlusConfig.java
-│   │   │   ├── RedisConfig.java
-│   │   │   └── SwaggerConfig.java
+│   │   ├── FitnessApplication.java  # 启动类（@MapperScan）
+│   │   ├── config/                  # 配置类（8个）
+│   │   │   ├── SecurityConfig.java  # Spring Security 无状态配置
+│   │   │   ├── CorsConfig.java      # CORS 跨域
+│   │   │   ├── MybatisPlusConfig.java # 分页+自动填充
+│   │   │   ├── RedisConfig.java     # Redis 序列化
+│   │   │   ├── JacksonConfig.java   # Long→String 防精度丢失
+│   │   │   ├── SwaggerConfig.java   # Knife4j 文档
+│   │   │   └── WebConfig.java       # 静态资源映射
 │   │   ├── common/                  # 通用组件
-│   │   │   ├── Result.java          # 统一响应
-│   │   │   ├── PageResult.java      # 分页响应
-│   │   │   ├── BaseEntity.java      # 实体基类
-│   │   │   └── exception/           # 异常处理
+│   │   │   ├── Result.java          # 统一响应 Result<T>
+│   │   │   ├── PageResult.java      # 分页响应封装
+│   │   │   ├── BaseEntity.java      # 实体基类（雪花ID+逻辑删除）
+│   │   │   └── exception/           # BusinessException + GlobalExceptionHandler
 │   │   ├── security/                # 安全模块
-│   │   │   ├── JwtTokenProvider.java
-│   │   │   ├── JwtAuthFilter.java
+│   │   │   ├── JwtTokenProvider.java # JWT 双Token生成/校验
+│   │   │   ├── JwtAuthFilter.java   # 请求JWT过滤器
 │   │   │   └── UserDetailsServiceImpl.java
-│   │   ├── module/                  # 业务模块
-│   │   │   ├── auth/                # 认证模块
-│   │   │   ├── user/                # 用户模块
-│   │   │   ├── exercise/            # 运动库模块
-│   │   │   ├── workout/             # 训练模块
-│   │   │   ├── course/              # 课程模块
-│   │   │   ├── membership/          # 会员卡模块
-│   │   │   ├── checkin/             # 签到模块
-│   │   │   └── system/              # 系统模块
+│   │   ├── module/                  # 业务模块（12个）
+│   │   │   ├── auth/                # 认证（注册/登录/Token刷新）
+│   │   │   ├── user/                # 用户 + 身体数据
+│   │   │   ├── exercise/            # 运动分类 + 动作库
+│   │   │   ├── workout/             # 训练模板/计划/记录（7表3级嵌套）
+│   │   │   ├── course/              # 课程 + 排课 + 预约（乐观锁防超卖）
+│   │   │   ├── membership/          # 卡种 + 会籍（办卡/续费/冻结）
+│   │   │   ├── checkin/             # 签到打卡
+│   │   │   ├── ai/                  # AI 健身助手（DeepSeek + SSE）
+│   │   │   ├── coach/               # 教练端（排课/分析/学员）
+│   │   │   ├── admin/               # 仪表盘统计
+│   │   │   ├── payment/             # 支付订单
+│   │   │   ├── file/                # 文件上传
+│   │   │   └── system/              # 公告 + 操作日志（AOP）
 │   │   └── util/                    # 工具类
 │   ├── src/main/resources/
-│   │   ├── application.yml
-│   │   ├── application-dev.yml
-│   │   └── mapper/                  # MyBatis XML
-│   └── pom.xml
-├── fitness-frontend/                # Vue 3 前端
+│   │   ├── application.yml          # 主配置（JWT/DeepSeek/MyBatis-Plus）
+│   │   ├── application-dev.yml      # 开发环境
+│   │   ├── application-prod.yml     # 生产环境
+│   │   └── mapper/                  # 8个 MyBatis XML 映射文件
+│   └── pom.xml                      # Maven 依赖管理
+├── fitness-frontend/                # Vue 3.4 前端
 │   ├── src/
-│   │   ├── api/                     # API 接口
+│   │   ├── api/                     # 15个 API 模块（auth/admin/ai/course/...）
 │   │   ├── assets/                  # 静态资源
-│   │   ├── components/              # 公共组件
-│   │   ├── composables/             # 组合式函数
-│   │   ├── layout/                  # 布局组件
-│   │   ├── router/                  # 路由配置
-│   │   ├── stores/                  # Pinia 状态
+│   │   ├── layout/                  # 3套布局（会员/教练/管理端）
+│   │   │   ├── AppLayout.vue
+│   │   │   ├── CoachLayout.vue
+│   │   │   └── AdminLayout.vue
+│   │   ├── router/                  # 路由（含角色守卫）
+│   │   ├── stores/                  # Pinia Store（auth/course/...）
 │   │   ├── styles/                  # 全局样式
-│   │   ├── utils/                   # 工具函数
-│   │   ├── views/                   # 页面视图
-│   │   │   ├── auth/                # 登录注册
-│   │   │   ├── dashboard/           # 仪表盘
-│   │   │   ├── member/              # 会员相关
-│   │   │   ├── exercise/            # 运动库
-│   │   │   ├── workout/             # 训练计划
-│   │   │   ├── course/              # 课程管理
-│   │   │   ├── profile/             # 个人中心
-│   │   │   └── system/              # 系统管理
+│   │   ├── utils/
+│   │   │   └── request.js           # Axios 封装（Token注入/自动刷新）
+│   │   ├── views/                   # 35个页面视图
+│   │   │   ├── auth/                # 登录/注册
+│   │   │   ├── app/                 # 会员端（首页/个人中心/身体数据）
+│   │   │   ├── admin/               # 管理端（仪表盘/会员/教练/课程/公告/日志）
+│   │   │   ├── coach/               # 教练端（排课/分析/学员）
+│   │   │   ├── ai/                  # AI 健身助手对话
+│   │   │   ├── course/              # 课程列表/预约/排课管理
+│   │   │   ├── workout/             # 训练计划/会话/记录/模板
+│   │   │   ├── checkin/             # 签到打卡
+│   │   │   ├── membership/          # 会籍信息/管理
+│   │   │   ├── exercise/            # 运动库浏览/管理
+│   │   │   ├── payment/             # 支付确认/结果
+│   │   │   └── error/               # 404/403
 │   │   ├── App.vue
 │   │   └── main.js
 │   ├── index.html
-│   ├── vite.config.js
+│   ├── vite.config.js               # Vite（自动导入/gzip/API代理）
 │   └── package.json
-├── docs/                            # 项目文档
-├── sql/                             # SQL 脚本
-├── CLAUDE.md                        # AI 代码生成规范
+├── nginx/conf.d/
+│   └── fitpro.conf                  # Nginx 反向代理 + SSE 流式支持
+├── sql/                             # SQL 脚本（建表+种子数据）
+├── docs/                            # 项目文档/论文
 └── README.md
 ```
 
 ---
 
-## 4. 非功能性需求
+## xxxxxxxxxx # 后端cd fitness-backendmvn package -DskipTestsjava -jar target/fitness-backend-*.jar​# 前端（使用 nginx 托管 dist 目录）cd fitness-frontendnpm install && npm run build# 将 dist/ 目录复制到 nginx html 目录bash
 
 | 类别     | 要求                                                 |
 | -------- | ---------------------------------------------------- |
-| 性能     | API 响应时间 < 500ms，列表页支持万级数据分页         |
-| 安全     | 密码 BCrypt 加密，JWT Token 过期机制，XSS/CSRF 防护  |
-| 可用性   | 前端响应式布局，兼容主流浏览器（Chrome/Edge/Firefox） |
-| 可维护性 | 代码分层清晰，注释覆盖率 > 30%，统一异常处理         |
-| 可测试性 | 核心 Service 层单元测试覆盖                          |
+| 性能     | API 响应 < 500ms，页面首次加载 < 2s，支持 50+ 并发   |
+| 安全     | BCrypt 加密，JWT 双Token（2h/7d），RBAC 角色控制，SQL注入/XSS 防护 |
+| 可用性   | 三端响应式布局（PC + 移动端），Chrome/Edge/Firefox 兼容 |
+| 可维护性 | Controller→Service→Mapper 分层架构，统一异常处理，Knife4j 自动文档 |
+| 可测试性 | 后端 91 个单元测试（5 Service + 3 Controller + E2E），前端 25 个测试 |
 
 ---
 
 ## 5. 部署方案
 
+### 5.1 容器化部署（Docker Compose）
+
 ```mermaid
-graph LR
-    subgraph 开发环境
-        A[开发者本机] --> B[MySQL 8.0]
-        A --> C[Redis 7.x]
-        A --> D[后端 :8080]
-        A --> E[前端 :5173]
+graph TB
+    subgraph Docker[Docker Compose 容器编排]
+        Nginx[Nginx :80<br/>静态资源 + 反向代理]
+        Backend[Spring Boot :8080<br/>REST API + SSE]
+        MySQL[(MySQL 8.0 :3306<br/>主数据库)]
+        Redis[(Redis 7 :6379<br/>缓存/Token)]
     end
 
-    subgraph 生产环境
-        F[Nginx] -->|静态资源| G[Vue 打包产物]
-        F -->|/api 反代| H[Spring Boot JAR]
-        H --> I[(MySQL)]
-        H --> J[(Redis)]
-    end
+    Browser[浏览器] -->|HTTP| Nginx
+    Nginx -->|/api/* 反代| Backend
+    Nginx -->|静态文件| Nginx
+    Backend -->|JDBC| MySQL
+    Backend -->|Jedis| Redis
 ```
 
-> **注意：** 开发阶段使用本地环境，生产环境可选用 Docker Compose 一键部署。
+| 服务 | 镜像 | 端口映射 | 说明 |
+|------|------|---------|------|
+| mysql | mysql:8.0 | 3307:3306 | utf8mb4，自动执行 sql/ 初始化脚本 |
+| redis | redis:7 | 6380:6379 | 无密码 |
+| backend | 自构建（多阶段） | 8080:8080 | Spring Boot JAR，环境变量注入配置 |
+| frontend | nginx:alpine | 80:80 | 静态资源 + API 反向代理 |
+
+### 5.2 关键配置
+
+- **Nginx**：`proxy_buffering off` 支持 AI 对话 SSE 流式传输，`proxy_read_timeout 300s`
+- **Dockerfile**：多阶段构建（Maven 编译 → JRE 运行），镜像体积约 200MB
+- **环境变量**：`SPRING_PROFILES_ACTIVE`、`DB_HOST`、`REDIS_HOST`、`DEEPSEEK_API_KEY`

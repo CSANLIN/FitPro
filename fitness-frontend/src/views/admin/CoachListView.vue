@@ -191,7 +191,7 @@ const handleSave = async () => {
     dialogVisible.value = false
     await fetchData()
   } catch (e) {
-    console.error('保存失败:', e)
+    ElMessage.error(e.message || '创建失败，请检查信息是否正确')
   } finally {
     saving.value = false
   }

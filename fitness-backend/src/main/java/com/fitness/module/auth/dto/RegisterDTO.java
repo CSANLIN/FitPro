@@ -38,6 +38,9 @@ public class RegisterDTO {
     @Schema(description = "手机号", example = "13800138000")
     private String phone;
 
+    @Schema(description = "邮箱（可选）")
+    private String email;
+
     @Schema(description = "角色，默认MEMBER", example = "MEMBER", defaultValue = "MEMBER")
     private String role = "MEMBER";
 }

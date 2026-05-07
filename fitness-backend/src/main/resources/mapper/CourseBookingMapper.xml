@@ -103,4 +103,61 @@
         LEFT JOIN sys_user sc ON cs.coach_id = sc.id
         ORDER BY cs.schedule_date DESC, cb.booked_at DESC
     </select>
+
+    <select id="selectBookingVOByCoachId" resultMap="BookingVOMap">
+        SELECT
+            cb.id,
+            cb.user_id,
+            u.nickname AS user_name,
+            cs.id AS schedule_id,
+            c.name AS course_name,
+            sc.nickname AS coach_name,
+            cs.schedule_date,
+            cs.start_time,
+            cs.end_time,
+            cb.status,
+            cb.booked_at,
+            cb.cancelled_at,
+            cb.created_at
+        FROM course_booking cb
+        INNER JOIN course_schedule cs ON cb.schedule_id = cs.id
+        INNER JOIN course c ON cs.course_id = c.id
+        LEFT JOIN sys_user u ON cb.user_id = u.id
+        LEFT JOIN sys_user sc ON cs.coach_id = sc.id
+        WHERE cs.coach_id = #{coachId}
+        ORDER BY cs.schedule_date DESC, cb.booked_at DESC
+    </select>
+
+    <resultMap id="CoachBookingVOMap" type="com.fitness.module.coach.vo.CoachBookingVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="schedule_date" property="scheduleDate"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="course_name" property="courseName"/>
+        <result column="status" property="status"/>
+        <result column="booked_at" property="bookedAt"/>
+    </resultMap>
+
+    <select id="selectCoachBookingVOByScheduleId" resultMap="CoachBookingVOMap">
+        SELECT
+            cb.id,
+            cb.user_id,
+            u.nickname AS user_name,
+            u.avatar AS user_avatar,
+            cs.schedule_date,
+            cs.start_time,
+            cs.end_time,
+            c.name AS course_name,
+            cb.status,
+            cb.booked_at
+        FROM course_booking cb
+        INNER JOIN course_schedule cs ON cb.schedule_id = cs.id
+        INNER JOIN course c ON cs.course_id = c.id
+        LEFT JOIN sys_user u ON cb.user_id = u.id
+        WHERE cb.schedule_id = #{scheduleId}
+        ORDER BY cb.booked_at ASC
+    </select>
 </mapper>

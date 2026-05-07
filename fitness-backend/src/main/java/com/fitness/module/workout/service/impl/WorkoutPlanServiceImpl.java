@@ -41,10 +41,24 @@ public class WorkoutPlanServiceImpl extends ServiceImpl<WorkoutPlanMapper, Worko
 
     @Override
     public WorkoutPlanDetailVO getDetail(Long id) {
+        log.debug("查询训练计划详情: id={}", id);
+        // 先检查计划是否存在（含已删除）
+        WorkoutPlanEntity entity = this.getById(id);
+        if (entity == null) {
+            log.warn("训练计划不存在(已被物理删除): id={}", id);
+            throw new BusinessException(404, "计划不存在，可能已被删除");
+        }
+        if (entity.getDeleted() != null && entity.getDeleted() == 1) {
+            log.warn("训练计划已被软删除: id={}", id);
+            throw new BusinessException(404, "计划不存在，可能已被删除");
+        }
         WorkoutPlanDetailVO detail = this.baseMapper.selectPlanDetail(id);
         if (detail == null) {
+            log.warn("训练计划详情查询返回空: id={}", id);
             throw new BusinessException(404, "计划不存在");
         }
+        log.debug("训练计划详情查询成功: id={}, days={}", id,
+                detail.getDays() != null ? detail.getDays().size() : 0);
         return detail;
     }
 

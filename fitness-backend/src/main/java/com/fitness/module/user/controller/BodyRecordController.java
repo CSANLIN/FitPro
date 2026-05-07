@@ -1,6 +1,7 @@
 package com.fitness.module.user.controller;
 
 import com.fitness.common.Result;
+import com.fitness.module.membership.service.MembershipService;
 import com.fitness.module.user.dto.BodyRecordCreateDTO;
 import com.fitness.module.user.service.BodyRecordService;
 import com.fitness.module.user.vo.BodyRecordVO;
@@ -22,6 +23,7 @@ import java.util.List;
 public class BodyRecordController {
 
     private final BodyRecordService bodyRecordService;
+    private final MembershipService membershipService;
 
     /**
      * 获取当前登录用户的 ID
@@ -42,6 +44,7 @@ public class BodyRecordController {
     @Operation(summary = "录入身体数据")
     public Result<BodyRecordVO> create(@RequestBody @Valid BodyRecordCreateDTO dto) {
         Long currentUserId = getCurrentUserId();
+        membershipService.requireActiveMembership(currentUserId);
         return Result.success(bodyRecordService.create(currentUserId, dto));
     }
 

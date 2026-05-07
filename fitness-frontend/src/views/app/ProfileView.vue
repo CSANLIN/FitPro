@@ -172,6 +172,7 @@ import { useAuthStore } from '@/stores/auth'
 import { userApi } from '@/api/user'
 import { checkinApi } from '@/api/checkin'
 import { membershipApi } from '@/api/membership'
+import { uploadApi } from '@/api/upload'
 import {
   DataLine, Lock, List, ChatLineSquare, Edit, Iphone, ArrowRight, Ticket
 } from '@element-plus/icons-vue'
@@ -288,8 +289,9 @@ const handleSaveProfile = async () => {
     ElMessage.success('资料已更新')
     editDialogVisible.value = false
   } catch (error) {
-    if (error?.response?.data?.message) {
-      ElMessage.error(error.response.data.message)
+    const msg = error?.response?.data?.message || error?.message
+    if (msg) {
+      ElMessage.error(msg)
     }
   } finally {
     profileLoading.value = false
@@ -298,12 +300,16 @@ const handleSaveProfile = async () => {
 
 const triggerAvatarUpload = () => avatarInputRef.value?.click()
 
-const handleAvatarChange = (event) => {
+const handleAvatarChange = async (event) => {
   const file = event.target.files[0]
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = (e) => { profileForm.avatar = e.target.result }
-  reader.readAsDataURL(file)
+  try {
+    const url = await uploadApi.upload(file)
+    profileForm.avatar = url
+    ElMessage.success('头像已上传')
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '头像上传失败')
+  }
   event.target.value = ''
 }
 
@@ -360,8 +366,9 @@ const handleChangePassword = async () => {
     await authStore.logout()
     router.push('/login')
   } catch (error) {
-    if (error?.response?.data?.message) {
-      ElMessage.error(error.response.data.message)
+    const msg = error?.response?.data?.message || error?.message
+    if (msg) {
+      ElMessage.error(msg)
     }
   } finally {
     passwordLoading.value = false

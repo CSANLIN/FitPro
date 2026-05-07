@@ -6,10 +6,8 @@ import { useAuthStore } from '@/stores/auth'
 // 创建 axios 实例
 const request = axios.create({
   baseURL: '/api',
-  timeout: 10000, // 10秒超时
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  timeout: 10000 // 10秒超时
+  // 不设全局 Content-Type，让 Axios 根据请求体自动设置
 })
 
 // Token刷新相关状态
@@ -79,18 +77,30 @@ request.interceptors.response.use(
     if (res.code === 401) {
       // token 过期，尝试刷新
       return handleTokenExpired(errorMessage, response.config)
-    } else if (res.code === 403) {
-      ElMessage.warning('无权限访问')
-    } else if (res.code === 404) {
-      ElMessage.warning('资源不存在')
-    } else if (res.code >= 500) {
-      ElMessage.error('服务器错误，请稍后重试')
-    } else {
-      // 其他业务错误
-      ElMessage.error(errorMessage)
+    }
+    if (res.code === 403) {
+      // 业务层面 403，清除认证并跳转登录
+      localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('userInfo')
+      ElMessage.warning('登录已过期，请重新登录')
+      if (router.currentRoute.value.path !== '/login') {
+        router.push('/login')
+      }
+      const err = new Error(errorMessage)
+      err.response = response
+      return Promise.reject(err)
     }
 
-    return Promise.reject(new Error(errorMessage))
+    // 404 由拦截器统一提示
+    if (res.code === 404) {
+      ElMessage.warning('资源不存在')
+    }
+
+    // 所有错误统一交给组件 catch 处理
+    const err = new Error(errorMessage)
+    err.response = response
+    return Promise.reject(err)
   },
   (error) => {
     // 处理 HTTP 错误（网络错误、超时等）
@@ -102,17 +112,34 @@ request.interceptors.response.use(
       if (status === 401) {
         // token 过期，尝试刷新
         return handleTokenExpired(message, error.config)
-      } else if (status === 403) {
-        ElMessage.warning('无权限访问')
-      } else if (status === 404) {
-        ElMessage.warning('资源不存在')
-      } else if (status >= 500) {
-        ElMessage.error('服务器错误，请稍后重试')
-      } else {
-        ElMessage.error(message)
       }
-    } else if (error.request) {
-      // 请求已发送但无响应（网络错误）
+      if (status === 403) {
+        // 403 通常因旧/无效 token 导致（匿名认证被 Spring Security 拒绝）
+        localStorage.removeItem('token')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('userInfo')
+        ElMessage.warning('登录已过期，请重新登录')
+        if (router.currentRoute.value.path !== '/login') {
+          router.push('/login')
+        }
+        const err = new Error(message)
+        err.response = error.response
+        return Promise.reject(err)
+      }
+
+      // 404 由拦截器统一提示
+      if (status === 404) {
+        ElMessage.warning('资源不存在')
+      }
+
+      // 所有错误统一交给组件 catch 处理
+      const err = new Error(message)
+      err.response = error.response
+      return Promise.reject(err)
+    }
+
+    // 请求已发送但无响应（网络错误/超时）
+    if (error.request) {
       if (error.code === 'ECONNABORTED') {
         ElMessage.error('请求超时，请检查网络连接')
       } else {

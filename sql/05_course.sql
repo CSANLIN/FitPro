@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS course (
     duration_minutes INT          NOT NULL COMMENT '课程时长(分钟)',
     max_capacity     INT          NOT NULL DEFAULT 20 COMMENT '最大容量',
     status           TINYINT      NOT NULL DEFAULT 1 COMMENT '状态 0下架 1上架',
+    price            DECIMAL(10,2) DEFAULT NULL COMMENT '课程价格',
+    deleted          TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除 0否 1是',
     created_at       DATETIME     NOT NULL COMMENT '创建时间',
     updated_at       DATETIME     NOT NULL COMMENT '更新时间',
     PRIMARY KEY (id)

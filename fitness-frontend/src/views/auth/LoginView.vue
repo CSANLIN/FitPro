@@ -151,7 +151,9 @@ const handleLogin = async () => {
     const userRole = authStore.userInfo?.role || ''
     const userRoleWithPrefix = userRole.startsWith('ROLE_') ? userRole : `ROLE_${userRole}`
 
-    if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
+    if (userRoleWithPrefix === 'ROLE_COACH') {
+      await router.push('/coach/schedule')
+    } else if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN') {
       await router.push('/admin/dashboard')
     } else if (userRoleWithPrefix === 'ROLE_MEMBER') {
       await router.push('/app/home')

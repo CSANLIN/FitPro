@@ -67,6 +67,7 @@ import {
   HomeFilled,
   Calendar,
   Basketball,
+  MagicStick,
   User
 } from '@element-plus/icons-vue'
 
@@ -78,6 +79,7 @@ const tabItems = ref([
   { path: '/app/home', label: '首页', icon: HomeFilled },
   { path: '/app/course', label: '课程', icon: Calendar },
   { path: '/app/exercise', label: '运动', icon: Basketball },
+  { path: '/app/ai', label: '助手', icon: MagicStick },
   { path: '/app/profile', label: '我的', icon: User }
 ])
 
@@ -91,6 +93,7 @@ const isActive = (item) => {
   if (item.path === '/app/home' && route.path === '/app/home') return true;
   if (item.path === '/app/course' && route.path.startsWith('/app/course')) return true;
   if (item.path === '/app/exercise' && (route.path.startsWith('/app/exercise') || route.path.startsWith('/app/plan'))) return true;
+  if (item.path === '/app/ai' && route.path.startsWith('/app/ai')) return true;
   if (item.path === '/app/profile' && (route.path.startsWith('/app/profile') || route.path.startsWith('/app/body-data') || route.path.startsWith('/app/membership') || route.path.startsWith('/app/record') || route.path.startsWith('/app/checkin'))) return true;
   return route.path.startsWith(item.path)
 }
@@ -194,7 +197,7 @@ const goToProfile = () => {
   justify-content: space-around;
   align-items: center;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   height: 72px;
   background: white;
   border-radius: 36px;

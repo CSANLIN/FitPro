@@ -234,7 +234,9 @@ const handleRegister = async () => {
     // 后端返回的角色不带 ROLE_ 前缀，但前端权限检查时需要带前缀
     const userRoleWithPrefix = userRole ? `ROLE_${userRole}` : null
 
-    if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
+    if (userRoleWithPrefix === 'ROLE_COACH') {
+      await router.push('/coach/schedule')
+    } else if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN') {
       await router.push('/admin/dashboard')
     } else if (userRoleWithPrefix === 'ROLE_MEMBER') {
       await router.push('/app/profile')

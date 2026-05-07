@@ -153,7 +153,8 @@ const fetchBookings = async () => {
   try {
     const res = await courseApi.myBookings()
     if (res && res.length > 0) {
-      nextCourse.value = res[0]
+      const active = res.find(b => b.status === 'BOOKED')
+      nextCourse.value = active || null
     }
   } catch (error) {
     console.warn('获取预约记录失败', error)

@@ -5,6 +5,8 @@ import com.fitness.common.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("course")
@@ -21,6 +23,8 @@ public class CourseEntity extends BaseEntity {
     private Integer durationMinutes;
 
     private Integer maxCapacity;
+
+    private BigDecimal price;
 
     private Integer status;
 }

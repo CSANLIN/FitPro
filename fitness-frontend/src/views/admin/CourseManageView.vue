@@ -122,8 +122,18 @@
           <el-input v-model="form.description" type="textarea" :rows="3" placeholder="向会员展示的课程特色简介..." class="premium-textarea" />
         </el-form-item>
         
-        <el-form-item label="宣传海报 (URL)" prop="coverImage">
-          <el-input v-model="form.coverImage" placeholder="https://..." class="premium-input" />
+        <el-form-item label="宣传海报" prop="coverImage">
+          <div class="upload-wrap">
+            <img v-if="form.coverImage" :src="form.coverImage" class="upload-preview" @click="triggerUpload" />
+            <el-upload
+              ref="coverUploadRef"
+              :show-file-list="false"
+              :accept="'image/jpeg,image/png,image/webp'"
+              :before-upload="(file) => handleUpload(file, 'coverImage')"
+            >
+              <el-button type="primary" plain>{{ form.coverImage ? '更换图片' : '上传图片' }}</el-button>
+            </el-upload>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -139,6 +149,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { courseApi } from '@/api/course'
+import { uploadApi } from '@/api/upload'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Notebook } from '@element-plus/icons-vue'
 
@@ -195,6 +206,18 @@ const handleEdit = (row) => {
   dialogVisible.value = true
 }
 
+const handleUpload = async (file, field) => {
+  try {
+    const url = await uploadApi.upload(file)
+    form[field] = url
+    ElMessage.success('上传成功')
+  } catch (e) {
+    console.error('上传失败:', e)
+    ElMessage.error(e.response?.data?.message || '上传失败')
+  }
+  return false
+}
+
 const handleSave = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
@@ -211,6 +234,7 @@ const handleSave = async () => {
     await fetchData()
   } catch (e) {
     console.error('保存课程失败:', e)
+    ElMessage.error(e.response?.data?.message || '保存失败')
   } finally {
     saving.value = false
   }
@@ -268,4 +292,6 @@ onMounted(() => fetchData())
 .pagination-wrapper { margin-top: 24px; padding-bottom: 8px; display: flex; justify-content: flex-end; }
 .dialog-desc { color: #64748b; font-size: 14px; margin-top: -10px; margin-bottom: 24px; }
 .full-width { width: 100%; }
+.upload-wrap { display: flex; align-items: center; gap: 12px; }
+.upload-preview { width: 120px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; }
 </style>

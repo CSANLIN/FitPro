@@ -185,13 +185,7 @@ const query = reactive({
   endDate: ''
 })
 
-const typeLabel = (val) => ({
-  YOGA: '瑜伽',
-  BOXING: '搏击',
-  SPINNING: '单车',
-  HIIT: 'HIIT',
-  OTHER: '其他'
-}[val] || val)
+const typeLabel = (val) => val || '其他'
 
 const dayOfMonth = (dateStr) => {
   if (!dateStr) return ''

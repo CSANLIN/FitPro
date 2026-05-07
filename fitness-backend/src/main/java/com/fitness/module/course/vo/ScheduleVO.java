@@ -3,6 +3,7 @@ package com.fitness.module.course.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -58,4 +59,7 @@ public class ScheduleVO {
 
     @Schema(description = "是否已预约")
     private Boolean booked;
+
+    @Schema(description = "课程价格")
+    private BigDecimal price;
 }

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { authApi } from '@/api/auth'
+import coachRoutes from './coach'
 
 // 路由懒加载
 const LoginView = () => import('@/views/auth/LoginView.vue')
@@ -33,6 +34,9 @@ const WorkoutPlan = () => import('@/views/workout/WorkoutPlanView.vue')
 const WorkoutRecord = () => import('@/views/workout/WorkoutRecordView.vue')
 const WorkoutSession = () => import('@/views/workout/WorkoutSessionView.vue')
 const WorkoutTemplateManage = () => import('@/views/workout/WorkoutTemplateManageView.vue')
+
+// AI 助手
+const AiChat = () => import('@/views/ai/AiChatView.vue')
 
 // 课程模块
 const CourseList = () => import('@/views/course/CourseListView.vue')
@@ -77,7 +81,7 @@ const router = createRouter({
       meta: {
         title: '管理端',
         requiresAuth: true,
-        roles: ['ROLE_SUPER_ADMIN', 'ROLE_COACH']
+        roles: ['ROLE_SUPER_ADMIN']
       },
       redirect: '/admin/dashboard',
       children: [
@@ -260,6 +264,16 @@ const router = createRouter({
             icon: 'Basketball'
           }
         },
+        // AI 健身助手
+        {
+          path: 'ai',
+          name: 'AppAiChat',
+          component: AiChat,
+          meta: {
+            title: '健身助手',
+            icon: 'MagicStick'
+          }
+        },
         // 训练计划
         {
           path: 'plan',
@@ -335,6 +349,23 @@ const router = createRouter({
       ]
     },
 
+    // 教练端路由
+    ...coachRoutes,
+
+    // 支付页面
+    {
+      path: '/payment/pay/:orderNo',
+      name: 'Payment',
+      component: () => import('@/views/payment/PaymentView.vue'),
+      meta: { title: '支付确认', requiresAuth: true, hideLayout: true }
+    },
+    {
+      path: '/payment/result/:orderNo',
+      name: 'PaymentResult',
+      component: () => import('@/views/payment/PaymentResultView.vue'),
+      meta: { title: '支付结果', requiresAuth: true, hideLayout: true }
+    },
+
     // 首页重定向
     {
       path: '/',
@@ -400,7 +431,9 @@ router.beforeEach(async (to, from, next) => {
     if (userInfo && userInfo.role) {
       const rawRole = userInfo.role
       const userRoleWithPrefix = rawRole.startsWith('ROLE_') ? rawRole : `ROLE_${rawRole}`
-      if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
+      if (userRoleWithPrefix === 'ROLE_COACH') {
+        next('/coach/schedule')
+      } else if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN') {
         next('/admin/dashboard')
       } else {
         next('/app/home')
@@ -412,7 +445,9 @@ router.beforeEach(async (to, from, next) => {
         localStorage.setItem('userInfo', JSON.stringify(freshUserInfo))
         const rawRole = freshUserInfo.role
         const userRoleWithPrefix = rawRole.startsWith('ROLE_') ? rawRole : `ROLE_${rawRole}`
-        if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN' || userRoleWithPrefix === 'ROLE_COACH') {
+        if (userRoleWithPrefix === 'ROLE_COACH') {
+          next('/coach/schedule')
+        } else if (userRoleWithPrefix === 'ROLE_SUPER_ADMIN') {
           next('/admin/dashboard')
         } else {
           next('/app/home')

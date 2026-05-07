@@ -237,11 +237,29 @@
             placeholder="请输入动作描述"
           />
         </el-form-item>
-        <el-form-item label="示意图URL" prop="imageUrl">
-          <el-input v-model="exerciseForm.imageUrl" placeholder="https://..." />
+        <el-form-item label="示意图" prop="imageUrl">
+          <div class="upload-wrap">
+            <img v-if="exerciseForm.imageUrl" :src="exerciseForm.imageUrl" class="upload-preview" />
+            <el-upload
+              :show-file-list="false"
+              :accept="'image/jpeg,image/png,image/webp'"
+              :before-upload="(file) => handleUpload(file, 'imageUrl')"
+            >
+              <el-button type="primary" plain>{{ exerciseForm.imageUrl ? '更换图片' : '上传图片' }}</el-button>
+            </el-upload>
+          </div>
         </el-form-item>
-        <el-form-item label="教学视频URL" prop="videoUrl">
-          <el-input v-model="exerciseForm.videoUrl" placeholder="https://..." />
+        <el-form-item label="教学视频" prop="videoUrl">
+          <div class="upload-wrap">
+            <video v-if="exerciseForm.videoUrl" :src="exerciseForm.videoUrl" class="video-preview" controls />
+            <el-upload
+              :show-file-list="false"
+              :accept="'video/mp4,video/webm'"
+              :before-upload="(file) => handleUpload(file, 'videoUrl')"
+            >
+              <el-button type="primary" plain>{{ exerciseForm.videoUrl ? '更换视频' : '上传视频' }}</el-button>
+            </el-upload>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -258,6 +276,7 @@
 import { ref, onMounted, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { exerciseApi } from '@/api/exercise'
+import { uploadApi } from '@/api/upload'
 import { ElMessage } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 
@@ -445,6 +464,18 @@ const openExerciseDialog = (row) => {
   exerciseDialogVisible.value = true
 }
 
+const handleUpload = async (file, field) => {
+  try {
+    const url = await uploadApi.upload(file)
+    exerciseForm[field] = url
+    ElMessage.success('上传成功')
+  } catch (e) {
+    console.error('上传失败:', e)
+    ElMessage.error(e.response?.data?.message || '上传失败')
+  }
+  return false
+}
+
 const handleSaveExercise = async () => {
   const valid = await exerciseFormRef.value.validate().catch(() => false)
   if (!valid) return
@@ -463,6 +494,7 @@ const handleSaveExercise = async () => {
     await fetchExercises()
   } catch (e) {
     console.error('保存动作失败:', e)
+    ElMessage.error(e.response?.data?.message || '保存失败')
   } finally {
     exerciseSaving.value = false
   }
@@ -537,4 +569,7 @@ onMounted(() => {
   margin-top: 16px;
   padding: 12px 0;
 }
+.upload-wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.upload-preview { width: 120px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
+.video-preview { width: 200px; max-height: 120px; border-radius: 8px; border: 1px solid #e2e8f0; }
 </style>
